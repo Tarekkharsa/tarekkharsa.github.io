@@ -1,0 +1,276 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Tarek Kharsa — software engineer</title>
+<meta name="description" content="Full-stack engineer. TypeScript by trade, Rust by obsession. Building agentstack — a local control plane for AI coding agents.">
+<meta name="color-scheme" content="light dark">
+<link rel="icon" type="image/svg+xml" href="favicon.svg">
+<meta property="og:title" content="Tarek Kharsa — software engineer">
+<meta property="og:description" content="Full-stack engineer. TypeScript by trade, Rust by obsession. Building agentstack.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://tarekkharsa.github.io/">
+<style>
+  :root {
+    --paper: #FBFAF7;
+    --ink: #1B1F24;
+    --muted: #5B6570;
+    --faint: #8A929B;
+    --accent: #B4540A;
+    --accent-soft: rgba(180, 84, 10, 0.10);
+    --accent-line: rgba(180, 84, 10, 0.28);
+    --line: #E7E2D9;
+    --term: #14181C;
+    --term-ink: #D7DEE4;
+    --term-dim: #97A1AD;
+    --term-green: #7CC08B;
+    --mono: ui-monospace, "SF Mono", SFMono-Regular, Menlo, Consolas, monospace;
+    --sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --paper: #14171B;
+      --ink: #E9E7E2;
+      --muted: #9AA3AC;
+      --faint: #737C85;
+      --accent: #F0975A;
+      --accent-soft: rgba(240, 151, 90, 0.12);
+      --accent-line: rgba(240, 151, 90, 0.30);
+      --line: #292E34;
+      --term: #0E1114;
+    }
+  }
+
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--paper);
+    color: var(--ink);
+    font: 17px/1.65 var(--sans);
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
+  a { color: var(--accent); text-decoration: none; }
+  a:hover, a:focus-visible { text-decoration: underline; text-underline-offset: 3px; }
+  :focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 3px; }
+  ::selection { background: var(--accent-soft); }
+
+  main {
+    max-width: 42rem;
+    margin: 0 auto;
+    padding: clamp(3rem, 9vh, 6rem) 1.35rem 4.5rem;
+  }
+
+  /* ---------- hero ---------- */
+  .prompt {
+    font-family: var(--mono);
+    font-size: 0.82rem;
+    color: var(--faint);
+    margin: 0 0 0.9rem;
+  }
+  .prompt .dollar { color: var(--accent); }
+  h1 {
+    font-family: var(--mono);
+    font-size: clamp(1.8rem, 6vw, 2.6rem);
+    line-height: 1.15;
+    letter-spacing: -0.03em;
+    font-weight: 700;
+    margin: 0 0 1rem;
+    text-wrap: balance;
+  }
+  h1 .accent { color: var(--accent); }
+  .lede {
+    font-size: 1.06rem;
+    color: var(--muted);
+    max-width: 36rem;
+    margin: 0 0 1.6rem;
+  }
+  .lede strong { color: var(--ink); font-weight: 600; }
+
+  .links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.6rem;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+  .links a {
+    display: inline-block;
+    font-family: var(--mono);
+    font-size: 0.8rem;
+    color: var(--ink);
+    padding: 0.38rem 0.8rem;
+    border: 1px solid var(--line);
+    border-radius: 999px;
+    transition: border-color 0.15s ease, background 0.15s ease;
+  }
+  .links a:hover {
+    text-decoration: none;
+    border-color: var(--accent-line);
+    background: var(--accent-soft);
+  }
+
+  /* ---------- sections ---------- */
+  section { margin-top: 4rem; }
+  h2 {
+    font-family: var(--mono);
+    font-size: 0.72rem;
+    font-weight: 600;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin: 0 0 1.4rem;
+    display: flex;
+    align-items: center;
+    gap: 0.55rem;
+  }
+  h2::after { content: ""; flex: 1; height: 1px; background: var(--line); }
+
+  /* ---------- work list ---------- */
+  .work { display: flex; flex-direction: column; }
+  .work article {
+    padding: 1.15rem 0;
+    border-top: 1px solid var(--line);
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 0.15rem 1rem;
+    align-items: baseline;
+  }
+  .work article:first-of-type { border-top: none; padding-top: 0; }
+  .work h3 {
+    font-family: var(--mono);
+    font-size: 0.98rem;
+    font-weight: 700;
+    letter-spacing: -0.01em;
+    margin: 0;
+  }
+  .work h3 a { color: var(--ink); }
+  .work h3 a:hover { color: var(--accent); text-decoration: none; }
+  .work .lang {
+    font-family: var(--mono);
+    font-size: 0.72rem;
+    color: var(--faint);
+    white-space: nowrap;
+  }
+  .work p {
+    grid-column: 1 / -1;
+    margin: 0.25rem 0 0;
+    color: var(--muted);
+    font-size: 0.95rem;
+    max-width: 38rem;
+  }
+
+  /* ---------- terminal card ---------- */
+  .term {
+    margin-top: 1.9rem;
+    background: var(--term);
+    color: var(--term-ink);
+    border-radius: 12px;
+    padding: 1.05rem 1.25rem;
+    font-family: var(--mono);
+    font-size: 0.82rem;
+    line-height: 1.75;
+    overflow-x: auto;
+    box-shadow: 0 14px 40px -18px rgba(16, 22, 30, 0.45);
+  }
+  .term .dim { color: var(--term-dim); }
+  .term .ok { color: var(--term-green); }
+
+  /* ---------- now / footer ---------- */
+  .now p { margin: 0 0 0.9rem; max-width: 38rem; }
+  .now p:last-child { margin-bottom: 0; }
+
+  footer {
+    margin-top: 4.5rem;
+    padding-top: 1.4rem;
+    border-top: 1px solid var(--line);
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem 1.4rem;
+    justify-content: space-between;
+    font-family: var(--mono);
+    font-size: 0.76rem;
+    color: var(--faint);
+  }
+  footer a { color: var(--faint); }
+  footer a:hover { color: var(--accent); }
+</style>
+</head>
+<body>
+<main>
+  <p class="prompt"><span class="dollar">$</span> whoami</p>
+  <h1>Tarek Kharsa<span class="accent">.</span></h1>
+  <p class="lede">
+    Full-stack software engineer. <strong>TypeScript</strong> by trade,
+    <strong>Rust</strong> by obsession. I like small tools with sharp edges:
+    CLIs, developer infrastructure, and the plumbing that makes AI agents
+    safe to let loose on a machine.
+  </p>
+  <ul class="links">
+    <li><a href="https://github.com/Tarekkharsa">github</a></li>
+    <li><a href="mailto:tarekkh1997@gmail.com">email</a></li>
+    <li><a href="https://tarekkharsa.github.io/agentstack/">agentstack</a></li>
+  </ul>
+
+  <section aria-labelledby="work-h">
+    <h2 id="work-h">Selected work</h2>
+    <div class="work">
+      <article>
+        <h3><a href="https://github.com/Tarekkharsa/agentstack">agentstack</a></h3>
+        <span class="lang">Rust</span>
+        <p>
+          A local control plane for AI coding agents. One manifest defines
+          skills, MCP servers, and settings; agentstack compiles it across 13
+          agent CLIs, trust-gates every capability, firewalls egress, and
+          audits every tool call. Nothing runs until it's trusted — and
+          nothing trusted runs unobserved.
+        </p>
+      </article>
+      <article>
+        <h3><a href="https://github.com/Tarekkharsa/devsweep">devsweep</a></h3>
+        <span class="lang">Go</span>
+        <p>
+          A CLI that hunts down the gigabytes of node_modules, build caches,
+          and stale toolchains that developer machines silently accumulate.
+        </p>
+      </article>
+      <article>
+        <h3><a href="https://github.com/Tarekkharsa/Webauthn-front-example">webauthn examples</a></h3>
+        <span class="lang">TypeScript</span>
+        <p>
+          Working front-end and back-end reference implementations of passkey
+          authentication with WebAuthn, written while figuring out the spec so
+          you don't have to.
+        </p>
+      </article>
+    </div>
+    <div class="term" role="img" aria-label="Terminal showing agentstack trust-gating a bundle">
+      <div><span class="dim">$</span> agentstack trust .</div>
+      <div><span class="ok">✓</span> lockfile digest pinned <span class="dim">sha256:9f2c…a41e</span></div>
+      <div><span class="ok">✓</span> 13 skills, 8 servers trusted for this machine</div>
+      <div><span class="dim"># nothing runs until it's trusted.</span></div>
+    </div>
+  </section>
+
+  <section class="now" aria-labelledby="now-h">
+    <h2 id="now-h">Now</h2>
+    <p>
+      Deep in Rust, building agentstack's enforcement layer: sandboxed
+      runtimes, an egress proxy that compiled policy actually governs, and an
+      audit trail you can hand to a security review.
+    </p>
+    <p>
+      Before that: years of shipping TypeScript — React front-ends, Node
+      back-ends, and the occasional detour through PHP, Java, and Flutter.
+    </p>
+  </section>
+
+  <footer>
+    <span>© 2026 Tarek Kharsa</span>
+    <a href="https://github.com/Tarekkharsa/tarekkharsa.github.io">source</a>
+  </footer>
+</main>
+</body>
+</html>
