@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+  <title>Tarek Kharsa</title>
+  <link href="https://tarekkharsa.github.io/"/>
+  <link rel="self" href="https://tarekkharsa.github.io/feed.xml"/>
+  <id>https://tarekkharsa.github.io/</id>
+  <updated>2026-09-28T00:00:00Z</updated>
+  <author>
+    <name>Tarek Kharsa</name>
+    <uri>https://tarekkharsa.github.io/</uri>
+  </author>
+  <entry>
+    <title>Turning my Linux PC into a T3 Code server</title>
+    <link href="https://tarekkharsa.github.io/posts/t3-code-tailscale-home-server.html"/>
+    <id>https://tarekkharsa.github.io/posts/t3-code-tailscale-home-server.html</id>
+    <published>2026-09-28T00:00:00Z</published>
+    <updated>2026-09-28T00:00:00Z</updated>
+    <summary>Run T3 Code on a Linux PC and reach it privately from your laptop and phone with Tailscale — plus every problem I hit and how I fixed it.</summary>
+  </entry>
+</feed>
