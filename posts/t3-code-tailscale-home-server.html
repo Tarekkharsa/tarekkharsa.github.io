@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Turning my Linux PC into a T3 Code server — Tarek Kharsa</title>
-<meta name="description" content="Run T3 Code on a Linux PC and reach it privately from your laptop and phone with Tailscale — plus every problem I hit and how I fixed it.">
+<meta name="description" content="Run T3 Code on a Linux PC and reach it privately from your laptop and phone with Tailscale. A short, step-by-step guide.">
 <meta name="author" content="Tarek Kharsa">
 <meta name="color-scheme" content="light dark">
 <meta name="theme-color" content="#FBFAF7" media="(prefers-color-scheme: light)">
@@ -16,7 +16,7 @@
 <meta property="og:site_name" content="Tarek Kharsa">
 <meta property="og:locale" content="en_US">
 <meta property="og:title" content="Turning my Linux PC into a T3 Code server">
-<meta property="og:description" content="Run T3 Code on a Linux PC and reach it privately from your laptop and phone with Tailscale — plus every problem I hit and how I fixed it.">
+<meta property="og:description" content="Run T3 Code on a Linux PC and reach it privately from your laptop and phone with Tailscale. A short, step-by-step guide.">
 <meta property="og:type" content="article">
 <meta property="og:url" content="https://tarekkharsa.github.io/posts/t3-code-tailscale-home-server.html">
 <meta property="og:image" content="https://tarekkharsa.github.io/assets/og/t3-code-tailscale-home-server.png">
@@ -28,14 +28,14 @@
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:creator" content="@tarekkh1997">
 <meta name="twitter:title" content="Turning my Linux PC into a T3 Code server">
-<meta name="twitter:description" content="Run T3 Code on a Linux PC and reach it privately from your laptop and phone with Tailscale — plus every problem I hit and how I fixed it.">
+<meta name="twitter:description" content="Run T3 Code on a Linux PC and reach it privately from your laptop and phone with Tailscale. A short, step-by-step guide.">
 <meta name="twitter:image" content="https://tarekkharsa.github.io/assets/og/t3-code-tailscale-home-server.png">
 <script type="application/ld+json">
 {
   "@context": "https://schema.org",
   "@type": "BlogPosting",
   "headline": "Turning my Linux PC into a T3 Code server",
-  "description": "Run T3 Code on a Linux PC and reach it privately from your laptop and phone with Tailscale — plus every problem I hit and how I fixed it.",
+  "description": "Run T3 Code on a Linux PC and reach it privately from your laptop and phone with Tailscale. A short, step-by-step guide.",
   "image": "https://tarekkharsa.github.io/assets/og/t3-code-tailscale-home-server.png",
   "datePublished": "2026-09-28T00:00:00Z",
   "dateModified": "2026-09-28T00:00:00Z",
@@ -168,14 +168,6 @@
   }
   blockquote p { margin: 0; }
 
-  .table-wrap { overflow-x: auto; margin: 0 0 1.2rem; }
-  table { border-collapse: collapse; width: 100%; min-width: 36rem; font-size: 0.9rem; }
-  th, td { text-align: left; vertical-align: top; padding: 0.55rem 0.7rem; border-bottom: 1px solid var(--line); }
-  th { font-family: var(--mono); font-size: 0.78rem; color: var(--muted); font-weight: 600; }
-
-  .checklist { list-style: none; padding-left: 0; }
-  .checklist input { margin: 0 0.55rem 0 0; vertical-align: middle; accent-color: var(--accent); }
-
   footer {
     margin-top: 4rem;
     padding-top: 1.4rem;
@@ -200,109 +192,36 @@
     <header>
       <p class="meta"><time datetime="2026-09-28">Sep 28, 2026</time></p>
       <h1>How I Turned My Linux PC into a T3 Code Server I Can Use from Anywhere</h1>
-      <p class="subtitle"><em>A friendly, step-by-step guide, plus every problem I hit and how I fixed it.</em></p>
+      <p class="subtitle"><em>A short, step-by-step guide.</em></p>
     </header>
 
     <hr>
 
-    <h2>What we're building</h2>
-    <p>I have a powerful Linux PC at my desk. I wanted to use it from my <strong>MacBook</strong> and my <strong>Android phone</strong>, wherever I am, to run coding agents with <a href="https://github.com/pingdotgg/t3code">T3 Code</a>.</p>
-    <p>The plan was simple:</p>
-    <ul>
-      <li>🖥️ <strong>The PC</strong> runs T3 Code in the background, all the time.</li>
-      <li>🔒 <strong>Tailscale</strong> connects my devices privately, so nothing is open to the public internet.</li>
-      <li>💻📱 <strong>My laptop and phone</strong> connect to the PC through Tailscale.</li>
-    </ul>
-    <p>The basic setup takes about 15 minutes. It took me a whole morning, because a few things went wrong. I've written them all down so you don't have to go through the same pain.</p>
-    <p><strong>What you need:</strong></p>
+    <p>My Linux PC runs <a href="https://github.com/pingdotgg/t3code">T3 Code</a> as a background service, all the time. <a href="https://tailscale.com">Tailscale</a> connects it privately to my MacBook and my Android phone. Nothing is open to the public internet.</p>
+    <p><strong>You need:</strong></p>
     <ul>
       <li>A Linux PC (I used Ubuntu)</li>
-      <li>Node.js installed</li>
-      <li>A free <a href="https://tailscale.com">Tailscale</a> account, with Tailscale installed on the PC <em>and</em> on every device you want to connect from</li>
+      <li>Node.js</li>
+      <li>Tailscale on the PC <em>and</em> on every device you want to connect from</li>
     </ul>
 
-    <hr>
-
-    <h2>Step 1: Install T3 Code on the PC</h2>
-    <p>Open a terminal and run:</p>
+    <h2>Step 1: Install T3 Code as a service</h2>
 <pre><code>npm i -g t3
-t3 service install</code></pre>
-    <p>The first line installs T3 Code. The second sets it up as a <strong>background service</strong>, so it keeps running even when you close the app.</p>
-    <p>We also want it to start when the PC boots, <strong>even if nobody logs in</strong>:</p>
-<pre><code>loginctl enable-linger $USER</code></pre>
-    <p>Check that it's working:</p>
+t3 service install
+loginctl enable-linger $USER</code></pre>
+    <p>This installs T3 Code, runs it as a background service, and starts it at boot, even if nobody logs in. Check it:</p>
 <pre><code>t3 service status</code></pre>
-    <p>You should see <code>Status: installed</code>. ✅</p>
+    <p>You should see <code>Status: installed</code>.</p>
 
     <hr>
 
-    <h2>Step 2: Make it reachable through Tailscale</h2>
-    <p>T3 Code has Tailscale support built in. It gives your PC a private web address like:</p>
-<pre><code>https://my-pc.tailXXXXX.ts.net</code></pre>
-    <p>Only your own devices on Tailscale can open it.</p>
-
-    <h3>2a. Give yourself permission (one time)</h3>
-    <p>By default, only the admin (root) can change these Tailscale settings. Allow your own user:</p>
+    <h2>Step 2: Turn on Tailscale Serve</h2>
+    <p>First, let your own user manage Tailscale Serve:</p>
 <pre><code>sudo tailscale set --operator=$USER</code></pre>
-    <blockquote><p>😬 <strong>If you skip this</strong>, you'll get: <code>Access denied: serve config denied</code></p></blockquote>
-
-    <h3>2b. Turn on Tailscale in the T3 service</h3>
-    <p>We'll add a small settings file. Doing it this way means T3 updates won't wipe it out.</p>
+    <p>Then add a small settings file (a systemd drop-in) to the T3 service:</p>
 <pre><code>mkdir -p ~/.config/systemd/user/t3code.service.d
 
-cat &gt; ~/.config/systemd/user/t3code.service.d/tailscale.conf &lt;&lt;'EOF'
-[Service]
-Environment=T3CODE_TAILSCALE_SERVE=1
-EOF
-
-systemctl --user daemon-reload
-systemctl --user restart t3code</code></pre>
-
-    <h3>2c. Check it</h3>
-<pre><code>tailscale serve status</code></pre>
-    <p>You should see your <code>https://...ts.net</code> address. 🎉</p>
-    <blockquote><p>💡 <strong>Tip:</strong> The very first time, it can take a few seconds to set up the HTTPS certificate. If the address doesn't load right away, wait a moment and try again.</p></blockquote>
-
-    <hr>
-
-    <h2>Step 3: Connect your laptop and phone</h2>
-    <p>On the PC, create a pairing code:</p>
-<pre><code>t3 pair --tailscale</code></pre>
-    <p>It shows a <strong>QR code</strong> and a <strong>link</strong>. In the T3 Code app on your laptop or phone:</p>
-    <ol>
-      <li>Go to <strong>Add Environment → Remote link</strong></li>
-      <li>Paste the full link, <strong>or</strong> tap the 📷 camera icon and scan the QR code</li>
-      <li>Tap <strong>Add environment</strong></li>
-    </ol>
-    <blockquote><p>⏰ <strong>The code expires after 5 minutes.</strong> If you need more time, use <code>t3 pair --tailscale --ttl 1h</code>.</p></blockquote>
-
-    <h3>😬 Problem: "Transport error" when adding the environment</h3>
-    <p>It looked like this:</p>
-<pre><code>Failed to fetch remote environment endpoint https://...ts.net/.well-known/t3/environment
-(HttpClientError: Transport error ...)</code></pre>
-    <p>This just means <strong>your device can't reach the PC</strong>. Check these, in order:</p>
-    <ol>
-      <li><strong>Is Tailscale on?</strong> Open the Tailscale app on your laptop or phone and make sure it says <em>Connected</em>.</li>
-      <li><strong>On a Mac:</strong> Tailscale menu → Settings → turn on <strong>Use Tailscale DNS</strong>.</li>
-      <li><strong>Is the code still fresh?</strong> Make a new one if it's been more than 5 minutes.</li>
-    </ol>
-
-    <h3>😬 Problem: Android still won't connect</h3>
-    <p>This one got me. Tailscale was connected, but my phone still showed the same error.</p>
-    <p><strong>The fix:</strong> on your phone, go to <strong>Settings → Private DNS</strong> and set it to <strong>Off</strong>.</p>
-    <p>"Automatic" did <strong>not</strong> work for me, only <strong>Off</strong>. Private DNS stops your phone from finding the Tailscale address.</p>
-
-    <hr>
-
-    <h2>Step 4: Make sure your coding agents work</h2>
-    <p>In the app, I saw this message:</p>
-    <blockquote><p>❌ <em>Could not start Codex CLI (codex).</em></p></blockquote>
-    <p>There were two reasons.</p>
-    <p><strong>Reason 1: Codex wasn't actually installed.</strong> Having the ChatGPT or Codex desktop app is <strong>not</strong> enough. You need the command-line tool:</p>
-<pre><code>npm i -g @openai/codex
-codex login status</code></pre>
-    <p><strong>Reason 2: the background service couldn't find it.</strong> Background services only look in a few system folders, not where Node tools get installed. Add your folders to the same settings file from Step 2b:</p>
-<pre><code>cat &gt; ~/.config/systemd/user/t3code.service.d/tailscale.conf &lt;&lt;EOF
+cat &gt; ~/.config/systemd/user/t3code.service.d/tailscale.conf &lt;&lt;EOF
 [Service]
 Environment=T3CODE_TAILSCALE_SERVE=1
 Environment=PATH=$HOME/.local/bin:$(dirname $(which node)):/usr/local/bin:/usr/bin:/bin:/snap/bin
@@ -310,126 +229,55 @@ EOF
 
 systemctl --user daemon-reload
 systemctl --user restart t3code</code></pre>
-    <blockquote><p>💡 If you later switch Node versions with <code>nvm</code>, run this again so the path stays correct.</p></blockquote>
+    <p>This file survives T3 updates. The <code>PATH</code> line matters because the service can't otherwise see where Node CLIs (like Codex) are installed. If you switch Node versions with <code>nvm</code>, run it again.</p>
+    <p>Check it:</p>
+<pre><code>tailscale serve status</code></pre>
+    <p>You should see a private address like <code>https://my-pc.tailXXXXX.ts.net</code>. The first HTTPS certificate can take a few seconds, so if it doesn't load right away, wait and try again.</p>
 
     <hr>
 
-    <h2>Step 5: Updating T3 Code (the tricky part)</h2>
+    <h2>Step 3: Pair your laptop and phone</h2>
+    <p>On the PC:</p>
+<pre><code>t3 pair --tailscale</code></pre>
+    <p>In the T3 Code app, go to <strong>Add Environment → Remote link</strong>, then paste the link or scan the QR code.</p>
+    <blockquote><p>The code expires after 5 minutes. Need more time? Use <code>t3 pair --tailscale --ttl 1h</code>.</p></blockquote>
 
-    <h3>😬 Problem: "This release requires a newer T3 Code service launcher"</h3>
-    <p>I clicked <strong>Update</strong> from my Mac, and it failed with that message.</p>
-    <p><strong>Why:</strong> my Mac app was on the <strong>nightly</strong> (beta) version, but the PC was on <strong>stable</strong>. Some updates can't be installed from another device; they have to be done on the PC itself.</p>
-    <p><strong>The fix:</strong> run the update <strong>on the PC</strong>, using the same channel as your other devices:</p>
+    <h3>Can't connect?</h3>
+    <p>If you see something like this, your device can't reach the PC:</p>
+<pre><code>Failed to fetch remote environment endpoint ... (HttpClientError: Transport error ...)</code></pre>
+    <p>Check these, in order:</p>
+    <ol>
+      <li>Tailscale is <em>Connected</em> on the device.</li>
+      <li><strong>Mac:</strong> Tailscale menu → Settings → turn on <strong>Use Tailscale DNS</strong>.</li>
+      <li><strong>Android:</strong> Settings → Private DNS → <strong>Off</strong>. "Automatic" didn't work for me.</li>
+      <li>The pairing code hasn't expired.</li>
+    </ol>
+
+    <hr>
+
+    <h2>Step 4: Install your agent CLIs</h2>
+    <p>T3 Code runs agents through their command-line tools, so install them on the PC. For Codex:</p>
+<pre><code>npm i -g @openai/codex
+codex login status</code></pre>
+    <p>The <code>PATH</code> line from Step 2 lets the service find them.</p>
+
+    <hr>
+
+    <h2>Step 5: Keep it reachable</h2>
+    <p>Stop the PC from sleeping:</p>
+<pre><code>sudo systemctl mask sleep.target suspend.target hibernate.target hybrid-sleep.target</code></pre>
+    <p>Tailscale logins expire after about 6 months. In the <a href="https://login.tailscale.com/admin/machines">Tailscale admin console</a>, click <strong>⋯</strong> next to your PC and choose <strong>Disable key expiry</strong>.</p>
+
+    <hr>
+
+    <h2>Updating T3 Code</h2>
+    <p><strong>Golden rule:</strong> keep the PC, the <code>t3</code> command and all your apps on the <strong>same channel</strong>, and run updates on the PC itself:</p>
 <pre><code>t3 update --channel nightly --yes</code></pre>
     <p><em>(Use <code>stable</code>, <code>preview</code> or <code>nightly</code>, whichever your other devices use.)</em></p>
 
-    <h3>😬 Problem: after updating, T3 wouldn't start at all</h3>
-    <p>The log kept saying:</p>
-<pre><code>Service state is invalid or unsupported.</code></pre>
-    <p><strong>Why:</strong> I ran the update with the <em>old</em> version of the <code>t3</code> command. It saved a settings file in an old format that the new version doesn't understand.</p>
-    <p><strong>The fix:</strong></p>
-    <ol>
-      <li>Open <code>~/.t3/runtime/service-state.json</code> (make a backup copy first!)</li>
-      <li>Change <code>"protocol": 2</code> to <code>"protocol": 3</code></li>
-      <li>Restart the service and update your <code>t3</code> command so this doesn't happen again:</li>
-    </ol>
-<pre><code>systemctl --user reset-failed t3code
-systemctl --user start t3code
-npm i -g t3@nightly</code></pre>
-    <blockquote><p>✅ <strong>Golden rule:</strong> keep the PC, the <code>t3</code> command and all your apps on the <strong>same channel</strong>.</p></blockquote>
-
     <hr>
 
-    <h2>Step 6: Make your PC act like a real server</h2>
-    <p>A normal PC likes to go to sleep and wait for someone to press buttons. A server shouldn't. Here's what I changed.</p>
-
-    <h3>Stop it from sleeping</h3>
-<pre><code>sudo systemctl mask sleep.target suspend.target hibernate.target hybrid-sleep.target
-gsettings set org.gnome.settings-daemon.plugins.power sleep-inactive-ac-type 'nothing'</code></pre>
-
-    <h3>Turn off Wi-Fi power saving</h3>
-    <p>It can make remote connections laggy or drop them.</p>
-<pre><code>printf '[connection]\nwifi.powersave = 2\n' | sudo tee /etc/NetworkManager/conf.d/wifi-powersave-off.conf</code></pre>
-
-    <h3>😬 Problem: after a crash, it got stuck at the boot menu</h3>
-    <p>After an unexpected shutdown, Ubuntu shows a boot menu and <strong>waits forever</strong> for someone to press Enter. If you're not at home, your server is stuck offline.</p>
-    <p><strong>The fix:</strong> tell it to continue on its own after 5 seconds:</p>
-<pre><code>echo 'GRUB_RECORDFAIL_TIMEOUT=5' | sudo tee /etc/default/grub.d/99-autoboot.cfg
-sudo update-grub</code></pre>
-
-    <h3>Don't let Tailscale log you out</h3>
-    <p>Tailscale logins expire after about 6 months. For your server, go to the <a href="https://login.tailscale.com/admin/machines">Tailscale admin console</a>, click <strong>⋯</strong> next to your PC, and choose <strong>Disable key expiry</strong>.</p>
-    <blockquote><p>💡 <strong>Small tip:</strong> don't save helper scripts in <code>/tmp</code>. It's cleared on every reboot. I learned that the hard way.</p></blockquote>
-
-    <hr>
-
-    <h2>Step 7: The mystery freezes (spoiler: broken hardware)</h2>
-    <p>Everything was set up, but my PC kept <strong>freezing and restarting randomly</strong>. Here's how I found out why. The same steps work for any Linux machine that "just dies."</p>
-
-    <h3>1. Check how it shut down</h3>
-<pre><code>journalctl -b -1 -n 30</code></pre>
-    <p>This shows the last lines from before the restart. A normal shutdown ends with shutdown messages. Mine just <strong>stopped mid-sentence</strong>, a sign of a hardware problem.</p>
-
-    <h3>2. Put some load on it</h3>
-<pre><code>sudo apt install stress-ng
-stress-ng --cpu $(nproc) --verify --timeout 10m</code></pre>
-    <p>Within seconds, random programs started crashing.</p>
-
-    <h3>3. Look for a pattern</h3>
-<pre><code>journalctl -k | grep -oE 'likely on CPU [0-9]+' | sort | uniq -c</code></pre>
-    <p>My result:</p>
-<pre><code>4 likely on CPU 21</code></pre>
-    <p><strong>Every single crash happened on the same CPU core.</strong> Different programs, same core, so the core itself was broken. My CPU (an Intel 14th gen) is known for this problem.</p>
-
-    <h3>4. Switch off the bad core</h3>
-<pre><code>echo 0 | sudo tee /sys/devices/system/cpu/cpu21/online</code></pre>
-    <p>I also added a small startup service so it stays off after every reboot. Then I tested again:</p>
-    <ul>
-      <li>✅ Every remaining core tested one by one: <strong>all passed</strong></li>
-      <li>✅ 15 minutes at full power, CPU and memory: <strong>zero errors, zero crashes</strong></li>
-    </ul>
-    <p>Losing one core out of 28 costs about 3–4% of performance. You won't notice it. But a broken core can get worse, so <strong>the real fix is replacing the CPU</strong>. Intel offers an extended warranty for affected 13th/14th-gen chips.</p>
-
-    <hr>
-
-    <h2>Quick fixes cheat sheet 🧾</h2>
-    <div class="table-wrap">
-      <table>
-        <thead>
-          <tr><th>What you see</th><th>What it means</th><th>How to fix it</th></tr>
-        </thead>
-        <tbody>
-          <tr><td><code>Access denied: serve config denied</code></td><td>No permission for Tailscale settings</td><td><code>sudo tailscale set --operator=$USER</code></td></tr>
-          <tr><td><code>Transport error</code> when pairing</td><td>Your device can't reach the PC</td><td>Turn on Tailscale on the device, use a fresh code</td></tr>
-          <tr><td>Android still can't connect</td><td>Private DNS is blocking it</td><td>Phone Settings → Private DNS → <strong>Off</strong></td></tr>
-          <tr><td><code>Could not start Codex CLI</code></td><td>Codex missing, or service can't find it</td><td>Install Codex + add the <code>PATH</code> line</td></tr>
-          <tr><td><code>requires a newer service launcher</code></td><td>Your devices are on a newer version</td><td>Run <code>t3 update</code> on the PC with the same channel</td></tr>
-          <tr><td><code>Service state is invalid</code></td><td>Settings file in an old format</td><td>Change <code>protocol</code> to <code>3</code>, update <code>t3</code></td></tr>
-          <tr><td>Stuck at the boot menu</td><td>Ubuntu waits forever after a crash</td><td><code>GRUB_RECORDFAIL_TIMEOUT=5</code></td></tr>
-          <tr><td>Random freezes and crashes</td><td>Possibly a broken CPU core</td><td>Stress test, find the core, switch it off</td></tr>
-        </tbody>
-      </table>
-    </div>
-
-    <hr>
-
-    <h2>Final checklist ✅</h2>
-    <ul class="checklist">
-      <li><label><input type="checkbox" disabled> T3 Code runs as a service (<code>t3 service status</code>)</label></li>
-      <li><label><input type="checkbox" disabled> Your Tailscale address works (<code>tailscale serve status</code>)</label></li>
-      <li><label><input type="checkbox" disabled> Your laptop and phone are paired</label></li>
-      <li><label><input type="checkbox" disabled> Codex and Claude show as working in the app</label></li>
-      <li><label><input type="checkbox" disabled> Sleep is turned off</label></li>
-      <li><label><input type="checkbox" disabled> The boot menu doesn't wait forever</label></li>
-      <li><label><input type="checkbox" disabled> Tailscale key expiry is disabled</label></li>
-    </ul>
-
-    <hr>
-
-    <h2>Wrapping up</h2>
-    <p>Now my PC is a quiet, always-on coding server. I can start an agent from my phone on the couch and check the results on my laptop later. 🚀</p>
-    <p>Was the setup harder than expected? Yes. Was it worth it? Totally. And if your PC randomly freezes, check your CPU cores. You might be surprised, like I was.</p>
-    <p><em>Got stuck on a step? Leave a comment and I'll try to help!</em></p>
+    <p>That's it: T3 Code on my PC, from anywhere. 🚀</p>
   </article>
 
   <footer>
