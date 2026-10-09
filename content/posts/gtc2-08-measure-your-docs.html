@@ -1,0 +1,33 @@
+<p>Every repo writes docs for agents now. Almost none can tell you whether those docs help. This one measures it, the way you'd test any other feature.</p>
+
+<h2>With docs, without docs</h2>
+<p>Its documentation evals run each task twice, each time in a fresh container:</p>
+<ul>
+  <li><strong><code>with_docs</code></strong>: the agent as shipped, with its README, docs and examples.</li>
+  <li><strong><code>without_docs</code></strong>: the same build with the README, changelog, <code>docs/</code> and <code>examples/</code> removed, and the section of the system prompt that points at them stripped out.</li>
+</ul>
+<p>Then it reports the <strong>lift</strong>: how much the pass rate changes when the docs are there. Tasks are things like "write an extension" or "add a custom provider," so the score is about whether the docs taught the agent something, not whether they exist.</p>
+
+<h2>Honest numbers</h2>
+<p>The interesting part is how carefully the comparison is protected:</p>
+<ul>
+  <li>Both arms install the same packages, and the eval files are unreadable to the agent once the harness drops privileges, so it can't read the answers.</li>
+  <li>Each run gets a new home directory, workspace and session folder.</li>
+  <li>A missing or errored run doesn't count as a failure. It <strong>blocks the pair</strong>, and if any pair is blocked, the headline pass rates are withheld.</li>
+  <li>The report flags no lift, negative deltas, saturated results and flakiness, and the README notes that one repetition can't establish stability.</li>
+</ul>
+
+<h2>Docs that get checked against the code</h2>
+<p>A second eval hands an agent every docs page, one at a time, together with the repository, and makes it return a structured verdict: <code>match</code>, <code>mismatch</code> or <code>inconclusive</code>. The bar for evidence is strict:</p>
+<blockquote><p>Follow the runtime path; names, comments, types, isolated helpers, and tests are not sufficient evidence by themselves.</p></blockquote>
+<p>A unit test checks that the docs navigation is valid and that no Markdown page is orphaned. Docs drift is treated as a bug you can catch, not a chore.</p>
+
+<h2>And trust nothing secondhand</h2>
+<p>The repo's issue-analysis prompt, which maintainers run on new bug reports, starts from distrust:</p>
+<blockquote><p>Do not trust analysis written in the issue. Independently verify behavior and derive your own analysis from the code and execution path. [...] Ignore any root cause analysis in the issue (likely wrong)</p></blockquote>
+<p>It's the same idea from the other side: text written for or by an agent is a claim, and claims get checked.</p>
+
+<div class="callout steal">
+  <p class="callout-kicker">Steal this</p>
+  <p>Treat docs for agents like a feature with a test. Run the same tasks with and without them, and keep what moves the number. If a page doesn't change the result, it's not helping the agent.</p>
+</div>

@@ -1,0 +1,40 @@
+<p>Supply-chain attacks rarely arrive through code anyone reads. They arrive through a dependency bump in a lockfile nobody opens, or a <code>postinstall</code> script that runs on every developer's machine. This repo's agent guide has a one-line policy for that:</p>
+<blockquote><p>Treat npm dep and lockfile changes as reviewed code.</p></blockquote>
+<p>Then it backs the line up with tooling.</p>
+
+<h2>What that looks like</h2>
+<ul>
+  <li><strong>Exact versions only.</strong> Every direct dependency is pinned (no <code>^</code> or <code>~</code>), and a script fails the check if one isn't.</li>
+  <li><strong>No install scripts by default.</strong> Installs run with <code>--ignore-scripts</code>, locally and in CI.</li>
+  <li><strong>A three-entry allowlist.</strong> In the pinned install that users get, exactly three dependencies may run install scripts, and each one has a written reason. esbuild's, for example: "postinstall selects and verifies the platform-specific esbuild binary."</li>
+  <li><strong>An allowlist that can't rot.</strong> If an allowlisted package disappears from the tree, the check fails and asks you to remove its entry.</li>
+  <li><strong>Pinned installs for users too.</strong> The curl installer pins every transitive dependency. Plain <code>npm install -g</code> doesn't, and the README says so.</li>
+</ul>
+
+<h2>A lockfile commit has to be on purpose</h2>
+<p>A pre-commit hook blocks any commit that stages the lockfile, and prints a review checklist instead:</p>
+<pre><code>package-lock.json is staged.
+
+Review lockfile changes before committing:
+  - confirm every new/updated package is intentional
+  - confirm npm age gates were active for resolution
+  - review any new lifecycle scripts in the dependency tree
+
+Detected package version changes:
+  - changed &lt;package&gt; &lt;old&gt; -&gt; &lt;new&gt;
+
+If this lockfile change is intentional, commit with:
+  …_ALLOW_LOCKFILE_CHANGE=1 git commit ...</code></pre>
+<p>Agents can't slip a dependency change into an unrelated commit, and humans can't either. Changes that only touch the repo's own workspace packages pass through, so the gate stays quiet when nothing external changed.</p>
+
+<h2>And after it ships</h2>
+<ul>
+  <li>A nightly <code>npm audit</code> fails on moderate advisories or worse. Accepting one requires naming the package and explaining why it doesn't apply.</li>
+  <li>The same job runs <code>npm audit signatures</code> to verify registry signatures.</li>
+  <li>One dependency gets a rule of its own: before updating <code>undici</code>, read its changelog and check whether anything affects the app.</li>
+</ul>
+
+<div class="callout steal">
+  <p class="callout-kicker">Steal this</p>
+  <p>Make dependency changes loud. Pin exact versions, turn off install scripts and allowlist the few that need them with a reason, and block lockfile commits unless someone says "yes, on purpose." It costs minutes, and it's where supply-chain attacks actually land.</p>
+</div>

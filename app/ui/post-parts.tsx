@@ -3,14 +3,15 @@ import { unsafeHTML } from 'remix/component'
 
 import {
   earlierHints,
-  lessons,
+  LESSONS_PER_ROUND,
   postPath,
   postUrl,
   readPostBody,
+  roundOf,
+  roundPosts,
   series,
   seriesIndex,
   seriesNeighbors,
-  seriesPosts,
   type LessonPost,
   type Post,
   type SeriesPost,
@@ -108,10 +109,10 @@ export function SeriesNav(handle: Handle<{ current: SeriesPost }>) {
   return () => (
     <nav class="series-nav" aria-label="Series">
       <a class="label" href={postPath(seriesIndex)}>
-        {series.name}
+        {`${series.name} · round ${handle.props.current.round}`}
       </a>
       <ol>
-        {seriesPosts.map((post) => (
+        {roundPosts(roundOf(handle.props.current)).map((post) => (
           <li>
             <a
               href={postPath(post)}
@@ -134,7 +135,7 @@ export function SeriesPager(handle: Handle<{ current: SeriesPost }>) {
       ? { href: postPath(prev), label: prev.title }
       : { href: postPath(seriesIndex), label: 'Series intro & rules' }
     let nextLink = next
-      ? { href: postPath(next), label: next.kind === 'finale' ? 'The reveal + 30 power-user tips' : next.title }
+      ? { href: postPath(next), label: next.kind === 'finale' ? next.teaser : next.title }
       : { href: postPath(seriesIndex), label: 'Back to the series' }
 
     return (
@@ -189,7 +190,10 @@ export function GuessCallout(handle: Handle<{ post: LessonPost }>) {
   return () => {
     let { post } = handle.props
     let earlier = earlierHints(post)
-    let guessText = `🕵️ My ${series.hashtag} guess for lesson ${post.lesson} ("${post.title}") by @${site.twitterHandle}: `
+    let { answer } = roundOf(post)
+    // Round 1 posts were shared before there were rounds, so their guess tweets say "lesson N".
+    let which = post.round === 1 ? `lesson ${post.lesson}` : `round ${post.round}, lesson ${post.lesson}`
+    let guessText = `🕵️ My ${series.hashtag} guess for ${which} ("${post.title}") by @${site.twitterHandle}: `
 
     return (
       <section class="callout game" aria-labelledby="game-h">
@@ -220,14 +224,14 @@ export function GuessCallout(handle: Handle<{ post: LessonPost }>) {
           <div class="answer">
             <p>
               <strong>
-                <a href={series.answer.url}>{series.answer.name}</a>
+                <a href={answer.url}>{answer.name}</a>
               </strong>{' '}
-              (<code>{series.answer.repo}</code>), {series.answer.blurb}. Where to look:
+              (<code>{answer.repo}</code>), {answer.blurb}. Where to look:
             </p>
             <ul>
               {post.sources.map((source) => (
                 <li>
-                  <a href={`${series.answer.blobBase}${source}`}>
+                  <a href={`${answer.blobBase}${source}`}>
                     <code>{source}</code>
                   </a>
                 </li>
@@ -240,8 +244,9 @@ export function GuessCallout(handle: Handle<{ post: LessonPost }>) {
   }
 }
 
+/** "round 2 · lesson 3" or "round 2 · the reveal", for breadcrumbs. */
 export function lessonLabel(post: SeriesPost): string {
-  return post.kind === 'lesson' ? `lesson ${post.lesson}` : 'the reveal'
+  return `round ${post.round} · ${post.kind === 'lesson' ? `lesson ${post.lesson}` : 'the reveal'}`
 }
 
-export const lessonCount = lessons.length
+export const lessonCount = LESSONS_PER_ROUND

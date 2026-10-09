@@ -9,7 +9,7 @@ import { execFileSync } from 'node:child_process'
 import * as path from 'node:path'
 import { pathToFileURL } from 'node:url'
 
-import { finale, lessons, series, seriesIndex } from '../app/content/posts.ts'
+import { LESSONS_PER_ROUND, rounds, series, seriesIndex } from '../app/content/posts.ts'
 
 const rootDir = path.resolve(import.meta.dirname, '..')
 const chrome = process.env.CHROME ?? '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome'
@@ -17,14 +17,30 @@ const template = pathToFileURL(path.join(rootDir, 'public/assets/og/og-series.ht
 const filter = process.argv[2]
 
 const images = [
-  { image: seriesIndex.image.path, k: series.hashtag, t: '8 engineering lessons from one open-source repo', s: 'Can you guess which one?' },
-  ...lessons.map((lesson) => ({
-    image: lesson.image.path,
-    k: `${series.hashtag} · lesson ${lesson.lesson} of ${lessons.length} · ${lesson.tag}`,
-    t: lesson.title,
-    s: 'Guess which open-source repo I learned this from',
-  })),
-  { image: finale.image.path, k: `${series.hashtag} · the reveal`, t: `It was ${series.answer.name}.`, s: '8 lessons + 30 power-user tips' },
+  {
+    image: seriesIndex.image.path,
+    k: series.hashtag,
+    t: 'Engineering lessons from great open-source repos',
+    s: '8 per round. Can you guess which one?',
+  },
+  ...rounds.flatMap((round) => {
+    // Round 1's images were made before there were rounds; keep their wording.
+    let tag = round.number === 1 ? series.hashtag : `${series.hashtag} round ${round.number}`
+    return [
+      ...round.lessons.map((lesson) => ({
+        image: lesson.image.path,
+        k: `${tag} · lesson ${lesson.lesson} of ${LESSONS_PER_ROUND} · ${lesson.tag}`,
+        t: lesson.title,
+        s: 'Guess which open-source repo I learned this from',
+      })),
+      {
+        image: round.finale.image.path,
+        k: `${tag} · the reveal`,
+        t: `It was ${round.answer.name}.`,
+        s: `8 lessons + ${round.finale.teaser.replace('The reveal + ', '')}`,
+      },
+    ]
+  }),
 ]
 
 for (let { image, k, t, s } of images) {

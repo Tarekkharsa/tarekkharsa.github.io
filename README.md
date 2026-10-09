@@ -18,7 +18,8 @@ buttons, heading anchors), and pages work without it.
 
 ```
 app/
-  content/posts.ts   post metadata: titles, dates, tags, hints, sources, feed entries
+  content/posts.ts   post metadata: titles, dates, tags, feed entries
+  content/rounds/    Guess the codebase rounds, one file per repo (lessons, hints, sources)
   actions/           route handlers (controller.tsx)
   pages/             home, post, series and 404 pages
   ui/                document <head>, header/footer, post building blocks
@@ -70,8 +71,9 @@ checklist for starting a new round of Guess the codebase.
 
 1. Write the body as HTML in `content/posts/<slug>.html`.
 2. Register it in `app/content/posts.ts`. Headers, share buttons, the home page list,
-   the feed and the sitemap are generated from that entry. Guess-the-codebase lessons
-   use `lesson({...})`, which also builds the hints box, the pager and the series nav.
+   the feed and the sitemap are generated from that entry. Guess the codebase lessons
+   live in their round's file in `app/content/rounds/`; `defineRound()` also builds the
+   hints box, the pager and the series nav.
 3. Add its social image to `public/assets/og/` (series images: `npm run og`).
 
 ## Social preview images

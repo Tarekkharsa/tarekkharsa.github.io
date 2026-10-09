@@ -1,0 +1,32 @@
+<p>Popular open-source projects now get more issues and PRs than any team can read, and a growing share are written by agents that nobody reviewed. This repo's answer is the bluntest one I've seen: everything from a new contributor is <strong>closed on arrival</strong>.</p>
+
+<h2>How the gate works</h2>
+<ol>
+  <li>A new contributor opens an issue or PR. A workflow closes it with a comment explaining why.</li>
+  <li>Maintainers read the closed issues <strong>daily</strong> and reopen the good ones.</li>
+  <li>To approve someone, a maintainer replies with one word. <code>lgtmi</code> means your future issues stay open; <code>lgtm</code> also lets you open PRs.</li>
+  <li>A workflow parses that comment, checks the commenter has write access, and commits your name to a plain-text file, <code>.github/APPROVED_CONTRIBUTORS</code>. It has 270 people in it.</li>
+</ol>
+<p>One detail I like: the gate reads that file from the <strong>default branch</strong>, never from the PR. A PR that adds its own author to the list doesn't approve itself.</p>
+
+<h2>A short quality bar</h2>
+<blockquote><p><strong>You must understand your code.</strong> If you cannot explain what your changes do and how they interact with the rest of the system, your PR will be closed.</p></blockquote>
+<ul>
+  <li>Using AI to write code is fine. "Submitting AI-generated slop without understanding it is not."</li>
+  <li>An issue must fit on one screen and be written in your own voice. If you use an LLM, post its text as a clearly labeled follow-up.</li>
+  <li>Issues opened Friday to Sunday may wait until the Monday review.</li>
+  <li>Ignore the guide twice, or flood the tracker through automation, and you're blocked.</li>
+</ul>
+
+<h2>Where AI fits</h2>
+<p>The FAQ answers the obvious question, "why not let AI triage everything?":</p>
+<blockquote><p>AI can help group duplicates, summarize reports, and spot missing information. It is not trusted to make final maintainer decisions.</p></blockquote>
+<p>And the other obvious question, "is this hostile to contributors?": "No. It is a guardrail against burnout and tracker spam."</p>
+
+<h2>Compared with round 1</h2>
+<p>Round 1's repo also wanted maintainer approval before a PR, but asked for it as a link inside the PR template. This one enforces it with a bot, before any human spends time reading.</p>
+
+<div class="callout steal">
+  <p class="callout-kicker">Steal this</p>
+  <p>When volume outruns reviewers, make "closed until a human says yes" the default. Keep the approval list in the repo, read it from the main branch, and make approval a one-word comment so saying yes costs nothing.</p>
+</div>

@@ -1,4 +1,4 @@
-import { postPath, posts, seriesIndex } from '../content/posts.ts'
+import { postPath, posts, rounds, seriesIndex } from '../content/posts.ts'
 import { absoluteUrl, site } from '../site.ts'
 import { Document } from '../ui/document.tsx'
 import { formatMonth } from '../ui/post-parts.tsx'
@@ -12,6 +12,8 @@ const personJsonLd = {
   image: absoluteUrl(site.photo.path),
   sameAs: [site.social.github, site.social.twitter],
 }
+
+const latestRound = rounds[0]!
 
 export function HomePage() {
   return () => (
@@ -86,11 +88,11 @@ export function HomePage() {
             Featured series
           </h2>
           <a class="feature" href={postPath(seriesIndex)}>
-            <p class="kicker">🕵️ #GuessTheCodebase</p>
-            <h3>8 engineering lessons from one open-source repo. Guess which one.</h3>
+            <p class="kicker">{`🕵️ #GuessTheCodebase · round ${latestRound.number} is live`}</p>
+            <h3>8 new lessons from a different open-source repo. Guess which one.</h3>
             <p>
-              Architecture, performance budgets, testing without sleeps, PR processes for the AI
-              era, lint rules as taste, and more. Each post ends with hints.
+              A core that lets you replace its own features, import budgets, tests with a fake
+              model, PRs closed by default, lockfile gates, and more. Each post ends with hints.
             </p>
             <div class="steps" aria-hidden="true">
               {[1, 2, 3, 4, 5, 6, 7, 8].map((n) => (

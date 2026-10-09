@@ -1,0 +1,35 @@
+<p>Most tools grow by adding features to the core. This one grows by refusing to. Its contributing guide opens with the rule:</p>
+<blockquote><p>If your feature does not belong in the core, it should be an extension. PRs that bloat the core will likely be rejected.</p></blockquote>
+<p>That's easy to write and hard to live by. What makes it real is the next part.</p>
+
+<h2>First-party features are plugins too</h2>
+<p>MCP support, a code-execution mode and tool search all ship <em>inside</em> the product. But none of them are wired into the core. They're built-in extensions, using the same extension API anyone else gets:</p>
+<pre><code>export const builtInExtensions = [
+  { name: "llama.cpp",   factory: llamaExtension,      builtin: true },
+  // Replaceable: an extension that registers `codemode`, `tool_search`,
+  // or `/mcp` takes over instead of running alongside the built-in one.
+  { name: "codemode",    factory: codemodeExtension,   replaceable: true, builtin: true },
+  { name: "tool-search", factory: toolSearchExtension, replaceable: true, builtin: true },
+  { name: "mcp",         factory: mcpExtension,        replaceable: true, builtin: true },
+];</code></pre>
+<p>Install a third-party MCP extension that registers <code>/mcp</code>, and the built-in one steps aside: it stops reading its config and stops connecting servers. Remove the extension and the built-in one comes back. Nobody had to add a setting called "use the other MCP".</p>
+
+<h2>Features it doesn't ship</h2>
+<p>The README says it plainly: it skips features like <strong>sub-agents and plan mode</strong>. Instead, there are 79 example extensions, including <code>subagent</code>, <code>plan-mode</code>, <code>permission-gate</code> and <code>sandbox</code>. The suggested way to get a missing feature is to ask the agent to build it as an extension, or install a package that does it your way.</p>
+
+<h2>Even hook points cost something</h2>
+<p>The guide doesn't treat extensibility as free either:</p>
+<blockquote><p>Even hook points for extensions however should be well considered and discussed to avoid adding unmaintainable bloat and complex interactions.</p></blockquote>
+<p>A small core with a hundred ad-hoc hooks isn't small. Every hook is API surface someone has to keep working.</p>
+
+<h2>Why this works</h2>
+<ul>
+  <li><strong>The API gets tested by its own authors.</strong> If MCP can be built as a plugin, so can the next protocol.</li>
+  <li><strong>Opinions become optional.</strong> You can disagree with how the built-in MCP works without forking the project.</li>
+  <li><strong>The core stays reviewable.</strong> Less code in the middle means fewer interactions to reason about.</li>
+</ul>
+
+<div class="callout steal">
+  <p class="callout-kicker">Steal this</p>
+  <p>Build your own features on your public plugin API, and let users replace them. If a first-party feature <em>can't</em> be written as a plugin, your API is missing something, and you just found it.</p>
+</div>

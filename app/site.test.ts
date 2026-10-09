@@ -2,7 +2,9 @@ import * as fs from 'node:fs'
 import * as assert from 'remix/assert'
 import { describe, it } from 'remix/test'
 
-import { finale, lessons, postPath, posts, t3CodeServerGuide } from './content/posts.ts'
+import { postPath, posts, roundPosts, rounds, t3CodeServerGuide } from './content/posts.ts'
+import { piRound } from './content/rounds/pi.ts'
+import { t3codeRound } from './content/rounds/t3code.ts'
 import { router } from './router.tsx'
 import { site } from './site.ts'
 import { staticPages } from './static-pages.ts'
@@ -48,26 +50,92 @@ describe('static build', () => {
   })
 })
 
+const { lessons } = t3codeRound
+
 describe('Guess the codebase series', () => {
-  it('accumulates hints from earlier lessons', async () => {
-    let { body } = await get(postPath(lessons[3]!))
+  it('accumulates hints from earlier lessons in the same round only', async () => {
+    let { body } = await get(postPath(t3codeRound.lessons[3]!))
     assert.match(body, /\+ 9 hints from earlier lessons/)
     assert.match(body, /Hint E9/)
     assert.doesNotMatch(body, /Hint E10/)
+
+    let first = (await get(postPath(piRound.lessons[0]!))).body
+    assert.doesNotMatch(first, /hints from earlier lessons/)
+    let last = (await get(postPath(piRound.lessons[7]!))).body
+    assert.match(last, /\+ 21 hints from earlier lessons/)
+    assert.ok(!last.includes(t3codeRound.lessons[0]!.hints[0]), 'round 1 hints leaked into round 2')
   })
 
-  it('keeps the reveal out of the feed and sitemap', async () => {
+  it('keeps every reveal out of the feed and sitemap, and lists every lesson', async () => {
     for (let path of ['/feed.xml', '/sitemap.xml']) {
       let { body } = await get(path)
-      assert.doesNotMatch(body, new RegExp(finale.slug), path)
-      for (let lesson of lessons) assert.match(body, new RegExp(lesson.slug), path)
+      for (let round of rounds) {
+        assert.doesNotMatch(body, new RegExp(round.finale.slug), path)
+        for (let lesson of round.lessons) assert.match(body, new RegExp(lesson.slug), path)
+      }
     }
   })
 
-  it('links each page to its neighbors', async () => {
-    let { body } = await get(postPath(lessons.at(-1)!))
-    let next = body.match(/<a [^>]*class="next"[^>]*>/)?.[0] ?? ''
-    assert.match(next, new RegExp(`href="${postPath(finale)}"`))
+  it('links each page to its neighbors within its round', async () => {
+    for (let round of rounds) {
+      let { body } = await get(postPath(round.lessons.at(-1)!))
+      let next = body.match(/<a [^>]*class="next"[^>]*>/)?.[0] ?? ''
+      assert.match(next, new RegExp(`href="${postPath(round.finale)}"`), `round ${round.number}`)
+    }
+  })
+
+  it("shows only the current round's pages in the series nav", async () => {
+    let { body } = await get(postPath(piRound.lessons[2]!))
+    let nav = body.match(/<nav [^>]*class="series-nav"[\s\S]*?<\/nav>/)?.[0] ?? ''
+    assert.match(nav, /round 2/)
+    for (let page of roundPosts(piRound)) assert.match(nav, new RegExp(postPath(page)))
+    for (let page of roundPosts(t3codeRound)) assert.doesNotMatch(nav, new RegExp(postPath(page)))
+  })
+
+  it("points each lesson's answer at its own round's repo", async () => {
+    for (let round of rounds) {
+      let { body } = await get(postPath(round.lessons[0]!))
+      let answer = body.match(/<div class="answer">[\s\S]*?<\/div>/)?.[0] ?? ''
+      assert.match(answer, new RegExp(`href="${round.answer.url}"`), `round ${round.number}`)
+      for (let other of rounds.filter((candidate) => candidate !== round)) {
+        assert.doesNotMatch(answer, new RegExp(other.answer.repo), `round ${round.number}`)
+      }
+    }
+  })
+
+  it('lists every round on the hub, newest first', async () => {
+    let { body } = await get('/posts/guess-the-codebase')
+    let positions = rounds.map((round) => body.indexOf(`id="round-${round.number}"`))
+    assert.ok(positions.every((position) => position > 0))
+    assert.deepEqual(positions, [...positions].sort((a, b) => a - b))
+  })
+
+  it('has a social image for every post', () => {
+    let missing = posts.filter((post) => !fs.existsSync(new URL(`.${post.image.path}`, publicDir)))
+    assert.deepEqual(missing.map((post) => post.slug), [])
+  })
+
+  it("keeps the answer out of every URL a player sees before the reveal", () => {
+    for (let round of rounds.filter((candidate) => candidate.number > 1)) {
+      let name = round.answer.name.toLowerCase()
+      for (let page of roundPosts(round)) {
+        assert.ok(!page.slug.split('-').includes(name), `${page.slug} contains "${name}"`)
+      }
+    }
+  })
+
+  it('never changes round 1 URLs, which are already shared', () => {
+    assert.deepEqual(roundPosts(t3codeRound).map(postPath), [
+      '/posts/gtc-01-decide-commit-then-act',
+      '/posts/gtc-02-performance-budgets-as-tests',
+      '/posts/gtc-03-mock-the-boundary',
+      '/posts/gtc-04-pr-process-for-the-ai-era',
+      '/posts/gtc-05-taste-as-lint-rules',
+      '/posts/gtc-06-dev-setup-for-parallel-agents',
+      '/posts/gtc-07-honest-ui',
+      '/posts/gtc-08-write-docs-for-agents',
+      '/posts/gtc-reveal-t3-code-power-user-tips',
+    ])
   })
 })
 

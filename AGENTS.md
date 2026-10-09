@@ -18,13 +18,16 @@ docs (`node_modules/remix/INDEX.md`) rather than relying on memory.
   `dist/posts/<slug>.html`, which Pages serves at both `/posts/<slug>` and the old
   `/posts/<slug>.html`). Link to the clean URL. Feed entry IDs stay on the old `.html`
   URLs on purpose: changing them makes readers show every post again.
-- **Spoilers:** the #GuessTheCodebase reveal post (`finale`) is `indexed: false`, so it stays
+- **Spoilers:** each #GuessTheCodebase round's reveal post (`finale`) is `indexed: false`, so it stays
   out of `feed.xml` and `sitemap.xml`. Keep it that way.
 
 ## Where things live
 
 - `app/routes.ts`: URL contract. `app/actions/controller.tsx`: route handlers.
   `app/router.tsx`: middleware and 404.
+- `app/content/rounds/<repo>.ts`: one Guess the codebase round each (answer, hints, lessons,
+  finale), built with `defineRound()` from `app/content/series.ts`. Never change a published
+  round's slugs. Plan a future round on a local branch that is never pushed: the repo is public.
 - `app/content/posts.ts`: all post metadata. The head tags, JSON-LD, series nav, hints,
   pager, share links, home list, feed and sitemap are generated from it.
 - `content/posts/<slug>.html`: the hand-written post body, inserted verbatim.

@@ -1,4 +1,4 @@
-# Round 2 lesson plan (draft for review)
+# Round 2 lesson plan (published)
 
 Codebase: [`earendil-works/pi`](https://github.com/earendil-works/pi) at
 `6fb2e7815167e6b19006fc526d1a5d0f5f998787` (main, 2026-10-08). 113k stars, 14k forks,
@@ -150,26 +150,27 @@ Hints:
 2. Its agent guide bans `git stash`.
 3. Its prompt templates live in a hidden folder named after the project.
 
-## 7. UI/UX: Don't fight the terminal
+## 7. UI/UX: Decide who owns the scrollback
 
-It's a terminal app that renders into your normal terminal, not a full-screen takeover:
-the main-screen renderer keeps your scrollback, and doesn't capture the mouse, "because
-the terminal owns its scrollback."
+Two renderers behind one `TUI` interface. Fullscreen (the default, alternate screen) owns
+the viewport, so it rebuilds scrolling, scrollbars, selection with copy, clickable links
+and prompt jumps, and prints the whole document back to scrollback on exit. Regular mode
+renders into the main buffer and doesn't capture the mouse or offer fixed layout regions,
+"because the terminal owns its scrollback."
 
-Rendering is differential: only lines from the first change downwards are rewritten,
-wrapped in synchronized output (`CSI ?2026`) so the terminal paints once, without flicker.
-Full redraws are the expensive exception and are **counted** (`fullRedraws`); a test fails
-if an edit tool's output causes one. On Android's Termux, showing the keyboard changes the
-terminal height, which would replay the whole history, so that case skips the redraw.
+Rendering is differential, wrapped in synchronized output (`CSI ?2026`). Full redraws are
+counted (`fullRedraws`) and a test fails if showing an edit tool's result causes one. On
+Termux the keyboard changes the terminal height, so that redraw is skipped. Every shortcut
+is a named action in `keybindings.json`; hard-coded key checks are forbidden.
 
-Every shortcut is a named action you can rebind in `keybindings.json`; the agent guide
-forbids hard-coded key checks.
+(Draft 1 said it "leaves your scrollback alone". Wrong: fullscreen is the default,
+`tuiMode: "fullscreen"` in `settings-defaults.ts`.)
 
-**Steal this:** count your expensive UI operations and test the count. A "full redraw
-happened" counter is a better regression test than a screenshot.
+**Steal this:** decide who owns each piece of UI and don't half-own it. Count your most
+expensive operation and assert on the count.
 
 Hints:
-1. It's a terminal app that leaves your scrollback alone.
+1. It has two terminal renderers behind one interface.
 2. It has a test that fails if editing a file redraws the whole screen.
 3. It runs on Android phones, and its renderer has a special case for that.
 

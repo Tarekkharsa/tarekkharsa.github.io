@@ -55,7 +55,11 @@ export function PostPage(handle: Handle<{ post: ArticlePost }>) {
           <article data-read-slug={post.slug} data-read-minutes={post.readMinutes}>
             <PostHeader
               post={post}
-              extra={post.kind === 'lesson' ? `Lesson ${post.lesson} of ${lessonCount}` : undefined}
+              extra={
+                post.kind === 'lesson'
+                  ? `Round ${post.round} · lesson ${post.lesson} of ${lessonCount}`
+                  : undefined
+              }
             />
             {post.kind !== 'guide' ? <SeriesNav current={post} /> : null}
             <PostBody slug={post.slug}>

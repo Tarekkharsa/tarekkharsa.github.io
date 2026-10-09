@@ -1,7 +1,9 @@
 // X campaign for Guess the codebase, round 1 (answer: T3 Code). Render with `npm run kit t3code`.
-import { finale, lessons, postUrl, series, seriesIndex } from '../../app/content/posts.ts'
+import { postUrl, series, seriesIndex } from '../../app/content/posts.ts'
+import { t3codeRound } from '../../app/content/rounds/t3code.ts'
 import { thread, type KitSection, type TweetKit } from '../kit.ts'
 
+const { lessons, finale } = t3codeRound
 const T = series.hashtag
 const hub = postUrl(seriesIndex)
 const reveal = postUrl(finale)

@@ -1,0 +1,29 @@
+<p>Terminal apps have to answer a question most UIs never face: <strong>who owns the scrolling?</strong> If the terminal owns it, you get native scrollback, search and selection, but the app can't control much. If the app owns it, it can do more, but now it has to rebuild everything the terminal used to do for free.</p>
+<p>This repo doesn't pick one. It ships two renderers behind one interface, and each one respects its answer.</p>
+
+<h2>Two renderers, one interface</h2>
+<p>Components render to a shared <code>TUI</code> interface. You only pick the concrete renderer when you construct the app:</p>
+<ul>
+  <li><strong>Fullscreen</strong> (the default) uses the terminal's alternate screen, so the app owns the viewport. It therefore rebuilds what the terminal would normally do: mouse-wheel and keyboard scrolling, scrollbars you can drag, text selection that copies to the clipboard, clickable links, and jumps between your prompts. When it exits, it prints the complete conversation back into your normal scrollback.</li>
+  <li><strong>Regular mode</strong> renders into the main terminal buffer, so the terminal owns scrollback. The app doesn't capture the mouse, and fixed layout regions are deliberately unavailable, "because the terminal owns its scrollback."</li>
+</ul>
+<p>Neither mode half-owns the screen. That's where flicker, lost scrollback and broken selection come from.</p>
+
+<h2>Redraw as little as possible, and count when you can't</h2>
+<p>Both renderers are differential: they compare the new frame with the last one and rewrite only from the first changed line. Updates are wrapped in synchronized output (<code>CSI ?2026h</code> … <code>?2026l</code>), so the terminal paints the change once instead of mid-write.</p>
+<p>A full redraw is the expensive exception: clear the screen and the scrollback, then repaint everything. So the renderer <strong>counts</strong> them, and there's a test that fails if showing an edit tool's result triggers one:</p>
+<pre><code>const redrawsBefore = tui.fullRedraws
+// ...render the edit tool's diff...
+expect(tui.fullRedraws).toBe(redrawsBefore)</code></pre>
+<p>There's even a dev-only <code>/tui</code> command that prints the counter for the current session.</p>
+
+<h2>One special case</h2>
+<p>A terminal height change normally forces a full redraw. On Android's Termux, though, the height changes every time the on-screen keyboard opens or closes, and a full redraw there replays the entire history. So that case is skipped on Termux. It's a one-line exception with a comment, and it's what makes the app usable on a phone.</p>
+
+<h2>Every key is a setting</h2>
+<p>Shortcuts are named actions with defaults, like <code>app.model.select</code> on <code>ctrl+l</code>, and you can rebind or disable any of them in <code>keybindings.json</code>. The agent guide forbids hard-coded key checks for exactly that reason: a hard-coded key is a shortcut someone can't change.</p>
+
+<div class="callout steal">
+  <p class="callout-kicker">Steal this</p>
+  <p>Decide who owns each piece of UI and don't half-own it. Then count your most expensive operation, like full redraws, and assert on the count in tests. A counter catches regressions a screenshot never will.</p>
+</div>

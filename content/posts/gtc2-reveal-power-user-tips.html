@@ -1,0 +1,68 @@
+<p>For eight posts I hid the source behind a "reveal" button. If you followed the hints (100,000+ stars, no sub-agents or plan mode, a fake model in the tests, the creators of libGDX and Flask, a two-letter <code>.dev</code> site, a mathematical constant), you were right:</p>
+
+<div class="callout callout-big">
+  <p class="callout-kicker">The codebase</p>
+  <p class="callout-title"><a href="https://github.com/earendil-works/pi">Pi</a></p>
+  <p>A minimal, extensible agent harness: an interactive coding agent in your terminal, plus print, JSON and RPC modes and a TypeScript SDK. It works with many model providers and is built to be bent to your workflow with extensions, skills, prompt templates and themes. Built in the open at <code>earendil-works</code>, mostly by Mario Zechner (who created libGDX) and Armin Ronacher (who created Flask).</p>
+</div>
+
+<h2>The eight lessons, unmasked</h2>
+<ol class="recap">
+  <li><a href="/posts/gtc2-01-small-replaceable-core">A small, replaceable core</a>: MCP, code mode and tool search are built-in extensions a third-party extension can replace.</li>
+  <li><a href="/posts/gtc2-02-entry-points-are-cost-contracts">Entry points are cost contracts</a>: a commit check that budgets each package entry's import graph.</li>
+  <li><a href="/posts/gtc2-03-fake-model-empty-environment">A fake model and an empty environment</a>: the faux provider and <code>env -i</code> in <code>test.sh</code>.</li>
+  <li><a href="/posts/gtc2-04-closed-by-default">Closed by default</a>: auto-closed issues and PRs, and <code>lgtm</code> approvals.</li>
+  <li><a href="/posts/gtc2-05-lockfile-is-code">The lockfile is code</a>: exact pins, three allowed install scripts, a lockfile commit gate.</li>
+  <li><a href="/posts/gtc2-06-many-agents-one-checkout">Many agents, one checkout</a>: the git rules in its <code>AGENTS.md</code>.</li>
+  <li><a href="/posts/gtc2-07-who-owns-the-scrollback">Who owns the scrollback</a>: two renderers, differential rendering, counted full redraws.</li>
+  <li><a href="/posts/gtc2-08-measure-your-docs">Measure your docs</a>: with-docs and without-docs evals.</li>
+</ol>
+
+<p>Reading the repo taught me how it's built. Using it taught me the tricks below. On Windows and WSL a few <kbd>Alt</kbd> shortcuts move; <code>/hotkeys</code> shows the ones active in your terminal.</p>
+
+<h2>20 power-user tips</h2>
+
+<h3>Keyboard first</h3>
+<ol class="tips">
+  <li><strong>Steer while it works.</strong> Type and press <kbd>Enter</kbd> to guide the next response once the current one and its tool calls finish. <kbd>Alt</kbd>+<kbd>Enter</kbd> queues a follow-up for after the whole task. <kbd>Alt</kbd>+<kbd>↑</kbd> pulls queued messages back into the editor, and <kbd>Esc</kbd> stops.</li>
+  <li><strong>Write long prompts in your editor.</strong> <kbd>Ctrl</kbd>+<kbd>G</kbd> opens the prompt in <code>$VISUAL</code> or <code>$EDITOR</code>.</li>
+  <li><strong>Attach files fast.</strong> Type <code>@</code> to search for a file, <kbd>Tab</kbd> to complete a path, or paste or drag an image in.</li>
+  <li><strong>Hide the noise.</strong> <kbd>Ctrl</kbd>+<kbd>O</kbd> expands or collapses tool output; <kbd>Ctrl</kbd>+<kbd>T</kbd> shows or hides thinking blocks.</li>
+  <li><strong>Switch brains quickly.</strong> <kbd>Shift</kbd>+<kbd>Tab</kbd> cycles the thinking level, <kbd>Ctrl</kbd>+<kbd>L</kbd> opens the model picker, and <kbd>Ctrl</kbd>+<kbd>P</kbd> cycles through the models you picked in <code>/scoped-models</code>.</li>
+  <li><strong>Run a command yourself.</strong> <code>!git status</code> runs it and sends the output to the model. <code>!!git status</code> runs it without sending anything.</li>
+  <li><strong>Copy the answer.</strong> <kbd>Ctrl</kbd>+<kbd>X</kbd> (or <code>/copy</code>) copies the last assistant message.</li>
+  <li><strong>Rebind anything.</strong> Every shortcut is a named action. Map it in <code>~/.pi/agent/keybindings.json</code>, use <code>[]</code> to disable one, then <code>/reload</code>.
+<pre><code>{
+  "app.session.new": "ctrl+shift+n",
+  "tui.altScreen.pageUp": []
+}</code></pre></li>
+</ol>
+
+<h3>Sessions are trees</h3>
+<ol class="tips" start="9">
+  <li><strong>Go back without losing anything.</strong> <code>/tree</code> shows the whole session. Pick an earlier message of yours, edit it and resubmit: that starts a new branch, and the old one stays. When you leave a branch, Pi can summarize it into the one you enter.</li>
+  <li><strong>Know which copy you want.</strong> <code>/fork</code> starts a new session from an earlier message of yours; <code>/clone</code> copies the current branch into a new session.</li>
+  <li><strong>Label and filter the tree.</strong> In <code>/tree</code>, <kbd>Shift</kbd>+<kbd>L</kbd> labels a node, and <kbd>Ctrl</kbd>+<kbd>U</kbd> shows only your messages.</li>
+  <li><strong>Pick up where you left off.</strong> <code>pi --continue</code> resumes the latest session in this folder, <code>pi --resume</code> opens the picker, and <code>/name</code> gives a session a name you'll recognize.</li>
+  <li><strong>Compact with intent.</strong> <code>/compact keep the API decisions and open questions</code> tells the summary what to preserve. The original messages stay in the session file.</li>
+  <li><strong>Leave no trace.</strong> <code>pi --no-session</code> runs without saving a session at all.</li>
+</ol>
+
+<h3>Automation</h3>
+<ol class="tips" start="15">
+  <li><strong>Pipe into it.</strong> <code>git diff | pi --print "Review this change"</code> prints the answer and exits. Piped input goes in front of your prompt.</li>
+  <li><strong>Get events, not text.</strong> <code>pi --mode json "Inspect this repo" &gt; events.jsonl</code> writes every agent event as JSON lines. <code>--mode rpc</code> lets another program drive it over stdin.</li>
+  <li><strong>Narrow the tools.</strong> <code>pi --tools read,grep,find,ls --print "Review this project"</code> runs with only those tools. <code>--tools +codemode,-write</code> adjusts the defaults instead of replacing them. It narrows what the model is offered, not what the machine allows, so use a sandbox for untrusted work.</li>
+</ol>
+
+<h3>Make it yours</h3>
+<ol class="tips" start="18">
+  <li><strong>Turn prompts into commands.</strong> Save <code>~/.pi/agent/prompts/review.md</code> and it becomes <code>/review</code>. Use <code>$1</code>, <code>$ARGUMENTS</code> or <code>${1:-correctness}</code> for arguments.</li>
+  <li><strong>Write skills, not giant prompts.</strong> A skill is a folder with a <code>SKILL.md</code>. Only its name and description sit in the prompt; the full instructions load when a task needs them.</li>
+  <li><strong>Try a package before installing it.</strong> <code>pi -e npm:@example/pi-tools</code> loads it for one run; <code>pi install</code> adds it for good. Packages run code, so read the source first.</li>
+</ol>
+
+<p>Bonus: missing sub-agents or a plan mode? The repo has example extensions for both, or you can ask Pi to write the extension you want. That's the whole idea.</p>
+
+<h2>What's next</h2>
+<p>Round 3 is another repo, and I've already started reading it. Follow <a href="https://twitter.com/tarekkh1997">@tarekkh1997</a> to play, or subscribe via <a href="/feed.xml">RSS</a>.</p>

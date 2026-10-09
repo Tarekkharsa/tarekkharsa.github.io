@@ -5,12 +5,13 @@ for each round of [Guess the codebase](https://tarekkharsa.github.io/posts/guess
 
 **Nothing here is deployed.** The site build only publishes `public/` and the routes in
 `app/`. But the repository is public, so anything in this folder can be read on GitHub.
-Don't put secrets or unannounced answers here if they need to stay private.
+Don't put secrets or unannounced answers here if they need to stay private: plan a future
+round on a local branch that is never pushed, and merge it on launch day.
 
 | Project              | Round | Status                                        |
 | -------------------- | ----- | --------------------------------------------- |
 | [t3code](./t3code/)  | 1     | Published, finale unlisted until reveal day   |
-| [pi](./pi/)          | 2     | Not started                                   |
+| [pi](./pi/)          | 2     | Published, finale unlisted until reveal day   |
 
 ## Layout
 
@@ -42,13 +43,14 @@ npm test                   # includes the kit checks
 2. **Pick 8 lessons** across different areas (architecture, performance, testing, PRs,
    tooling, dev setup, UX, docs). Write 3 hints per lesson, vague first and specific last.
    Hints accumulate across lessons, so the last ones can be nearly a giveaway.
-3. **Site:** `app/content/posts.ts` currently has a single `series` with one `answer`.
-   Before round 2, turn it into a list of rounds (each with its own answer, slug prefix,
-   lesson count and date) so lessons, hints, the series nav and the finale are scoped per
-   round. Round 1 URLs must not change: they're already shared.
-4. **Posts:** prose in `content/posts/<slug>.html`, metadata in `app/content/posts.ts`.
+3. **Site:** add `app/content/rounds/<name>.ts` with `defineRound({...})` (answer, hint zero,
+   8 lessons, finale) and put it first in `rounds` in `app/content/posts.ts`. Slugs start
+   with the round's prefix (`gtc3-01-...`). The hub, series nav, hints, pager and feed pick it
+   up from there. Never change an earlier round's slugs: they're already shared.
+4. **Posts:** prose in `content/posts/<slug>.html`, metadata in the round's file. Don't name
+   the repo in lessons (redact package names, env vars, config folders); the answer box does.
    Keep the finale `indexed: false` until reveal day.
-5. **Images:** `npm run og`.
+5. **Images:** `npm run og -- gtc3` renders only the new round's images.
 6. **Campaign:** copy `t3code/tweets.ts` as a starting point, then `npm run kit -- <name>`.
-7. **Reveal day:** index the finale, list it on the home page, and update the test that keeps
-   the reveal out of the feed.
+7. **Reveal day:** in the round's file set `finale.indexed: true` and add a `listing`, then
+   update the "keeps every reveal out of the feed" test in `app/site.test.ts`.

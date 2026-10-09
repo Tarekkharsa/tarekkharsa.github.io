@@ -90,6 +90,9 @@ repo moves fast (520 commits in the month before this snapshot).
 - Named, rebindable actions: `packages/coding-agent/docs/keybindings.md`; no hard-coded key
   checks: `AGENTS.md` ("Code Quality")
 - Termux support: `packages/coding-agent/docs/termux.md`
+- Fullscreen is the default: `packages/coding-agent/src/core/settings-defaults.ts` (`tuiMode`),
+  `packages/coding-agent/docs/usage.md`; alt-screen prints the final document on exit:
+  `packages/tui/README.md`
 
 ## 8. Measure whether your docs help
 
@@ -100,3 +103,19 @@ repo moves fast (520 commits in the month before this snapshot).
 - Docs navigation checks: `packages/coding-agent/test/documentation.test.ts`
 - "Do not trust analysis written in the issue": `.pi/prompts/is.md`
 - `pi.dev`: `README.md`
+
+## Finale: 20 power-user tips
+
+All in `packages/coding-agent/docs/`:
+
+- Steering vs follow-up (`Enter`, `Alt+Enter`, `Alt+Up`, `Esc`), `Ctrl+G`, `@` and `Tab`,
+  `Ctrl+O`, `Ctrl+T`, `Shift+Tab`, `Ctrl+L`, `!` and `!!`, `Ctrl+X`: `usage.md`
+- `Ctrl+P` cycles scoped models, tree `Shift+L` / `Ctrl+U`, `keybindings.json`, `[]` to
+  disable: `keybindings.md`
+- `/tree`, `/fork`, `/clone`, branch summaries, `--continue`, `--resume`, `/name`,
+  `/compact [instructions]`, `--no-session`: `sessions.md`, `slash-commands.md`
+- `--print` with piped stdin, `--mode json`, `--mode rpc`, `--tools`, `+name/-name`: `cli.md`
+- Prompt templates and `$1` / `$ARGUMENTS` / `${1:-default}`: `prompt-templates.md`
+- Skills load full instructions on demand: `skills.md`
+- `pi -e npm:...`, `pi install`, review packages first: `packages.md`
+- `subagent` and `plan-mode` examples: `packages/coding-agent/examples/extensions/`
