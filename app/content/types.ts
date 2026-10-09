@@ -70,6 +70,8 @@ export interface Round {
   answer: Answer
   /** Published on the hub before any lesson, vaguer than every lesson hint. */
   hintZero: string
+  /** One or two sentences for the home page card while this is the latest round. */
+  pitch: string
   lessons: LessonPost[]
   finale: FinalePost
 }

@@ -17,6 +17,8 @@ export const piRound = defineRound({
   },
   hintZero:
     "It's open source, it's small on purpose, and it expects you to bend it to your own workflow.",
+  pitch:
+    'A core that lets you replace its own features, import budgets, tests with a fake model, PRs closed by default, lockfile gates, and more. Each post ends with hints.',
   lessons: [
     {
       slug: 'gtc2-01-small-replaceable-core',

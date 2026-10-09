@@ -12,6 +12,7 @@ round on a local branch that is never pushed, and merge it on launch day.
 | -------------------- | ----- | --------------------------------------------- |
 | [t3code](./t3code/)  | 1     | Published, finale unlisted until reveal day   |
 | [pi](./pi/)          | 2     | Published, finale unlisted until reveal day   |
+| [opencode](./opencode/) | 3  | Published, finale unlisted until reveal day   |
 
 ## Layout
 

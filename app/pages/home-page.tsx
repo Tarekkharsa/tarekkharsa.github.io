@@ -90,10 +90,7 @@ export function HomePage() {
           <a class="feature" href={postPath(seriesIndex)}>
             <p class="kicker">{`🕵️ #GuessTheCodebase · round ${latestRound.number} is live`}</p>
             <h3>8 new lessons from a different open-source repo. Guess which one.</h3>
-            <p>
-              A core that lets you replace its own features, import budgets, tests with a fake
-              model, PRs closed by default, lockfile gates, and more. Each post ends with hints.
-            </p>
+            <p>{latestRound.pitch}</p>
             <div class="steps" aria-hidden="true">
               {[1, 2, 3, 4, 5, 6, 7, 8].map((n) => (
                 <span>{String(n)}</span>

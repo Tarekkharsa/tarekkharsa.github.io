@@ -28,6 +28,7 @@ export interface RoundInput {
   slugPrefix: string
   answer: Answer
   hintZero: string
+  pitch: string
   lessons: LessonInput[]
   finale: Omit<FinalePost, 'kind' | 'round' | 'date' | 'indexed'> & { indexed?: boolean }
 }
@@ -83,5 +84,5 @@ export function defineRound(input: RoundInput): Round {
     indexed: input.finale.indexed ?? false,
   }
 
-  return { number, answer: input.answer, hintZero: input.hintZero, lessons, finale }
+  return { number, answer: input.answer, hintZero: input.hintZero, pitch: input.pitch, lessons, finale }
 }

@@ -14,6 +14,8 @@ export const t3codeRound = defineRound({
   },
   hintZero:
     "It's open source, it has hundreds of thousands of users, and the people building it use it to build it.",
+  pitch:
+    'Architecture, performance budgets, testing without sleeps, PR processes for the AI era, lint rules as taste, and more. Each post ends with hints.',
   lessons: [
     {
       slug: 'gtc-01-decide-commit-then-act',

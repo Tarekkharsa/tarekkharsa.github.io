@@ -1,0 +1,27 @@
+<p>Here's a common shape for "turn off provider X": an <code>enabled_providers</code> list, a <code>disabled_providers</code> list, and some code that checks both while it loads provider config. It works until a company wants to forbid a provider that a developer has perfectly valid credentials for. Now "is it configured?" and "is it allowed?" are tangled into one setting.</p>
+<p>This repo's v2 replaces those lists with a separate idea: <strong>policy</strong>.</p>
+
+<h2>Two different questions</h2>
+<blockquote><p>A provider can be correctly configured and have valid credentials while policy still denies its use.</p></blockquote>
+<ul>
+  <li><strong>Config</strong> describes endpoints, options and model overrides. It answers "how do I use this?"</li>
+  <li><strong>Policy</strong> answers "may I use this?" It doesn't configure anything, and "policies do not make unusable resources usable."</li>
+</ul>
+
+<h2>The whole evaluator</h2>
+<p>A statement is an effect (<code>allow</code> or <code>deny</code>), an action and a resource, both with wildcards. Evaluation is one line:</p>
+<pre><code>statements.findLast(
+  (s) =&gt; Wildcard.match(action, s.action) &amp;&amp; Wildcard.match(resource, s.resource),
+)?.effect ?? fallback</code></pre>
+<p><strong>The last matching statement wins.</strong> There's no "more specific pattern beats a wildcard" rule: "A specific resource does not automatically beat a wildcard resource. Written/evaluation order controls the result." So "deny everything except Anthropic" is exactly two lines in that order:</p>
+<pre><code>{ "effect": "deny",  "action": "provider.use", "resource": "*" },
+{ "effect": "allow", "action": "provider.use", "resource": "anthropic" }</code></pre>
+<p>Each caller passes its own default. Provider use defaults to <code>allow</code>, so a user with no policy sees no change at all.</p>
+
+<h2>Built to grow, but only a little</h2>
+<p>The vocabulary is meant to cover more actions later, like <code>plugin.load</code> or <code>mcp.connect</code>, with user policy overriding repository policy and, eventually, organization policy overriding both. The non-goals are written down just as clearly: no conditions, no principals, no approval prompts.</p>
+
+<div class="callout steal">
+  <p class="callout-kicker">Steal this</p>
+  <p>Keep "is it configured?" and "is it allowed?" in separate layers. Make policy ordered statements where the last match wins, so anyone can predict the result by reading top to bottom.</p>
+</div>

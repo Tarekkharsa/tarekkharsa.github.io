@@ -1,0 +1,20 @@
+<p>The classic way to build a version 2 is a long-lived branch. It starts clean, falls behind, and eventually becomes a merge nobody wants to do. This repo tried that. Its <code>2.0</code> branch ends at a commit called "2.0 exploration", from April. Everything on it has been merged, and it's now <strong>4,760 commits behind</strong> the default branch.</p>
+<p>The rewrite actually happens on the default branch, next to v1.</p>
+
+<h2>v2 lives beside v1</h2>
+<p>New code sits in clearly named places, like <code>specs/v2</code>, <code>test/v2</code>, v2 plugin and SDK folders and a <code>session/v2</code> page in the app, while v1 keeps shipping releases. A bridge publishes prompts made through v1 as v2 events, so v2 sees them during the transition. The planning doc is refreshingly honest about why:</p>
+<blockquote><p>ok we need to work towards a launch of v2 so we can get out of this rebuild phase</p></blockquote>
+
+<h2>A dated log of every contract change</h2>
+<p>A schema changelog records every v2 change to the database, durable events, projected messages, HTTP API or generated SDK: 28 dated entries. Each says <strong>why</strong> the contract changed and <strong>what existing data needs</strong>:</p>
+<blockquote><p>Reset experimental V2 events, projections, inputs, Context Epochs, and synchronized workspace state while preserving canonical V1 <code>session</code>, <code>message</code>, and <code>part</code> rows.</p></blockquote>
+<p>Experimental v2 data is allowed to be thrown away. v1 data never is.</p>
+
+<h2>Port nothing by default</h2>
+<p>The config review goes through the legacy schema field by field, and each one gets a verdict: <strong>12 keep, 14 remove, 13 redesign</strong>, each with a reason. <code>logLevel</code> is removed because "no config consumer exists". The server settings are removed because location config loads after the server is already running. The old <code>config.json</code> filename isn't supported in v2.</p>
+<p>Design options that lost are kept too, marked as history, so the next person can see what was considered.</p>
+
+<div class="callout steal">
+  <p class="callout-kicker">Steal this</p>
+  <p>Grow the next version on your main branch, behind clear names, instead of on a branch that drifts. Keep a dated log of every contract change with its compatibility story, and make every legacy setting earn its way into the new version.</p>
+</div>

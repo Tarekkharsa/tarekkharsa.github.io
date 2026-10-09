@@ -1,0 +1,29 @@
+<p>In most agents, pressing Enter does two things at once: it adds your message to the conversation and starts the model. That's fine until something goes wrong in between. The process restarts, the request retries, or you send a second message while the agent is mid-task. Which message did the model see, and in what order?</p>
+<p>This repo's rewrite splits the two apart.</p>
+
+<h2>Admission and promotion</h2>
+<p>A prompt first lands in a durable inbox, a <code>session_input</code> table. That's <strong>admission</strong>: the input is accepted and replayable, but the model hasn't seen it yet. Later, a runner <strong>promotes</strong> it: one atomic step consumes the inbox row and appends the visible user message to the conversation.</p>
+<pre><code>sessions.prompt({ id?, sessionID, prompt, delivery?, resume? })
+  -&gt; supplied ID inserts one durable inbox row when absent
+  -&gt; exact reuse returns the same admission receipt
+  -&gt; reusing one message ID for another session, prompt,
+     or delivery mode fails
+  -&gt; resume false admits only</code></pre>
+<p>Retries are safe by construction: send the same prompt with the same ID twice and you get the same receipt back, not a duplicate message. Reuse the ID for something different and it fails loudly instead of guessing.</p>
+
+<h2>Steer or queue</h2>
+<p>Because admission and promotion are separate, "what happens to a message sent mid-task" becomes an explicit rule instead of a race:</p>
+<ul>
+  <li><strong>Steer</strong> (the default): promoted at the next safe boundary before a model call, while the current task continues.</li>
+  <li><strong>Queue</strong>: waits until the session would otherwise go idle, then promotes one queued input, and decides again before promoting the next.</li>
+</ul>
+<p>Clients can show pending input from the admission event, before it's part of the conversation.</p>
+
+<h2>What isn't durable, on purpose</h2>
+<p>The running part, a <strong>drain</strong>, is deliberately <em>not</em> a stored entity: "A Session Drain has no durable identity or transcript boundary." Interrupting stops the current process's work but keeps the inbox rows for a later run, and interrupting an idle session is a no-op. Recovery reasons from what's durable (prompts, history, provider attempts, tool state), not from an invented "execution" record.</p>
+<p>The agent guide spells this out as an invariant: "Keep durable prompt admission separate from model execution."</p>
+
+<div class="callout steal">
+  <p class="callout-kicker">Steal this</p>
+  <p>Put a durable inbox between "the user sent it" and "the model sees it." Make prompt IDs idempotent, make steer and queue explicit delivery modes, and don't persist the parts that are only coordination.</p>
+</div>

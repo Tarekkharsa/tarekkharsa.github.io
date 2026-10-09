@@ -1,6 +1,7 @@
 import * as fs from 'node:fs'
 
 import { absoluteUrl, site } from '../site.ts'
+import { opencodeRound } from './rounds/opencode.ts'
 import { piRound } from './rounds/pi.ts'
 import { t3codeRound } from './rounds/t3code.ts'
 import { series } from './series.ts'
@@ -18,7 +19,7 @@ export type * from './types.ts'
  */
 
 /** Newest first. */
-export const rounds: Round[] = [piRound, t3codeRound]
+export const rounds: Round[] = [opencodeRound, piRound, t3codeRound]
 
 export const seriesIndex: SeriesIndexPost = {
   kind: 'series',
@@ -44,7 +45,7 @@ export const seriesIndex: SeriesIndexPost = {
     tag: 'series',
     title: 'Guess the codebase',
     summary:
-      'Eight engineering lessons from one open-source repo per round, on architecture, performance, testing, PRs and more. Round 2 is live.',
+      'Eight engineering lessons from one open-source repo per round, on architecture, performance, testing, PRs and more. Round 3 is live.',
   },
 }
 

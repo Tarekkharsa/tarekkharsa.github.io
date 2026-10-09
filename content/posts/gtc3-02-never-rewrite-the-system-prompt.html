@@ -1,0 +1,26 @@
+<p>Model providers cache the start of your request. If the system prompt is byte-for-byte the same as last turn, you pay less and wait less. Most agents break that cache all the time without noticing: the current date, the git branch, the open files or the active rules get re-rendered into the system prompt on every turn.</p>
+<p>This repo's rewrite treats the system prompt as something you <strong>never rewrite</strong> mid-conversation.</p>
+
+<h2>Freeze the baseline</h2>
+<p>At the start of a <strong>Context Epoch</strong>, the runtime renders the full system context once. That baseline then stays "the immutable provider-cache baseline" until something that really requires a new one: a completed compaction, moving the session, or an incompatible change.</p>
+
+<h2>Append what changed</h2>
+<p>The context is built from typed <strong>Context Sources</strong>, each with a stable key, a JSON codec and pure renderers. The runtime keeps a snapshot of the last value it showed the model for each source. When one changes, it doesn't edit the baseline. It appends a <strong>Mid-Conversation System Message</strong> with the newly effective state. Roughly, with made-up sources:</p>
+<pre><code>turn 1   [baseline: rules, environment, branch=main]  user  assistant
+turn 2                                                  user  assistant
+turn 3   [update: branch is now fix-login]              user  assistant
+         ^ appended, so everything before it stays cached</code></pre>
+
+<h2>The rules that make it work</h2>
+<ul>
+  <li><strong>Lazy, not pushed.</strong> Changes are "sampled and admitted lazily at a Safe Provider-Turn Boundary, never pushed asynchronously when their source changes."</li>
+  <li><strong>One message per boundary.</strong> Changes from several sources at the same boundary combine into a single update.</li>
+  <li><strong>Deterministic order.</strong> Producers run concurrently but combine in stable key order, so the same state always renders the same text. Duplicate keys fail.</li>
+  <li><strong>Stale beats missing.</strong> If a source temporarily can't be read, the previous value stays in effect and nothing is emitted. That's different from a source that's really gone, which can emit removal text.</li>
+  <li><strong>Exact text is stored.</strong> The update persists the exact text sent to the model, so replay is faithful.</li>
+</ul>
+
+<div class="callout steal">
+  <p class="callout-kicker">Steal this</p>
+  <p>Render the system prompt once per epoch and never edit it. Track what the model last saw for each piece of context, and append changes at turn boundaries. Your cache hit rate, and your bill, will thank you.</p>
+</div>
