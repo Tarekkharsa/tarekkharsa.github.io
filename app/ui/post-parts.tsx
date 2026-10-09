@@ -66,14 +66,6 @@ export function PostMeta(handle: Handle<{ post: Post; extra?: string }>) {
 export function Byline() {
   return () => (
     <p class="byline">
-      <img
-        class="avatar-sm"
-        src={site.photo.path}
-        alt=""
-        width="400"
-        height="400"
-        decoding="async"
-      />
       <span>
         by <a href={routes.home.href()}>{site.name}</a>
         <span aria-hidden="true"> · </span>

@@ -384,5 +384,4 @@ export const author = {
   '@type': 'Person',
   name: site.name,
   url: absoluteUrl('/'),
-  image: absoluteUrl(site.photo.path),
 } as const

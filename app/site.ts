@@ -11,7 +11,7 @@ export const site = {
     twitter: 'https://twitter.com/tarekkh1997',
   },
   copyrightYear: 2026,
-  /** 400×400 portrait, shown in the home hero and post bylines. */
+  /** 400×400 portrait, shown on the home page only. */
   photo: { path: '/assets/tarek.jpg', alt: 'Tarek Kharsa' },
 } as const
 

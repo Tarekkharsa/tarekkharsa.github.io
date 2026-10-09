@@ -123,16 +123,29 @@ main { max-width: var(--wide); margin: 0 auto; padding: clamp(2rem, 6vh, 4rem) 1
 /* ---------- home ---------- */
 .prompt { font-family: var(--mono); font-size: 0.82rem; color: var(--faint); margin: 0 0 0.9rem; }
 .prompt .dollar { color: var(--accent); }
-/* portrait: a thin line ring, a gap in the page color, then an accent ring */
-.avatar, .avatar-sm {
-  display: block; flex: none; border-radius: 50%; object-fit: cover; background: var(--paper-2);
-  box-shadow: 0 0 0 1px var(--line), 0 0 0 4px var(--paper), 0 0 0 5px var(--accent-line);
+/* home hero: intro on the left, a small window-framed portrait on the right */
+.hero-split { display: grid; grid-template-columns: minmax(0, 1fr) 13.5rem; gap: 2.75rem; align-items: center; }
+.hero-text { min-width: 0; }
+.portrait {
+  margin: 0; background: var(--card); border: 1px solid var(--line); border-radius: 14px;
+  overflow: hidden; box-shadow: var(--shadow); transform: rotate(1.5deg);
+  transition: transform 0.25s ease;
 }
-.avatar { width: 5.75rem; height: 5.75rem; }
-.avatar-sm { width: 1.75rem; height: 1.75rem; box-shadow: 0 0 0 1px var(--line); }
-.hero-head { display: flex; align-items: center; gap: 1.4rem; margin: 0 0 1rem; }
-.hero-head .prompt { margin-bottom: 0.5rem; }
-.hero-head h1 { margin: 0; }
+.portrait:hover { transform: rotate(0deg) translateY(-2px); }
+.portrait-bar {
+  display: flex; align-items: center; gap: 0.6rem; padding: 0.5rem 0.7rem;
+  border-bottom: 1px solid var(--line); font-family: var(--mono); font-size: 0.68rem; color: var(--faint);
+}
+.portrait-dots { display: flex; gap: 0.3rem; }
+.portrait-dots span { width: 0.55rem; height: 0.55rem; border-radius: 50%; background: var(--pill-line); }
+.portrait-dots span:first-child { background: var(--accent); }
+.portrait img {
+  display: block; width: 100%; height: auto; aspect-ratio: 4 / 5; object-fit: cover; object-position: 38% 50%;
+}
+.portrait figcaption {
+  padding: 0.55rem 0.75rem 0.6rem; border-top: 1px solid var(--line);
+  font-family: var(--mono); font-size: 0.66rem; line-height: 1.45; color: var(--faint);
+}
 .hero h1 {
   font-family: var(--mono); font-size: clamp(2rem, 7vw, 3rem); line-height: 1.1;
   letter-spacing: -0.04em; font-weight: 700; margin: 0 0 1rem;
@@ -357,9 +370,11 @@ th { font-family: var(--mono); font-size: 0.74rem; color: var(--faint); font-wei
 .site-footer a:hover { color: var(--accent); }
 .site-footer nav { display: flex; gap: 1.1rem; }
 
+@media (max-width: 720px) {
+  .hero-split { grid-template-columns: 1fr; gap: 1.75rem; }
+  .portrait { order: -1; width: 10rem; }
+}
 @media (max-width: 560px) {
-  .avatar { width: 4.5rem; height: 4.5rem; }
-  .hero-head { gap: 1.1rem; }
   body { font-size: 16.5px; }
   .nav a.hide-sm { display: none; }
   .pager { grid-template-columns: 1fr; }
