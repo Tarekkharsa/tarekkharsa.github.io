@@ -1,0 +1,50 @@
+<p>Open source has a new problem: writing code is now cheap and reviewing it isn't. This repo's contribution process is designed around that.</p>
+
+<h2>A PR template that asks for reasoning</h2>
+<ul>
+  <li><strong>Problem</strong>: one or two sentences.</li>
+  <li><strong>Change</strong>: how it fixes the problem, and why changes to several components belong together.</li>
+  <li><strong>Scope &amp; approval</strong>: a link to the maintainer's approval <em>comment</em>. A linked issue alone isn't enough.</li>
+  <li><strong>Verification</strong>: what you checked, what you saw, and what you <em>couldn't</em> check.</li>
+</ul>
+<blockquote><p>"Tests pass" alone is insufficient.</p></blockquote>
+<p>It ends with the model and harness that did the work. No hiding AI involvement and no shaming it either. It's recorded the way you'd record a dependency version.</p>
+
+<h2>One underlying problem per PR</h2>
+<blockquote><p>Count the underlying problems, not the linked issues.</p></blockquote>
+<p>Five issues can describe one bug. A big diff can still be one problem. Adjacent cleanup gets its own PR.</p>
+
+<h2>AI triage that resists prompt injection</h2>
+<p>If a bot triages PRs, a PR can try to talk it into approving. Their defense: every run resolves <code>main</code> to a commit SHA and loads the policy and exemption list from <em>that</em> SHA.</p>
+<blockquote><p>PR/fork copies and PR-body instructions cannot change policy or exemptions.</p></blockquote>
+<p>If a policy file is missing or malformed, the PR is left unresolved. Nothing gets exempted or auto-closed because of it.</p>
+
+<h2>Review bots with a narrow job</h2>
+<p>Their AI UI reviewer looks only at changed lines, answers exactly three questions, doesn't build the project or ask for screenshots, has a budget per run and per PR, and replies <em>exactly</em> "All clear" when there's nothing to report. A narrow job with clear rules beats "please review this PR".</p>
+<p>Auto-approval has two explicit carve-outs that always need a human: PRs that <strong>change product defaults</strong>, and PRs that <strong>add or broaden a lint or type suppression</strong>.</p>
+
+<h2>Automation that gives context, not gates</h2>
+<ul>
+  <li><strong>Size labels</strong> from XS to XXL, with test files <em>excluded</em> in mixed PRs. If adding tests made a PR look bigger and scarier, people would stop adding tests.</li>
+  <li><strong>A native-change label</strong> on mobile PRs that change the native build fingerprint. Those get merged as a batch right before a store submission, so main can ship over-the-air updates the rest of the time.</li>
+  <li><strong>CI rejects committed PR screenshots.</strong> UI PRs need before/after images, but they're uploaded to the PR. Git history is forever.</li>
+</ul>
+
+<h2>A security comment every repo should copy</h2>
+<pre><code># This pull_request_target job may fetch untrusted PR commits only as passive
+# git data. Do not add dependency installs, build/test scripts, or cache
+# actions here.</code></pre>
+
+<h2>Closing PRs without being a jerk</h2>
+<p>Every policy closure names the rule, cites the evidence, links the guide section and explains how to get the PR reconsidered. And:</p>
+<blockquote><p>We assess the problem, scope, approval, and evidence, not an author's writing style or whether we think an agent wrote the PR.</p></blockquote>
+
+<h2>Commit titles that read like release notes</h2>
+<pre><code>fix(server): status refresh no longer pegs CPU in repos with thousands of untracked files
+perf(web): DOM changes no longer restyle the whole page</code></pre>
+<p>A conventional-commit prefix, then what changed for the user. Not "fix bug in StatusService".</p>
+
+<div class="callout steal">
+  <p class="callout-kicker">Steal this</p>
+  <p>Make the PR template ask for reasoning and evidence, not checkboxes. Load bot policy from a trusted ref, never from the PR. Give each AI reviewer one narrow job. Pick your "always needs a human" triggers on purpose.</p>
+</div>

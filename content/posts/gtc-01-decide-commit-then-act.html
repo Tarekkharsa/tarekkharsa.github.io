@@ -1,0 +1,46 @@
+<p>Picture this: an AI agent is halfway through editing your repo when the app crashes. Or the user's laptop sleeps. Or their phone reconnects from a train tunnel and retries the last request. <strong>What's actually true now?</strong></p>
+<p>Most apps can't answer that cleanly. This codebase can, because every change goes through the same three steps.</p>
+
+<h2>The pattern</h2>
+<pre><code>client request ──▶ command
+                     │
+                     ▼
+  1. DECIDE   pure function: (state, command) → events      no I/O at all
+                     │
+                     ▼
+  2. COMMIT   ONE database transaction writes:
+                events + read models + command receipt + outbox
+                     │   (only after commit)
+                     ▼
+  3. ACT      a worker runs the outbox effects
+              (start the agent, take a git checkpoint, …)
+              and feeds results back in as new commands</code></pre>
+
+<h3>1. Decide without I/O</h3>
+<p>The orchestrator takes the current state and a command and returns events. It never touches the network, the filesystem or a subprocess. You can unit-test it, replay it, and it can't hang on a slow API call while holding a lock.</p>
+
+<h3>2. Commit facts and intent together</h3>
+<p>One transaction writes the events, the read models the UI reads, a <em>command receipt</em>, and the <em>outbox</em>: a record of side effects that still need to run. That buys three things:</p>
+<ul>
+  <li><strong>Read models can't get ahead of the log.</strong> They commit in the same transaction.</li>
+  <li><strong>Retries are idempotent.</strong> A replayed command finds its receipt and returns the same result.</li>
+  <li><strong>Crashes don't lose work.</strong> If the process dies right after commit, the intent to "start the agent" is already saved.</li>
+</ul>
+
+<h3>3. Act after commit</h3>
+<p>A worker picks up outbox effects and does the slow, failure-prone work. Results come back in as new commands, which go through the same decide → commit loop.</p>
+
+<h2>The consequence most apps get wrong</h2>
+<blockquote><p>A command acknowledgement means the <em>intent</em> committed, not that the work finished.</p></blockquote>
+<p>If your UI treats "request accepted" as "done", you ship a lying spinner. Here, "accepted", "agent running" and "follow-up work settled" are separate states. A late checkpoint isn't even allowed to stretch the recorded duration of the agent's turn.</p>
+
+<h2>Two more traps the docs call out</h2>
+<ul>
+  <li><strong>Your schema has a past.</strong> Every stored event must still decode on replay. A schema change affects every old database on its next startup, not just the newest client.</li>
+  <li><strong>Not every effect can replay.</strong> Work tied to a provider process that died is retired during recovery, before new work starts.</li>
+</ul>
+
+<div class="callout steal">
+  <p class="callout-kicker">Steal this</p>
+  <p>You don't need an event-sourcing framework. You need a pure <em>decide</em> step, <strong>one</strong> transaction that records facts and intent together, and a worker that does the I/O afterwards. Most "it got into a weird state" bugs come from breaking one of those three.</p>
+</div>

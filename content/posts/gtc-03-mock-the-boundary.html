@@ -1,0 +1,47 @@
+<p>One sentence in this repo's agent guide sums up the whole testing philosophy:</p>
+<blockquote><p>A test that needs a timeout to pass is wrong.</p></blockquote>
+<p>Here's how they make that achievable.</p>
+
+<h2>The default test shape</h2>
+<pre><code>command dispatch
+  → real orchestrator
+  → real provider adapter
+  → REPLAYED provider transport   ← the only fake
+  → real normalizer
+  → real event store + projections
+  → assertions</code></pre>
+<p>Fakes are allowed at true boundaries only: the external process, the network, the clock, random IDs, a temp filesystem, a temp database.</p>
+<p><strong>Explicitly not allowed:</strong> a mocked orchestrator, adapter, normalizer, event sink, projection reducer or checkpoint policy. A few integration tests that run the real stack beat hundreds of unit tests that mock away the behavior they claim to test.</p>
+
+<h2>Replay real traffic</h2>
+<p>The app integrates with several AI agent CLIs. Tests don't call those CLIs. Instead, raw protocol frames are recorded into <em>replay transcripts</em> and fed through the real adapter. The replay runtime doesn't know what a "turn" or an "approval" is; only the adapter does. So the replay can't quietly hide adapter bugs.</p>
+
+<h2>Determinism comes from production code</h2>
+<p>Production code reads time through the framework's <code>Clock</code> and randomness through its <code>Random</code> service, never <code>Date.now()</code> or <code>Math.random()</code> directly. Tests swap in a <code>TestClock</code> and a seeded <code>Random</code>. No flaky timestamps, and no snapshots that change every run because of a new UUID.</p>
+
+<h2>Drain, don't sleep</h2>
+<p>Background work runs on a <em>drainable worker</em>. Its <code>drain()</code> resolves only when:</p>
+<ul>
+  <li>the queue is empty, <strong>and</strong></li>
+  <li>the item currently being processed has finished.</li>
+</ul>
+<p>An empty queue alone doesn't prove the worker is idle, and that gap is where most "add a 100&nbsp;ms sleep" hacks come from.</p>
+
+<h2>Test a restart the way a restart happens</h2>
+<p>To test "the app restarted mid-task", they don't add a <code>restartForTest()</code> method. They tear down the outermost server layer and rebuild it against the same durable storage. Production code doesn't grow APIs that exist only for tests.</p>
+
+<h2>An empty database is a bad test</h2>
+<p>One script rebuilds a dev database from a <em>read-only, pruned</em> snapshot of the developer's real data. It drops scheduled tasks, pending work and auth sessions, so the dev server never runs real agents. Then it runs migrations on top, which proves new migrations apply to real data and catches two branches claiming the same migration number.</p>
+
+<h2>And what not to test</h2>
+<ul>
+  <li>Don't render components to static markup just to assert props.</li>
+  <li>Don't write tests that only check callback wiring or mirror the implementation.</li>
+  <li>Lint bans declaring tests inside a <code>for</code> loop; use <code>it.each</code>.</li>
+  <li>Locally, run the smallest proof that the change works. CI owns the full suite.</li>
+</ul>
+
+<div class="callout steal">
+  <p class="callout-kicker">Steal this</p>
+  <p>"No mocks" is the wrong lesson. The rule is to fake only at true boundaries: process, network, clock, IDs, filesystem. Make time and randomness injectable in <em>production</em> code, and wait on milestones instead of sleeping.</p>
+</div>

@@ -1,0 +1,32 @@
+<blockquote><p>Most … contributions will come from [the app] itself, often controlled remotely.</p></blockquote>
+<p>That sentence changes how you write docs. This repo's <code>AGENTS.md</code> reads like onboarding for a sharp new hire who has never seen the codebase and will start shipping in five minutes.</p>
+
+<h2>What's in it</h2>
+<ul>
+  <li><strong>A glossary.</strong> <em>Environment</em>, <em>project</em>, <em>thread</em>, <em>turn</em>, <em>command</em>, <em>event</em>, <em>projection</em>, <em>outbox</em>: each means exactly one thing. When humans and agents use the same words, half the bugs never get written.</li>
+  <li><strong>"The three ways to hurt yourself."</strong> Killing processes by pattern, writing to the live install, baking origins into the bundle. Short, concrete and memorable.</li>
+  <li><strong>"Hit every surface."</strong> The checklist from Lesson 7.</li>
+  <li><strong>Verification limits.</strong> Run the smallest proof that the change works. No repo-wide checks; CI owns those.</li>
+  <li><strong>Safety around real data.</strong> Read the user's real database, copy from it, never write to it.</li>
+</ul>
+
+<h2>Rules for the docs themselves</h2>
+<ul>
+  <li>Internal docs record <strong>decisions, constraints spanning components, and traps</strong> that are hard to find in the source.</li>
+  <li>No feature catalogs, no field lists, no narrated control flow. Agents can read the code.</li>
+  <li>When a decision changes, <strong>rewrite</strong> the text. Don't append another account of the new behavior.</li>
+  <li>Before adding a paragraph, ask: <em>what would a maintainer get wrong without it?</em></li>
+</ul>
+
+<h2>The note from the founder</h2>
+<blockquote><p>Do not preserve complexity just because it already exists. Do not introduce machinery because it looks architecturally impressive. Understand the real constraint, then fight for the smallest model that makes the correct behavior unsurprising.</p></blockquote>
+<p>Channel both "measure twice, cut once" and "YAGNI". I've reread that paragraph more than any other in the repo.</p>
+
+<h2>Rules as guidance, with an escape hatch</h2>
+<blockquote><p>If a rule here fights the task in front of you, say so loudly and get a human sign-off before breaking it.</p></blockquote>
+<p>Most "rules for AI" files are long lists of MUSTs. This one gives good defaults and says exactly what to do when one of them is wrong.</p>
+
+<div class="callout steal">
+  <p class="callout-kicker">Steal this</p>
+  <p>Write your agent guide like onboarding for a new hire: shared vocabulary, the few ways to cause real damage, a "did you hit every surface" checklist, and a clear escape hatch. Keep docs for decisions and traps; let the code document itself.</p>
+</div>
