@@ -11,17 +11,15 @@ export const opencodeRound = defineRound({
   number: 3,
   date: '2026-10-09',
   slugPrefix: 'gtc3',
-  answer: {
+  codebase: {
     name: 'OpenCode',
     repo: 'anomalyco/opencode',
     url: 'https://github.com/anomalyco/opencode',
     blobBase: `https://github.com/anomalyco/opencode/blob/${STUDIED_AT}/`,
     blurb: 'the open-source coding agent (these lessons are from its upcoming v2)',
   },
-  hintZero:
-    "It's open source, it's very popular, and it's in the middle of rebuilding its own core.",
   pitch:
-    'A durable prompt inbox, a system prompt that never gets rewritten, bounded tool output, compaction before overflow, and more, from a rewrite in progress.',
+    "A durable prompt inbox, a system prompt that never gets rewritten, bounded tool output, compaction before overflow, and more, from a rewrite still in progress.",
   lessons: [
     {
       slug: 'gtc3-01-admit-then-run',
@@ -32,11 +30,6 @@ export const opencodeRound = defineRound({
       readMinutes: 2,
       problem: "In most agents, pressing Enter saves your message and starts the model in one step. After a crash, a retry or a message sent mid-task, nobody can say what the model actually saw.",
       idea: "Save the prompt to a durable inbox first. Move it into the conversation later, at a safe point between model calls.",
-      hints: [
-        "It's open source, and its README is translated into 21 languages.",
-        'It runs on Bun.',
-        "Its default branch isn't called main.",
-      ],
       sources: [
         'CONTEXT.md',
         'specs/v2/session.md',
@@ -63,11 +56,6 @@ Keep "who is running right now" in memory unless there's a real reason to store 
       readMinutes: 2,
       problem: "Agents re-render the date, branch and rules into the system prompt every turn, which breaks the provider's prompt cache.",
       idea: "Freeze the system prompt for the conversation, and append a short update at the next turn when something changes.",
-      hints: [
-        'Its terminal UI is written in SolidJS.',
-        'Its headless server listens on port 4096 by default.',
-        'Its terminal UI can attach to a server running somewhere else.',
-      ],
       sources: [
         'CONTEXT.md',
         'packages/core/src/system-context/index.ts',
@@ -93,11 +81,6 @@ If the provider reports cache hits, show me the before and after.`,
       readMinutes: 2,
       problem: "Hand-written HTTP mocks return what you think the API sends, not what it really sends.",
       idea: "Record real traffic once and replay it forever. Fail in CI when a recording is missing, and redact secrets before saving.",
-      hints: [
-        'It published its HTTP test recorder as its own npm package.',
-        'New model providers are added in a separate open database, not in this repo.',
-        'The team behind it also makes an infrastructure-as-code framework.',
-      ],
       sources: [
         'packages/http-recorder/README.md',
         'packages/core/test/session-runner-recorded.test.ts',
@@ -123,11 +106,6 @@ Never record against production with real customer data. Keep the change small.`
       readMinutes: 3,
       problem: "One noisy command can dump megabytes of output into the conversation, filling the context window and burying the part that mattered.",
       idea: "Cap every tool result with one limit, keep its beginning and end, and save the full output to a file the model can open if it needs more.",
-      hints: [
-        "It caps every tool result at 2,000 lines or 50 KB, whichever comes first.",
-        "It has its own curated model gateway.",
-        "Its second-busiest committer is its own GitHub app.",
-      ],
       sources: [
         "packages/core/src/tool-output-store.ts",
         "packages/core/src/tool/registry.ts",
@@ -153,11 +131,6 @@ Keep structured results unchanged. Only the text the model sees is bounded.`,
       readMinutes: 2,
       problem: "An embedded SDK that calls internals directly slowly drifts from the HTTP API: different validation, fields and errors.",
       idea: "Send embedded calls through the real router with an in-memory fetch, so both modes share one API.",
-      hints: [
-        'Its SDK is generated from its HTTP API definition.',
-        'It ships an official Slack integration.',
-        'You can summon it in a GitHub comment with a slash command.',
-      ],
       sources: ['packages/sdk-next/src/opencode.ts', 'CONTEXT.md', 'AGENTS.md'],
       prompt: `Check whether this project's in-process or embedded mode goes through the same API as remote clients.
 
@@ -179,11 +152,6 @@ Implement only the first step, with a test that the in-memory and HTTP paths ret
       readMinutes: 2,
       problem: "A long-lived v2 branch falls behind, and merging it back becomes the project nobody wants to do.",
       idea: "Build v2 on the main branch next to v1, log every contract change with its data impact, and review every old setting.",
-      hints: [
-        'It keeps a dated changelog of every schema change in its next major version.',
-        'An old branch called 2.0 is thousands of commits behind.',
-        'Its GitHub org was renamed, and the old URL still redirects.',
-      ],
       sources: ['specs/v2/schema-changelog.md', 'specs/v2/config.md', 'specs/v2/todo.md'],
       prompt: `Plan a rewrite or next major version of part of this project without a long-lived branch.
 
@@ -205,11 +173,6 @@ Don't move any code yet. Deliver the plan, the changelog file and the review tab
       readMinutes: 2,
       problem: "“Enabled” and “disabled” provider lists mix two questions: how do I use this provider, and may I? A company can't forbid a provider a developer has valid keys for.",
       idea: "Keep config and permission apart. Permission is a short list of allow/deny rules, and the last rule that matches wins.",
-      hints: [
-        'Its whole provider policy check is one findLast.',
-        'It has two built-in primary agents, and one of them asks before every file edit or shell command.',
-        'You switch between those two agents with the Tab key.',
-      ],
       sources: [
         'specs/v2/provider-policy.md',
         'packages/core/src/policy.ts',
@@ -235,11 +198,6 @@ No conditions, roles or approval flows for now. Keep the change small.`,
       readMinutes: 3,
       problem: "Many agents compact only after the provider rejects a request as too long, then squash everything into a vague paragraph and lose exact paths, errors and decisions.",
       idea: "Before every model call, check whether the request still fits with room for the reply. If not, summarize only the older turns into a fixed template and keep recent turns verbatim.",
-      hints: [
-        "Its compaction summaries always follow the same Markdown template.",
-        "Its config file is named after the product, as .json or .jsonc.",
-        "Its name is “code” with the opposite of “closed” in front.",
-      ],
       sources: [
         "packages/core/src/session/compaction.ts",
         "specs/v2/schema-changelog.md",
@@ -259,19 +217,16 @@ Keep the estimate cheap. Approximate token counts are fine.`,
   ],
   finale: {
     slug: 'gtc3-reveal-power-user-tips',
-    title: 'The reveal: it was OpenCode v2 (plus 20 power-user tips)',
-    teaser: 'The reveal + 20 power-user tips',
-    description:
-      "All eight round-3 #GuessTheCodebase lessons came from OpenCode's upcoming v2. Here's the repo, plus 20 power-user tips for using OpenCode today.",
-    subtitle:
-      "Round 3's eight lessons came from a rewrite in progress. Here's whose, and how to get the most out of it today.",
-    tag: 'Finale',
+    title: 'OpenCode: 20 power-user tips',
+    teaser: '20 power-user tips',
+    description: '20 power-user tips for OpenCode as it ships today, plus a recap of the eight engineering lessons from its upcoming v2.',
+    subtitle: 'The TUI, custom commands, permissions and headless runs, checked against its docs.',
+    tag: 'Tips',
     readMinutes: 5,
     image: {
       path: '/assets/og/gtc3-reveal.png',
-      alt: 'Guess the codebase, round 3: the reveal. It was OpenCode v2.',
+      alt: 'OpenCode: 20 power-user tips',
     },
-    shareText:
-      'The #GuessTheCodebase round 3 answer: it was OpenCode v2. 8 engineering lessons, plus 20 power-user tips:',
+    shareText: '20 power-user tips for OpenCode, plus 8 engineering lessons from its v2 rewrite:',
   },
 })

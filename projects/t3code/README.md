@@ -11,12 +11,12 @@
 | ------------------------ | -------------------------------------------------------- | ------------------------ |
 | 8 lesson posts           | `content/posts/gtc-0*.html`                              | Live, in feed            |
 | Series hub               | `content/posts/guess-the-codebase.html`                  | Live, in feed            |
-| Finale + 30 tips         | `content/posts/gtc-reveal-t3-code-power-user-tips.html`  | Live but unlisted        |
+| Finale + 30 tips         | `content/posts/gtc-reveal-t3-code-power-user-tips.html`  | Live, in feed            |
 | OG images                | `public/assets/og/gtc-*.png`                             | Rendered (`npm run og`)  |
 | X campaign               | [`tweets.ts`](./tweets.ts) → [`tweet-kit.html`](./tweet-kit.html) | Ready, 46 tweets |
 
-The finale is reachable from the series nav ("?") and the hub, but stays out of the home
-page, feed and sitemap until reveal day. See the playbook in `tweet-kit.html`.
+The site names the codebase on every page; the guessing game runs on X only. See the
+playbook in `tweet-kit.html`.
 
 ## Files
 

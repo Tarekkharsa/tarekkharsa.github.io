@@ -14,7 +14,7 @@ export function NotFoundPage() {
         </h1>
         <p class="lede">
           That page doesn't exist. Try the <a href={routes.home.href()}>home page</a> or the{' '}
-          <a href={postPath(seriesIndex)}>#GuessTheCodebase series</a>.
+          <a href={postPath(seriesIndex)}>lessons from great codebases</a>.
         </p>
       </main>
     </Document>

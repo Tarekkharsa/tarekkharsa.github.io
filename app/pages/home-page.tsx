@@ -1,4 +1,6 @@
-import { postPath, posts, rounds, seriesIndex } from '../content/posts.ts'
+import type { Handle } from 'remix/component'
+
+import { LESSONS_PER_ROUND, postPath, posts, rounds, seriesIndex, type Round } from '../content/posts.ts'
 import { absoluteUrl, site } from '../site.ts'
 import { Document } from '../ui/document.tsx'
 import { formatMonth } from '../ui/post-parts.tsx'
@@ -12,8 +14,6 @@ const personJsonLd = {
   image: absoluteUrl(site.photo.path),
   sameAs: [site.social.github, site.social.twitter],
 }
-
-const latestRound = rounds[0]!
 
 export function HomePage() {
   return () => (
@@ -52,8 +52,8 @@ export function HomePage() {
             <p class="now">
               <span class="dot" aria-hidden="true" />
               <span>
-                now: reading great codebases and posting{' '}
-                <a href={postPath(seriesIndex)}>#GuessTheCodebase</a>
+                now: reading great codebases cover to cover and writing up{' '}
+                <a href={postPath(seriesIndex)}>what they teach</a>
               </span>
             </p>
             <ul class="links">
@@ -85,30 +85,24 @@ export function HomePage() {
           </figure>
         </section>
 
-        <section class="section" aria-labelledby="series-h">
-          <h2 class="section-title" id="series-h">
-            Featured series
+        <section class="section" id="lessons" aria-labelledby="lessons-h">
+          <h2 class="section-title" id="lessons-h">
+            Lessons from great codebases
           </h2>
-          <a class="feature" href={postPath(seriesIndex)}>
-            <p class="kicker">
-              <span>🕵️ #GuessTheCodebase</span>
-              <span class="live">{`round ${latestRound.number} is live`}</span>
-            </p>
-            <h3>8 new lessons from a different open-source repo. Guess which one.</h3>
-            <p>{latestRound.pitch}</p>
-            <div class="steps" aria-hidden="true">
-              {[1, 2, 3, 4, 5, 6, 7, 8].map((n) => (
-                <span>{String(n)}</span>
-              ))}
-              <span class="final">reveal</span>
-            </div>
-            <span class="cta">Start playing →</span>
-          </a>
+          <p class="section-lede">
+            {`I read an open-source codebase cover to cover, then write up ${LESSONS_PER_ROUND} things it does better than most: short, verified in the source, with a prompt to apply each one to your own code.`}{' '}
+            <a href={postPath(seriesIndex)}>How the lessons work →</a>
+          </p>
+          <div class="codebases">
+            {rounds.map((round, index) => (
+              <CodebaseCard round={round} latest={index === 0} />
+            ))}
+          </div>
         </section>
 
         <section class="section" id="writing" aria-labelledby="writing-h">
           <h2 class="section-title" id="writing-h">
-            Writing
+            Guides
           </h2>
           <ul class="posts">
             {posts.flatMap((post) =>
@@ -132,4 +126,38 @@ export function HomePage() {
       </main>
     </Document>
   )
+}
+
+function CodebaseCard(handle: Handle<{ round: Round; latest: boolean }>) {
+  return () => {
+    let { round, latest } = handle.props
+    let { codebase, lessons, finale } = round
+    let id = `codebase-${round.number}`
+
+    return (
+      <article class="codebase" aria-labelledby={id}>
+        <p class="kicker">
+          <span>{codebase.repo}</span>
+          {latest ? <span class="live">new</span> : null}
+        </p>
+        <h3 id={id}>
+          <a href={postPath(lessons[0]!)}>{codebase.name}</a>
+        </h3>
+        <p>{round.pitch}</p>
+        <ol class="lesson-list">
+          {lessons.map((lesson) => (
+            <li>
+              <a href={postPath(lesson)}>
+                <span class="n">{String(lesson.lesson).padStart(2, '0')}</span>
+                <span>{lesson.title}</span>
+              </a>
+            </li>
+          ))}
+        </ol>
+        <a class="cta" href={postPath(finale)}>
+          {`+ ${finale.teaser} →`}
+        </a>
+      </article>
+    )
+  }
 }

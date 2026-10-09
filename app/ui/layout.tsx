@@ -20,10 +20,10 @@ export function SiteHeader(handle: Handle<{ current?: NavSection }>) {
           </a>
           <nav class="nav" aria-label="Main">
             <a href={`${routes.home.href()}#writing`} aria-current={currentFor('writing')}>
-              writing
+              guides
             </a>
             <a href={postPath(seriesIndex)} aria-current={currentFor('series')}>
-              series
+              lessons
             </a>
             <button class="theme-toggle" type="button" aria-label="Toggle dark mode">
               <SunIcon />

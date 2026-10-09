@@ -2,14 +2,12 @@ import type { Handle, RemixNode } from 'remix/component'
 import { unsafeHTML } from 'remix/component'
 
 import {
-  earlierHints,
   LESSONS_PER_ROUND,
   postPath,
   postUrl,
   readPostBody,
   roundOf,
   roundPosts,
-  series,
   seriesIndex,
   seriesNeighbors,
   type LessonPost,
@@ -107,26 +105,31 @@ export function PostBody(handle: Handle<{ slug: string; before?: RemixNode; chil
 }
 
 export function SeriesNav(handle: Handle<{ current: SeriesPost }>) {
-  return () => (
-    <nav class="series-nav" aria-label="Series">
-      <a class="label" href={postPath(seriesIndex)}>
-        {`${series.name} · round ${handle.props.current.round}`}
-      </a>
-      <ol>
-        {roundPosts(roundOf(handle.props.current)).map((post) => (
-          <li>
-            <a
-              href={postPath(post)}
-              aria-current={post === handle.props.current ? 'page' : undefined}
-              title={post.kind === 'lesson' ? post.title : 'The reveal'}
-            >
-              {post.kind === 'lesson' ? String(post.lesson) : '?'}
-            </a>
-          </li>
-        ))}
-      </ol>
-    </nav>
-  )
+  return () => {
+    let { current } = handle.props
+    let round = roundOf(current)
+    return (
+      <nav class="series-nav" aria-label="Series">
+        <a class="label" href={`${postPath(seriesIndex)}#round-${round.number}`}>
+          {`Lessons from ${round.codebase.name}`}
+        </a>
+        <ol>
+          {roundPosts(round).map((post) => (
+            <li>
+              <a
+                href={postPath(post)}
+                aria-current={post === current ? 'page' : undefined}
+                title={post.kind === 'lesson' ? post.title : post.teaser}
+                class={post.kind === 'finale' ? 'tips' : undefined}
+              >
+                {post.kind === 'lesson' ? String(post.lesson) : 'tips'}
+              </a>
+            </li>
+          ))}
+        </ol>
+      </nav>
+    )
+  }
 }
 
 export function SeriesPager(handle: Handle<{ current: SeriesPost }>) {
@@ -134,10 +137,10 @@ export function SeriesPager(handle: Handle<{ current: SeriesPost }>) {
     let { prev, next } = seriesNeighbors(handle.props.current)
     let prevLink = prev
       ? { href: postPath(prev), label: prev.title }
-      : { href: postPath(seriesIndex), label: 'Series intro & rules' }
+      : { href: postPath(seriesIndex), label: 'All lessons' }
     let nextLink = next
-      ? { href: postPath(next), label: next.kind === 'finale' ? next.teaser : next.title }
-      : { href: postPath(seriesIndex), label: 'Back to the series' }
+      ? { href: postPath(next), label: next.title }
+      : { href: postPath(seriesIndex), label: 'More codebases' }
 
     return (
       <nav class="pager" aria-label="More in this series">
@@ -169,21 +172,6 @@ export function ShareBar(handle: Handle<{ post: Post }>) {
       </div>
     )
   }
-}
-
-function HintList(handle: Handle<{ hints: string[]; prefix: string }>) {
-  return () => (
-    <ul class="hints">
-      {handle.props.hints.map((hint, index) => (
-        <li>
-          <details>
-            <summary>{`Hint ${handle.props.prefix}${index + 1}`}</summary>
-            <p>{hint}</p>
-          </details>
-        </li>
-      ))}
-    </ul>
-  )
 }
 
 /** The "In short" card at the top of a lesson: the problem, then the idea. */
@@ -225,68 +213,42 @@ export function ApplyPrompt(handle: Handle<{ post: LessonPost }>) {
   )
 }
 
-/** The #GuessTheCodebase box at the end of each lesson: hints, a guess button and the answer. */
-export function GuessCallout(handle: Handle<{ post: LessonPost }>) {
+/** The end of each lesson: the codebase it came from and the files that back it. */
+export function SourceCallout(handle: Handle<{ post: LessonPost }>) {
   return () => {
     let { post } = handle.props
-    let earlier = earlierHints(post)
-    let { answer } = roundOf(post)
-    // Round 1 posts were shared before there were rounds, so their guess tweets say "lesson N".
-    let which = post.round === 1 ? `lesson ${post.lesson}` : `round ${post.round}, lesson ${post.lesson}`
-    let guessText = `🕵️ My ${series.hashtag} guess for ${which} ("${post.title}") by @${site.twitterHandle}: `
+    let { codebase } = roundOf(post)
 
     return (
-      <section class="callout game" aria-labelledby="game-h">
-        <p class="callout-kicker">🕵️ {series.hashtag}</p>
-        <p class="callout-title" id="game-h">
-          Which open-source codebase did I learn this from?
+      <section class="callout source" aria-labelledby="source-h">
+        <p class="callout-kicker">Read the source</p>
+        <p class="callout-title" id="source-h">
+          Where this comes from
         </p>
-        <p>Open the hints one at a time, then post your guess before you peek.</p>
-        <HintList hints={post.hints} prefix="" />
-        {earlier.length > 0 ? (
-          <details class="hints-earlier">
-            <summary>{`+ ${earlier.length} hints from earlier lessons`}</summary>
-            <HintList hints={earlier} prefix="E" />
-          </details>
-        ) : null}
-        <div class="game-actions">
-          <a
-            class="btn btn-primary"
-            href={tweetIntent(guessText, postUrl(post))}
-            target="_blank"
-            rel="noopener"
-          >
-            <XLogo /> Post my guess
-          </a>
-        </div>
-        <details class="reveal">
-          <summary>I give up. Reveal the codebase.</summary>
-          <div class="answer">
-            <p>
-              <strong>
-                <a href={answer.url}>{answer.name}</a>
-              </strong>{' '}
-              (<code>{answer.repo}</code>), {answer.blurb}. Where to look:
-            </p>
-            <ul>
-              {post.sources.map((source) => (
-                <li>
-                  <a href={`${answer.blobBase}${source}`}>
-                    <code>{source}</code>
-                  </a>
-                </li>
-              ))}
-            </ul>
-          </div>
-        </details>
+        <p>
+          <strong>
+            <a href={codebase.url}>{codebase.name}</a>
+          </strong>{' '}
+          (<code>{codebase.repo}</code>), {codebase.blurb}. The files behind this lesson:
+        </p>
+        <ul>
+          {post.sources.map((source) => (
+            <li>
+              <a href={`${codebase.blobBase}${source}`}>
+                <code>{source}</code>
+              </a>
+            </li>
+          ))}
+        </ul>
       </section>
     )
   }
 }
 
-/** "round 2 · lesson 3" or "round 2 · the reveal", for breadcrumbs. */
+/** "opencode · lesson 3" or "opencode · tips", for breadcrumbs. */
 export function lessonLabel(post: SeriesPost): string {
-  return `round ${post.round} · ${post.kind === 'lesson' ? `lesson ${post.lesson}` : 'the reveal'}`
+  let name = roundOf(post).codebase.name.toLowerCase()
+  return `${name} · ${post.kind === 'lesson' ? `lesson ${post.lesson}` : 'tips'}`
 }
 
 export const lessonCount = LESSONS_PER_ROUND

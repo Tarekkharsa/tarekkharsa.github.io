@@ -18,18 +18,21 @@ docs (`node_modules/remix/INDEX.md`) rather than relying on memory.
   `dist/posts/<slug>.html`, which Pages serves at both `/posts/<slug>` and the old
   `/posts/<slug>.html`). Link to the clean URL. Feed entry IDs stay on the old `.html`
   URLs on purpose: changing them makes readers show every post again.
-- **Spoilers:** each #GuessTheCodebase round's reveal post (`finale`) is `indexed: false`, so it stays
-  out of `feed.xml` and `sitemap.xml`. Keep it that way.
+- **No guessing game on the site.** The site names every codebase up front and links lessons
+  to their sources. #GuessTheCodebase runs on X only (`projects/<name>/tweets.ts`): post a
+  lesson there without the name, reveal it later. The series hub keeps its first URL,
+  `/posts/guess-the-codebase`, because it's already shared.
 
 ## Where things live
 
 - `app/routes.ts`: URL contract. `app/actions/controller.tsx`: route handlers.
   `app/router.tsx`: middleware and 404.
-- `app/content/rounds/<repo>.ts`: one Guess the codebase round each (answer, hints, lessons,
-  finale), built with `defineRound()` from `app/content/series.ts`. Never change a published
-  round's slugs. Plan a future round on a local branch that is never pushed: the repo is public.
-- `app/content/posts.ts`: all post metadata. The head tags, JSON-LD, series nav, hints,
-  pager, share links, home list, feed and sitemap are generated from it.
+- `app/content/rounds/<repo>.ts`: one round of lessons each (codebase, lessons, power-user
+  tips `finale`), built with `defineRound()` from `app/content/series.ts`. Never change a
+  published round's slugs. If a round will be teased on X before the site names it, plan it
+  on a local branch that is never pushed: the repo is public.
+- `app/content/posts.ts`: all post metadata. The head tags, JSON-LD, series nav, source links,
+  pager, share links, home page, feed and sitemap are generated from it.
 - `content/posts/<slug>.html`: the hand-written post body, inserted verbatim.
 - `app/pages/`, `app/ui/`: page components and shared pieces (`remix/component` JSX, not React).
 - `public/`: copied to `dist/` unchanged (`site.css`, `site.js`, icons, OG images).
@@ -38,8 +41,9 @@ docs (`node_modules/remix/INDEX.md`) rather than relying on memory.
   fallback paragraph, so lessons read fine without JavaScript.
 - Lesson format: `problem` and `idea` (the "In short" card) and `prompt` (the "Use it in
   your code" card) live in the round file; the body has an optional demo, then `.flow` step
-  cards and `.compare-grid` comparisons, then "Steal this". Lessons must teach real
-  engineering from the repo, verified in its source, and never name the answer.
+  cards and `.compare-grid` comparisons, then "Steal this". The "Read the source" box is
+  generated from `sources`. Lessons must teach real engineering from the repo, verified in
+  its source. Prompts describe the idea, not the repo, so they work in any codebase.
 - Replaced lessons: add `old-slug -> new-slug` to `movedPosts` in `app/content/posts.ts`;
   the old URL becomes a forwarding page.
 

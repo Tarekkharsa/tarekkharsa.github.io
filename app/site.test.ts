@@ -60,26 +60,12 @@ describe('static build', () => {
 
 const { lessons } = t3codeRound
 
-describe('Guess the codebase series', () => {
-  it('accumulates hints from earlier lessons in the same round only', async () => {
-    let { body } = await get(postPath(t3codeRound.lessons[3]!))
-    assert.match(body, /\+ 9 hints from earlier lessons/)
-    assert.match(body, /Hint E9/)
-    assert.doesNotMatch(body, /Hint E10/)
-
-    let first = (await get(postPath(piRound.lessons[0]!))).body
-    assert.doesNotMatch(first, /hints from earlier lessons/)
-    let last = (await get(postPath(piRound.lessons[7]!))).body
-    assert.match(last, /\+ 21 hints from earlier lessons/)
-    assert.ok(!last.includes(t3codeRound.lessons[0]!.hints[0]), 'round 1 hints leaked into round 2')
-  })
-
-  it('keeps every reveal out of the feed and sitemap, and lists every lesson', async () => {
+describe('lessons series', () => {
+  it('lists every lesson and every tips page in the feed and sitemap', async () => {
     for (let path of ['/feed.xml', '/sitemap.xml']) {
       let { body } = await get(path)
       for (let round of rounds) {
-        assert.doesNotMatch(body, new RegExp(round.finale.slug), path)
-        for (let lesson of round.lessons) assert.match(body, new RegExp(lesson.slug), path)
+        for (let page of roundPosts(round)) assert.match(body, new RegExp(page.slug), path)
       }
     }
   })
@@ -95,19 +81,32 @@ describe('Guess the codebase series', () => {
   it("shows only the current round's pages in the series nav", async () => {
     let { body } = await get(postPath(piRound.lessons[2]!))
     let nav = body.match(/<nav [^>]*class="series-nav"[\s\S]*?<\/nav>/)?.[0] ?? ''
-    assert.match(nav, /round 2/)
+    assert.match(nav, /Lessons from Pi/)
     for (let page of roundPosts(piRound)) assert.match(nav, new RegExp(postPath(page)))
     for (let page of roundPosts(t3codeRound)) assert.doesNotMatch(nav, new RegExp(postPath(page)))
   })
 
-  it("points each lesson's answer at its own round's repo", async () => {
+  it("names each lesson's codebase and links its own round's sources", async () => {
     for (let round of rounds) {
-      let { body } = await get(postPath(round.lessons[0]!))
-      let answer = body.match(/<div class="answer">[\s\S]*?<\/div>/)?.[0] ?? ''
-      assert.match(answer, new RegExp(`href="${round.answer.url}"`), `round ${round.number}`)
-      for (let other of rounds.filter((candidate) => candidate !== round)) {
-        assert.doesNotMatch(answer, new RegExp(other.answer.repo), `round ${round.number}`)
+      let lesson = round.lessons[0]!
+      let { body } = await get(postPath(lesson))
+      assert.match(body, new RegExp(`${round.codebase.name} · lesson 1 of 8`), `round ${round.number}`)
+      let source = body.match(/<section [^>]*class="callout source"[\s\S]*?<\/section>/)?.[0] ?? ''
+      assert.match(source, new RegExp(`href="${round.codebase.url}"`), `round ${round.number}`)
+      for (let file of lesson.sources) {
+        assert.ok(source.includes(`href="${round.codebase.blobBase}${file}"`), `${lesson.slug}: ${file}`)
       }
+      for (let other of rounds.filter((candidate) => candidate !== round)) {
+        assert.doesNotMatch(source, new RegExp(other.codebase.repo), `round ${round.number}`)
+      }
+    }
+  })
+
+  it('has no guessing game left on the site', async () => {
+    for (let page of staticPages()) {
+      if (!page.file.endsWith('.html')) continue
+      let { body } = await get(page.path)
+      assert.doesNotMatch(body, /class="(?:callout game|hints|reveal)"|Post my guess|#GuessTheCodebase/, page.path)
     }
   })
 
@@ -123,31 +122,24 @@ describe('Guess the codebase series', () => {
     assert.deepEqual(missing.map((post) => post.slug), [])
   })
 
-  it("keeps the answer out of every URL a player sees before the reveal", () => {
-    for (let round of rounds.filter((candidate) => candidate.number > 1)) {
-      let name = round.answer.name.toLowerCase()
-      for (let page of roundPosts(round)) {
-        assert.ok(!page.slug.split('-').includes(name), `${page.slug} contains "${name}"`)
-      }
-    }
-  })
-
-  it('gives every lesson an "in short" card and a prompt, neither naming the answer', async () => {
+  it('gives every lesson an "in short" card, a prompt and its sources', async () => {
     for (let round of rounds) {
-      let names = [round.answer.name, round.answer.repo, round.answer.repo.split('/')[0]!]
       for (let lesson of round.lessons) {
         assert.ok(lesson.prompt.length > 200, `${lesson.slug} has no real prompt`)
-        for (let name of names) {
-          let pattern = new RegExp(`\\b${name.replace(/[.*+?^${}()|[\]\\/]/g, '\\$&')}\\b`, 'i')
-          for (let [field, text] of Object.entries({ prompt: lesson.prompt, problem: lesson.problem, idea: lesson.idea })) {
-            assert.ok(!pattern.test(text), `${lesson.slug} ${field} names "${name}"`)
-          }
-        }
+        assert.ok(lesson.sources.length > 0, `${lesson.slug} has no sources`)
         let { body } = await get(postPath(lesson))
         assert.match(body, /class="callout apply"/, lesson.slug)
         assert.match(body, /<dl class="tldr">/, lesson.slug)
         assert.match(body, /<pre class="prompt-text">/, lesson.slug)
       }
+    }
+  })
+
+  it('lists every codebase and its lessons on the home page', async () => {
+    let { body } = await get('/')
+    for (let round of rounds) {
+      assert.match(body, new RegExp(`id="codebase-${round.number}"`))
+      for (let page of roundPosts(round)) assert.match(body, new RegExp(`href="${postPath(page)}"`))
     }
   })
 

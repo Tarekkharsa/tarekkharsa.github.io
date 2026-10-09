@@ -19,8 +19,8 @@ buttons, heading anchors), and pages work without it.
 ```
 app/
   content/posts.ts   post metadata: titles, dates, tags, feed entries
-  content/rounds/    Guess the codebase rounds, one file per repo (lessons, hints, sources,
-                     "In short" text and the copyable prompt)
+  content/rounds/    lessons, one file per codebase studied (lessons, sources, "In short"
+                     text, the copyable prompt and the power-user tips page)
   actions/           route handlers (controller.tsx)
   pages/             home, post, series and 404 pages
   ui/                document <head>, header/footer, post building blocks
@@ -64,17 +64,17 @@ and preview don't skew the numbers. To stop counting your own visits in a browse
 ## Projects
 
 Each codebase I study gets a folder in [`projects/`](projects/README.md): research notes,
-archived drafts, and the X campaign as typed data with a generated, copy-ready tweet kit.
-None of it is deployed, but the repository is public. The projects README has the
-checklist for starting a new round of Guess the codebase.
+archived drafts, and the X campaign (#GuessTheCodebase, which only runs on X) as typed data
+with a generated, copy-ready tweet kit. None of it is deployed, but the repository is
+public. The projects README has the checklist for starting a new round.
 
 ## Adding a post
 
 1. Write the body as HTML in `content/posts/<slug>.html`.
 2. Register it in `app/content/posts.ts`. Headers, share buttons, the home page list,
-   the feed and the sitemap are generated from that entry. Guess the codebase lessons
-   live in their round's file in `app/content/rounds/`; `defineRound()` also builds the
-   hints box, the pager and the series nav.
+   the feed and the sitemap are generated from that entry. Lessons live in their
+   codebase's file in `app/content/rounds/`; `defineRound()` also builds the source links,
+   the pager and the series nav.
 3. Add its social image to `public/assets/og/` (series images: `npm run og`).
 
 ## Social preview images
@@ -87,4 +87,4 @@ Images live in `public/assets/og/`. To re-render one after editing its HTML sour
   --screenshot=public/assets/og/home.png file://$PWD/public/assets/og/og-home.html
 ```
 
-`og-series.html` is a template for series images: pass `?k=kicker&t=title&s=subtitle`.
+`og-series.html` is a template for lesson images: pass `?k=kicker&t=title&s=subtitle`.

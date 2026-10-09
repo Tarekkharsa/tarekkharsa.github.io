@@ -1,4 +1,4 @@
-// Renders the social preview images for the Guess the codebase series with headless Chrome,
+// Renders the social preview images for the lessons series with headless Chrome,
 // from public/assets/og/og-series.html. Local only: CI never runs this, the PNGs are committed.
 //
 //   npm run og                 every series image
@@ -19,28 +19,24 @@ const filter = process.argv[2]
 const images = [
   {
     image: seriesIndex.image.path,
-    k: series.hashtag,
+    k: series.name,
     t: 'Engineering lessons from great open-source repos',
-    s: '8 per round. Can you guess which one?',
+    s: `${LESSONS_PER_ROUND} per codebase, every claim linked to the source`,
   },
-  ...rounds.flatMap((round) => {
-    // Round 1's images were made before there were rounds; keep their wording.
-    let tag = round.number === 1 ? series.hashtag : `${series.hashtag} round ${round.number}`
-    return [
-      ...round.lessons.map((lesson) => ({
-        image: lesson.image.path,
-        k: `${tag} · lesson ${lesson.lesson} of ${LESSONS_PER_ROUND} · ${lesson.tag}`,
-        t: lesson.title,
-        s: 'Guess which open-source repo I learned this from',
-      })),
-      {
-        image: round.finale.image.path,
-        k: `${tag} · the reveal`,
-        t: `It was ${round.answer.name}.`,
-        s: `8 lessons + ${round.finale.teaser.replace('The reveal + ', '')}`,
-      },
-    ]
-  }),
+  ...rounds.flatMap(({ codebase, lessons, finale }) => [
+    ...lessons.map((lesson) => ({
+      image: lesson.image.path,
+      k: `${codebase.name} · lesson ${lesson.lesson} of ${LESSONS_PER_ROUND} · ${lesson.tag}`,
+      t: lesson.title,
+      s: lesson.subtitle,
+    })),
+    {
+      image: finale.image.path,
+      k: `${codebase.name} · power-user tips`,
+      t: finale.title,
+      s: finale.subtitle,
+    },
+  ]),
 ]
 
 for (let { image, k, t, s } of images) {

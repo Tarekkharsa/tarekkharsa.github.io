@@ -179,35 +179,41 @@ main { max-width: var(--wide); margin: 0 auto; padding: clamp(2rem, 6vh, 4rem) 1
 }
 .section-title::after { content: ""; flex: 1; height: 1px; background: var(--line); }
 
-/* featured series card */
-.feature {
-  position: relative; display: block; color: var(--ink); background: var(--card);
-  border: 1px solid var(--line); border-radius: 16px; padding: 1.5rem 1.5rem 1.3rem; box-shadow: var(--shadow);
-  overflow: hidden; transition: border-color 0.15s ease, transform 0.15s ease;
-}
-.feature:hover { text-decoration: none; border-color: var(--accent-line); transform: translateY(-1px); }
-.feature::before {
-  content: "?"; position: absolute; right: -0.5rem; top: -2.4rem; font-family: var(--mono); font-weight: 700;
-  font-size: 11rem; line-height: 1; color: var(--accent-soft); pointer-events: none;
+.section-lede { color: var(--muted); margin: -0.3rem 0 1.4rem; max-width: 40rem; }
+.section-lede a { font-family: var(--mono); font-size: 0.85rem; font-weight: 600; white-space: nowrap; }
+
+/* codebase cards: one per studied repo, with its lessons */
+.codebases { display: grid; gap: 1.1rem; }
+.codebase {
+  background: var(--card); border: 1px solid var(--line); border-radius: 16px; padding: 1.4rem 1.5rem 1.25rem;
+  box-shadow: var(--shadow);
 }
 .kicker {
-  font-family: var(--mono); font-size: 0.72rem; letter-spacing: 0.12em; text-transform: uppercase; color: var(--accent);
-  margin: 0 0 0.5rem; display: flex; flex-wrap: wrap; align-items: center; gap: 0.35rem 0.6rem;
+  font-family: var(--mono); font-size: 0.72rem; letter-spacing: 0.08em; color: var(--faint);
+  margin: 0 0 0.4rem; display: flex; flex-wrap: wrap; align-items: center; gap: 0.35rem 0.6rem;
 }
 .kicker > span { white-space: nowrap; }
 .kicker .live {
-  display: inline-flex; align-items: center; gap: 0.4rem; letter-spacing: 0.08em; color: var(--ink);
-  border: 1px solid var(--line); background: var(--paper-2); border-radius: 999px; padding: 0.1rem 0.55rem;
+  display: inline-flex; align-items: center; gap: 0.4rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--ink);
+  border: 1px solid var(--line); background: var(--paper-2); border-radius: 999px; padding: 0.05rem 0.5rem;
 }
 .kicker .live::before { content: ""; width: 0.42rem; height: 0.42rem; border-radius: 50%; background: #3FB950; }
-.feature h3 { font-family: var(--mono); font-size: 1.35rem; letter-spacing: -0.02em; line-height: 1.25; margin: 0 0 0.45rem; }
-.feature p { color: var(--muted); margin: 0 0 1rem; max-width: 34rem; }
-.steps { display: flex; gap: 0.3rem; flex-wrap: wrap; margin: 0 0 1rem; }
-.steps span {
-  font-family: var(--mono); font-size: 0.72rem; width: 1.75rem; height: 1.75rem; display: grid; place-items: center;
-  border-radius: 7px; border: 1px solid var(--pill-line); color: var(--muted);
+.codebase h3 { font-family: var(--mono); font-size: 1.45rem; letter-spacing: -0.03em; line-height: 1.2; margin: 0 0 0.4rem; }
+.codebase h3 a { color: var(--ink); }
+.codebase h3 a:hover { color: var(--accent); text-decoration: none; }
+.codebase > p:not(.kicker) { color: var(--muted); margin: 0 0 1rem; max-width: 38rem; }
+.lesson-list {
+  list-style: none; margin: 0 0 1rem; padding: 0; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0 1.2rem; border-top: 1px solid var(--line);
 }
-.steps span.final { width: auto; padding: 0 0.55rem; border-style: dashed; }
+.lesson-list li { border-bottom: 1px solid var(--line); }
+.lesson-list a {
+  display: flex; gap: 0.65rem; align-items: baseline; padding: 0.55rem 0.1rem; color: var(--ink); font-size: 0.93rem;
+  line-height: 1.4; text-wrap: pretty;
+}
+.lesson-list a:hover { color: var(--accent); text-decoration: none; }
+.lesson-list .n { font-family: var(--mono); font-size: 0.72rem; color: var(--faint); flex: none; }
+.lesson-list a:hover .n { color: var(--accent); }
 .cta { font-family: var(--mono); font-size: 0.82rem; font-weight: 600; color: var(--accent); }
 
 /* post list */
@@ -229,6 +235,8 @@ main { max-width: var(--wide); margin: 0 auto; padding: clamp(2rem, 6vh, 4rem) 1
   color: var(--accent); background: var(--accent-soft); border-radius: 5px; padding: 0.05rem 0.4rem; margin-right: 0.4rem;
   vertical-align: 0.12em;
 }
+
+.round-intro { color: var(--muted); }
 
 /* ---------- article ---------- */
 .crumbs { font-family: var(--mono); font-size: 0.78rem; color: var(--faint); margin: 0 0 1.6rem; }
@@ -262,6 +270,7 @@ main { max-width: var(--wide); margin: 0 auto; padding: clamp(2rem, 6vh, 4rem) 1
   display: grid; place-items: center; border-radius: 7px; border: 1px solid var(--pill-line); color: var(--muted);
 }
 .series-nav ol a:hover { text-decoration: none; border-color: var(--accent-line); color: var(--ink); }
+.series-nav ol a.tips { border-style: dashed; }
 .series-nav ol a[aria-current="page"] { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); font-weight: 700; }
 
 .prose { margin-top: 2.4rem; }
@@ -324,19 +333,10 @@ th { font-family: var(--mono); font-size: 0.74rem; color: var(--faint); font-wei
 .callout-big .callout-title { font-size: 1.8rem; }
 .steal { border-color: var(--accent-line); }
 
-/* guess game */
-.game { border: 1px dashed var(--accent-line); background: var(--paper-2); }
-.hints { list-style: none; padding: 0 !important; margin: 0.8rem 0 1rem !important; display: grid; gap: 0.5rem; }
-.hints details { border: 1px solid var(--line); background: var(--card); border-radius: 9px; }
-.hints summary {
-  cursor: pointer; list-style: none; padding: 0.55rem 0.8rem; font-family: var(--mono); font-size: 0.82rem; color: var(--muted);
-  display: flex; justify-content: space-between; gap: 1rem;
-}
-.hints summary::-webkit-details-marker, .reveal summary::-webkit-details-marker { display: none; }
-.hints summary::after { content: "show"; color: var(--accent); }
-.hints details[open] summary::after { content: "hide"; }
-.hints details p { margin: 0; padding: 0 0.8rem 0.65rem; }
-.game-actions { display: flex; flex-wrap: wrap; gap: 0.55rem; margin: 0 0 1rem; }
+/* "Read the source" at the end of each lesson */
+.source { border-style: dashed; border-color: var(--accent-line); background: var(--paper-2); box-shadow: none; }
+.source ul { margin: 0.5rem 0 0 !important; }
+.source li code { white-space: normal; overflow-wrap: anywhere; }
 .btn {
   display: inline-flex; align-items: center; gap: 0.45rem; font: 600 0.8rem var(--mono); cursor: pointer;
   border-radius: 9px; padding: 0.5rem 0.85rem; border: 1px solid var(--pill-line); background: var(--card); color: var(--ink);
@@ -345,15 +345,6 @@ th { font-family: var(--mono); font-size: 0.74rem; color: var(--faint); font-wei
 .btn-primary { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); }
 .btn-primary:hover { background: var(--accent); filter: brightness(1.06); color: var(--accent-ink); }
 .btn svg { width: 0.95rem; height: 0.95rem; }
-.hints-earlier { margin: 0 0 1rem; }
-.hints-earlier > summary { cursor: pointer; font-family: var(--mono); font-size: 0.8rem; color: var(--faint); }
-.hints-earlier > summary:hover { color: var(--accent); }
-.reveal { border-top: 1px solid var(--line); padding-top: 0.9rem; }
-.reveal summary { cursor: pointer; list-style: none; font-family: var(--mono); font-size: 0.86rem; font-weight: 700; color: var(--accent); }
-.reveal summary::before { content: "▸ "; }
-.reveal[open] summary::before { content: "▾ "; }
-.reveal .answer { margin: 0.8rem 0 0; }
-.reveal ul { margin: 0.5rem 0 0 !important; }
 
 /* ---------- lesson building blocks ---------- */
 /* "In short": the problem and the idea, one sentence each, at the top of a lesson */
@@ -576,15 +567,13 @@ pre.term .tl.painted { animation: paint 0.6s ease; }
   .nav a { padding: 0.5rem 0.65rem; }
   .theme-toggle { width: 2.35rem; height: 2.35rem; }
   .btn { padding: 0.62rem 0.95rem; }
-  .hints summary { padding: 0.72rem 0.85rem; }
   .links a { padding: 0.5rem 0.95rem; }
 
-  /* featured card */
-  .feature { padding: 1.2rem 1.1rem 1.1rem; }
-  .feature::before { font-size: 7rem; top: -1.2rem; right: -0.6rem; }
-  .feature h3 { font-size: 1.15rem; }
-  .steps { display: grid; grid-template-columns: repeat(8, minmax(0, 1fr)) auto; gap: 0.25rem; }
-  .steps span { width: auto; height: 1.7rem; }
+  /* codebase cards */
+  .codebase { padding: 1.15rem 1.1rem 1.05rem; }
+  .codebase h3 { font-size: 1.25rem; }
+  .lesson-list { grid-template-columns: 1fr; }
+  .lesson-list a { padding: 0.65rem 0.1rem; }
 
   /* post lists: tag on its own line, title below it */
   .posts a.row { padding: 0.95rem 0.6rem; margin: 0 -0.6rem; }
@@ -597,8 +586,9 @@ pre.term .tl.painted { animation: paint 0.6s ease; }
   /* series nav: label above, every page in one even row */
   .series-nav { display: block; padding: 0.75rem; margin-top: 1.5rem; }
   .series-nav .label { display: block; margin-bottom: 0.55rem; }
-  .series-nav ol { display: grid; grid-auto-flow: column; grid-auto-columns: minmax(0, 1fr); gap: 0.25rem; }
+  .series-nav ol { display: grid; grid-template-columns: repeat(8, minmax(0, 1fr)) auto; gap: 0.25rem; }
   .series-nav ol a { min-width: 0; height: 2.1rem; padding: 0; }
+  .series-nav ol a.tips { padding: 0 0.5rem; }
 
   /* prose */
   .prose { margin-top: 2rem; }
