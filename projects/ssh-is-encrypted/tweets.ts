@@ -1,4 +1,4 @@
-// X campaign for the "But SSH is encrypted" essay, a reply to Theo's tweet of Oct 9, 2026.
+// X campaign for the "But SSH is encrypted" post, a reply to Theo's tweet of Oct 9, 2026.
 // Render with `npm run kit -- ssh-is-encrypted`.
 import { postUrl, sshEncryptedEssay } from '../../app/content/posts.ts'
 import { thread, type TweetKit } from '../kit.ts'
@@ -7,86 +7,55 @@ const url = postUrl(sshEncryptedEssay)
 
 export const kit: TweetKit = {
   project: 'ssh-is-encrypted',
-  title: '"But SSH is encrypted" essay',
+  title: '"But SSH is encrypted"',
   hub: url,
   playbook: [
-    "Quote-tweet Theo's post while it's still getting views; that's where the audience for this already is.",
-    'Keep it about the idea, not the person who made the argument. No dunking: concede the plain-HTTP LAN point up front.',
-    'Link goes in the first reply, not in the quote-tweet itself.',
-    'Post the standalone thread a day later for people who missed the quote-tweet.',
+    "Quote-tweet Theo's post while it's still getting views.",
+    'Joke about the argument, not the person. Theo never named them; keep it that way.',
+    'Link goes in the first reply, not in the quote-tweet.',
+    'Post the short thread a day later for people who missed it.',
   ],
   schedule: [
-    { when: 'Today', what: "Quote-tweet of Theo's post + link reply", notes: 'While his tweet is still circulating.' },
-    { when: 'Tomorrow', what: 'Standalone thread', notes: 'Pin it if it does well.' },
+    { when: 'Today', what: "Quote-tweet Theo + link reply", notes: 'While his tweet is still circulating.' },
+    { when: 'Tomorrow', what: 'Short thread', notes: 'Pin it if it does well.' },
   ],
   sections: [
     {
       title: "Quote-tweet of Theo's post",
-      note: "Quote https://x.com/theo's \"ssh is encrypted\" tweet with the first post, then reply to yourself with the link.",
+      note: "Quote Theo's \"ssh is encrypted\" tweet with the first post, then reply to yourself with the link.",
       thread: true,
       tweets: thread([
-        `Good news: SSH is encrypted.
+        `SSH is encrypted. So is WhatsApp. I still wouldn't give WhatsApp a shell on my laptop.
 
-Also encrypted: everything T3 Code uses. Tailscale is WireGuard, T3 Connect is HTTPS, and it can literally connect over SSH.
-
-Bad news: when someone grabs your unlocked phone, their rm -rf ~ is also fully encrypted. 🔐`,
-        `"It's encrypted" is the "it compiles" of security: necessary, nice to hear, wildly insufficient.
-
-The 4 questions that actually matter, plus the one place the critique is right:
+The pipe was never the question. What someone can do with your stolen phone is.`,
+        `Made a tiny interactive thing about it. Pick a setup, see what the thief gets:
 
 ${url}`,
       ]),
     },
     {
-      title: 'Standalone thread',
+      title: 'Short thread',
       thread: true,
       tweets: thread([
-        `"But SSH is encrypted" is the wrong security question. 🧵
+        `"But SSH is encrypted" 🧵
 
-It's like picking a car because the seatbelts work. Every car has seatbelts.
+Sure. Every pipe is. T3 Code over Tailscale is WireGuard, over T3 Connect it's HTTPS, and it can even connect over SSH.
 
-Encryption answers 1 of 4 questions:
+So that's a tie. Here's what isn't:`,
+        `Your phone gets stolen.
 
-1. Can anyone read my traffic?
-2. Who can connect?
-3. What can they do once in?
-4. How do I take it back?`,
-        `Row 1 is a tie between a phone SSH terminal and T3 Code.
+SSH key on it: the thief has a shell as you. Files, ~/.aws, git push, rm -rf ~. End-to-end encrypted, at least 🔐
 
-- Tailscale: WireGuard end to end
-- T3 Connect: HTTPS through a tunnel, and the relay never sees your session token
-- SSH: T3 Code's desktop app can literally connect over SSH`,
-        `The fair part of the critique: T3 Code's plain LAN pairing (t3 serve --host <ip>) is HTTP. Its own docs say so.
+T3 Code on it: they get whatever you gave that phone. Make it read-only and they can only watch.`,
+        `Fixing it:
 
-Fine at home. On café Wi-Fi, use Tailscale.
+SSH: find every server that key reaches and delete it from authorized_keys. Hope you remember them all.
 
-Steelman the argument before you answer it.`,
-        `Now the threat that actually happens: someone has your phone.
+T3 Code: Settings → Connections → revoke the phone. Done.`,
+        `One fair hit: T3 Code's plain LAN pairing is HTTP. Don't use it on airport Wi-Fi.
 
-A raw SSH key on it is usually a full shell as you. Every file, every credential, git push, rm -rf.
+"It's encrypted" is the "it compiles" of security. Good to hear, nowhere near done.
 
-Silver lining: the thief's rm -rf ~ arrives end-to-end encrypted. 🔐`,
-        `A T3 Code device gets its own session:
-
-- scoped: pairing can narrow permissions, never widen them; read-only is an option
-- revocable per device in Settings → Connections
-- over T3 Connect, bound to a key on the device (DPoP)
-- agents ask for approval in Supervised mode`,
-        `To be fair: a full-permission T3 Code device is powerful too. It can start an agent in Full access.
-
-The difference is you can choose less, per device, and revoke it cleanly. With SSH you could too, but it's manual, so nobody does.
-
-That's least privilege.`,
-        `Usability is a separate argument. Claude Code in tmux over SSH works, and some people love it.
-
-T3 Code's case is approvals, readable diffs, notifications, many machines. Product reasons, not security reasons. Don't blur them.`,
-        `Encryption is a property of the pipe. Security is a property of the system.
-
-A sealed envelope is great. Less great if you mailed it to the burglar.
-
-Ask who can connect, what they can do, and how you take it back.
-
-Full post:
 ${url}`,
       ]),
     },

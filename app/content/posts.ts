@@ -310,31 +310,27 @@ export const seriesIndex: SeriesIndexPost = {
 export const sshEncryptedEssay: GuidePost = {
   kind: 'guide',
   slug: 'ssh-is-encrypted-wrong-question',
-  title: '"But SSH is encrypted": the wrong security question',
-  heading: '"But SSH is encrypted" is the wrong security question',
+  title: '"But SSH is encrypted"',
   description:
-    'A phone terminal over SSH vs. T3 Code: encryption is a tie, so the real differences are who can connect, what they can do, and how you take access back when a phone is lost.',
-  subtitle: 'Encryption is a property of the pipe. Security is a property of the system.',
+    'Sure. So is everything else. A short, interactive look at what actually matters when your phone gets stolen: SSH key vs. T3 Code.',
+  subtitle: 'Sure. So is WhatsApp.',
   date: '2026-10-09',
   tag: 'Security',
-  readMinutes: 5,
+  readMinutes: 2,
   image: {
     path: '/assets/og/ssh-is-encrypted-wrong-question.png',
-    alt: '"But SSH is encrypted": the wrong security question, by Tarek Kharsa',
+    alt: '"But SSH is encrypted." Sure. So is WhatsApp. By Tarek Kharsa',
   },
-  shareText:
-    '"SSH is encrypted" answers 1 of the 4 questions that matter for remote access. The other 3 are where the real differences are:',
+  shareText: '"But SSH is encrypted." Sure. So is every pipe. What matters is what a stolen phone can do:',
   indexed: true,
   feed: {
-    title: '"But SSH is encrypted": the wrong security question',
-    summary:
-      'Encryption is a tie between a phone SSH terminal and T3 Code. Authentication, authorization and revocation are where they differ.',
+    title: '"But SSH is encrypted"',
+    summary: 'Sure. So is every pipe. What a stolen phone can do with an SSH key vs. T3 Code.',
   },
   listing: {
     tag: 'security',
-    title: '"But SSH is encrypted" is the wrong security question',
-    summary:
-      'A phone terminal over SSH vs. T3 Code: encryption is a tie, so the real differences are who can connect, what they can do, and how you take it back.',
+    title: '"But SSH is encrypted"',
+    summary: 'Sure. So is WhatsApp. A 2-minute, interactive look at what a stolen phone can actually do.',
   },
 }
 

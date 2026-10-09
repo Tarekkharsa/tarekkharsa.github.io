@@ -342,6 +342,41 @@ th { font-family: var(--mono); font-size: 0.74rem; color: var(--faint); font-wei
 .reveal .answer { margin: 0.8rem 0 0; }
 .reveal ul { margin: 0.5rem 0 0 !important; }
 
+/* compare: CSS-only toggle between two setups (radio inputs, no JS) */
+.compare {
+  border: 1px solid var(--line); background: var(--card); border-radius: var(--radius);
+  padding: 0.9rem 1rem 0.4rem; margin: 0 0 1.4rem; box-shadow: var(--shadow);
+}
+.compare input { position: absolute; opacity: 0; pointer-events: none; }
+.compare label {
+  display: inline-block; font-family: var(--mono); font-size: 0.82rem; font-weight: 600; cursor: pointer;
+  padding: 0.45rem 0.85rem; margin: 0 0.35rem 0.9rem 0; border-radius: 9px;
+  border: 1px solid var(--pill-line); color: var(--muted);
+}
+.compare label:hover { border-color: var(--accent-line); color: var(--ink); }
+.compare input:checked + label { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); }
+.compare input:focus-visible + label { outline: 2px solid var(--accent); outline-offset: 2px; }
+.compare-panel { display: none; }
+#setup-ssh:checked ~ .compare-ssh, #setup-t3:checked ~ .compare-t3 { display: block; }
+.prose .compare-row { margin: 0 0 0.8rem; }
+.compare-k {
+  display: block; font-family: var(--mono); font-size: 0.7rem; letter-spacing: 0.08em; text-transform: uppercase;
+  color: var(--accent); margin-bottom: 0.15rem;
+}
+
+/* checklist: plain checkboxes the reader can tick */
+.prose .checklist { list-style: none; padding: 0; margin: 0 0 1.4rem; display: grid; gap: 0.45rem; }
+.checklist label {
+  display: flex; gap: 0.7rem; align-items: baseline; cursor: pointer; padding: 0.6rem 0.8rem;
+  border: 1px solid var(--line); border-radius: 10px; background: var(--card);
+}
+.checklist input { accent-color: var(--accent); width: 1rem; height: 1rem; flex: none; transform: translateY(0.15rem); }
+.checklist input:disabled { cursor: default; }
+.checklist input:checked + span { color: var(--muted); }
+.checklist input:checked + span strong { color: var(--ink); }
+
+.prose .sources { font-size: 0.82rem; color: var(--faint); margin-top: 2rem; }
+
 /* recap + tips */
 .recap li { margin: 0.45rem 0; }
 .tips { padding-left: 1.7rem !important; }
