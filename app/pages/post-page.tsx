@@ -12,7 +12,9 @@ import {
 import { absoluteUrl } from '../site.ts'
 import { Document, isoTimestamp } from '../ui/document.tsx'
 import {
+  ApplyPrompt,
   Crumbs,
+  InShort,
   GuessCallout,
   lessonCount,
   lessonLabel,
@@ -62,7 +64,11 @@ export function PostPage(handle: Handle<{ post: ArticlePost }>) {
               }
             />
             {post.kind !== 'guide' ? <SeriesNav current={post} /> : null}
-            <PostBody slug={post.slug}>
+            <PostBody
+              slug={post.slug}
+              before={post.kind === 'lesson' ? <InShort post={post} /> : null}
+            >
+              {post.kind === 'lesson' ? <ApplyPrompt post={post} /> : null}
               {post.kind === 'lesson' ? <GuessCallout post={post} /> : null}
             </PostBody>
             <ShareBar post={post} />

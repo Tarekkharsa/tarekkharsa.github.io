@@ -96,9 +96,10 @@ export function PostHeader(handle: Handle<{ post: Post; extra?: string; heading?
 }
 
 /** The hand-written prose for a post, inserted verbatim from content/posts/<slug>.html. */
-export function PostBody(handle: Handle<{ slug: string; children?: RemixNode }>) {
+export function PostBody(handle: Handle<{ slug: string; before?: RemixNode; children?: RemixNode }>) {
   return () => (
     <div class="prose">
+      {handle.props.before}
       <div class="prose-body" innerHTML={unsafeHTML(readPostBody(handle.props.slug))} />
       {handle.props.children}
     </div>
@@ -182,6 +183,45 @@ function HintList(handle: Handle<{ hints: string[]; prefix: string }>) {
         </li>
       ))}
     </ul>
+  )
+}
+
+/** The "In short" card at the top of a lesson: the problem, then the idea. */
+export function InShort(handle: Handle<{ post: LessonPost }>) {
+  return () => (
+    <dl class="tldr">
+      <div>
+        <dt class="k">Problem</dt>
+        <dd>
+          <p>{handle.props.post.problem}</p>
+        </dd>
+      </div>
+      <div class="idea">
+        <dt class="k">Idea</dt>
+        <dd>
+          <p>{handle.props.post.idea}</p>
+        </dd>
+      </div>
+    </dl>
+  )
+}
+
+/** A copyable prompt that applies the lesson to the reader's own codebase. */
+export function ApplyPrompt(handle: Handle<{ post: LessonPost }>) {
+  return () => (
+    <section class="callout apply" aria-labelledby="apply-h">
+      <p class="callout-kicker">Use it in your code</p>
+      <p class="callout-title" id="apply-h">
+        A prompt for your coding agent
+      </p>
+      <p>
+        Run it from the root of your repo. It checks whether the idea fits before it changes
+        anything.
+      </p>
+      <pre class="prompt-text">
+        <code>{handle.props.post.prompt}</code>
+      </pre>
+    </section>
   )
 }
 

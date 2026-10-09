@@ -37,9 +37,18 @@ export interface LessonPost extends BasePost {
   kind: 'lesson'
   round: number
   lesson: number
+  /** "In short" card: the problem, in one or two sentences. */
+  problem: string
+  /** "In short" card: the idea that fixes it, in one sentence. */
+  idea: string
   hints: [string, string, string]
   /** Paths in the answer repo, shown when the reader gives up. */
   sources: string[]
+  /**
+   * A prompt readers paste into their coding agent to apply the lesson to their own code.
+   * It must not name the answer repo.
+   */
+  prompt: string
 }
 
 export interface FinalePost extends BasePost {

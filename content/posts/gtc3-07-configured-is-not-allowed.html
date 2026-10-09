@@ -1,27 +1,30 @@
-<p>Here's a common shape for "turn off provider X": an <code>enabled_providers</code> list, a <code>disabled_providers</code> list, and some code that checks both while it loads provider config. It works until a company wants to forbid a provider that a developer has perfectly valid credentials for. Now "is it configured?" and "is it allowed?" are tangled into one setting.</p>
-<p>This repo's v2 replaces those lists with a separate idea: <strong>policy</strong>.</p>
-
-<h2>Two different questions</h2>
-<blockquote><p>A provider can be correctly configured and have valid credentials while policy still denies its use.</p></blockquote>
-<ul>
-  <li><strong>Config</strong> describes endpoints, options and model overrides. It answers "how do I use this?"</li>
-  <li><strong>Policy</strong> answers "may I use this?" It doesn't configure anything, and "policies do not make unusable resources usable."</li>
-</ul>
-
-<h2>The whole evaluator</h2>
-<p>A statement is an effect (<code>allow</code> or <code>deny</code>), an action and a resource, both with wildcards. Evaluation is one line:</p>
+<div class="demo">
+  <div class="demo-head">
+    <span class="demo-icon" aria-hidden="true">▶</span>
+    <div><p class="demo-title">Try it: last match wins</p><p class="demo-sub">pick a provider, flip, reorder or add rules</p></div>
+  </div>
+  <div class="demo-stage" data-demo="policy">
+    <p class="demo-status">Rules: 1. deny <code>*</code> &nbsp;2. allow <code>anthropic</code>. For <code>openai</code>, only rule 1 matches, so it's denied. For <code>anthropic</code>, both match and rule 2 is last, so it's allowed.</p>
+  </div>
 <pre><code>statements.findLast(
   (s) =&gt; Wildcard.match(action, s.action) &amp;&amp; Wildcard.match(resource, s.resource),
 )?.effect ?? fallback</code></pre>
-<p><strong>The last matching statement wins.</strong> There's no "more specific pattern beats a wildcard" rule: "A specific resource does not automatically beat a wildcard resource. Written/evaluation order controls the result." So "deny everything except Anthropic" is exactly two lines in that order:</p>
-<pre><code>{ "effect": "deny",  "action": "provider.use", "resource": "*" },
-{ "effect": "allow", "action": "provider.use", "resource": "anthropic" }</code></pre>
-<p>Each caller passes its own default. Provider use defaults to <code>allow</code>, so a user with no policy sees no change at all.</p>
+</div>
 
-<h2>Built to grow, but only a little</h2>
-<p>The vocabulary is meant to cover more actions later, like <code>plugin.load</code> or <code>mcp.connect</code>, with user policy overriding repository policy and, eventually, organization policy overriding both. The non-goals are written down just as clearly: no conditions, no principals, no approval prompts.</p>
+<h2>Two different questions</h2>
+<div class="compare-grid">
+  <div><p class="k">Config: how?</p><p>Endpoints, options and model overrides.</p><p>Says nothing about permission.</p></div>
+  <div><p class="k">Policy: may I?</p><p>Ordered allow/deny rules with wildcards.</p><p>"Policies do not make unusable resources usable."</p></div>
+</div>
+<blockquote><p>A provider can be correctly configured and have valid credentials while policy still denies its use.</p></blockquote>
+
+<h2>Order decides, not specificity</h2>
+<p>There's no "the more specific rule wins" magic: "A specific resource does not automatically beat a wildcard resource. Written/evaluation order controls the result." You can predict any answer by reading the rules top to bottom, which is what the demo above does. Each caller passes its own default; provider use defaults to <code>allow</code>, so people with no policy see no change.</p>
+
+<h2>Small on purpose</h2>
+<p>The same vocabulary is meant for more actions later, like <code>plugin.load</code> or <code>mcp.connect</code>, with user rules overriding repository rules. The non-goals are written down too: no conditions, no principals, no approval prompts.</p>
 
 <div class="callout steal">
   <p class="callout-kicker">Steal this</p>
-  <p>Keep "is it configured?" and "is it allowed?" in separate layers. Make policy ordered statements where the last match wins, so anyone can predict the result by reading top to bottom.</p>
+  <p>Keep "is it configured?" and "is it allowed?" in separate layers. Make permission an ordered list where the last match wins, so anyone can predict the result by reading top to bottom.</p>
 </div>

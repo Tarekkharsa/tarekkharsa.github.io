@@ -16,8 +16,11 @@ export interface LessonInput {
   subtitle: string
   tag: string
   readMinutes: number
+  problem: string
+  idea: string
   hints: [string, string, string]
   sources: string[]
+  prompt: string
 }
 
 export interface RoundInput {

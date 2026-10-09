@@ -124,6 +124,25 @@ describe('Guess the codebase series', () => {
     }
   })
 
+  it('gives every lesson an "in short" card and a prompt, neither naming the answer', async () => {
+    for (let round of rounds) {
+      let names = [round.answer.name, round.answer.repo, round.answer.repo.split('/')[0]!]
+      for (let lesson of round.lessons) {
+        assert.ok(lesson.prompt.length > 200, `${lesson.slug} has no real prompt`)
+        for (let name of names) {
+          let pattern = new RegExp(`\\b${name.replace(/[.*+?^${}()|[\]\\/]/g, '\\$&')}\\b`, 'i')
+          for (let [field, text] of Object.entries({ prompt: lesson.prompt, problem: lesson.problem, idea: lesson.idea })) {
+            assert.ok(!pattern.test(text), `${lesson.slug} ${field} names "${name}"`)
+          }
+        }
+        let { body } = await get(postPath(lesson))
+        assert.match(body, /class="callout apply"/, lesson.slug)
+        assert.match(body, /<dl class="tldr">/, lesson.slug)
+        assert.match(body, /<pre class="prompt-text">/, lesson.slug)
+      }
+    }
+  })
+
   it('never changes round 1 URLs, which are already shared', () => {
     assert.deepEqual(roundPosts(t3codeRound).map(postPath), [
       '/posts/gtc-01-decide-commit-then-act',

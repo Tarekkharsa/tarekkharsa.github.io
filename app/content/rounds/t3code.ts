@@ -25,6 +25,8 @@ export const t3codeRound = defineRound({
         'The three-step server pattern that keeps AI agents from leaving your app in a weird state.',
       tag: 'Architecture',
       readMinutes: 2,
+      problem: "When a request saves data and then calls another service, a crash or retry in between leaves the app in a state nobody planned for.",
+      idea: "Decide with a pure function, commit the facts and the intended side effects in one transaction, then run the side effects afterwards.",
       hints: [
         "It's open source and has over 400,000 users.",
         'The same server drives a web app, a desktop app and a mobile app.',
@@ -36,6 +38,16 @@ export const t3codeRound = defineRound({
         'apps/server/src/orchestration-v2/EventSink.ts',
         'apps/server/src/orchestration-v2/EffectWorker.ts',
       ],
+      prompt: `Apply the "decide, commit, then act" pattern to this codebase.
+
+The idea: every state change goes through three steps. Decide: a pure function turns (current state, command) into the changes to make, with no I/O. Commit: one database transaction writes those changes together with a record of the side effects still to run (an outbox). Act: a worker runs the side effects after the commit and reports results back as new commands.
+
+1. Find one workflow where a crash, timeout or retry could leave things half-done, for example saving a record and then calling an external API or sending an email in the same request. Show me the code path.
+2. Tell me whether this pattern fits it. If it doesn't, say why and stop.
+3. If it fits, propose the smallest version: a pure decide function, one transaction that also inserts an outbox row, and a worker that processes outbox rows with retries. Make retries idempotent, for example with a command ID.
+4. Implement it, with tests for the decide function alone, a retry of the same command, and a crash between commit and act.
+
+Don't introduce an event-sourcing framework. Keep the change small and tell me how you verified it.`,
     },
     {
       slug: 'gtc-02-performance-budgets-as-tests',
@@ -45,6 +57,8 @@ export const t3codeRound = defineRound({
         "Seven performance patterns from one repo's commit log, and why their budgets fail the build.",
       tag: 'Performance',
       readMinutes: 2,
+      problem: "Most teams find performance regressions when a user complains.",
+      idea: "Write each budget down as a number and assert it in a unit test, on the path users actually run.",
       hints: [
         'Its maintainers list “performance without compromise” as a value they never trade away.',
         'Its users run AI agents all day, and the docs say they notice a single dropped frame.',
@@ -56,6 +70,16 @@ export const t3codeRound = defineRound({
         'oxlint-plugin-t3code/rules/no-unscoped-has.ts',
         'docs/internals/connection-runtime.md',
       ],
+      prompt: `Turn one of this codebase's performance expectations into a unit test.
+
+The idea: write the budget down as a number (bytes sent, queries per request, items rendered, calls made) and assert it in a normal test, so a regression fails the build instead of reaching users.
+
+1. Find the hot path that matters most to users here: a page load, an API response, a sync, a render. Measure what it does today: payload size, number of queries or calls, or work per item.
+2. Propose one or two budgets with concrete numbers and a little headroom, and explain why each number matters. Prefer deterministic counts over wall-clock time.
+3. Write the tests against the code path users actually run, not a simplified fixture.
+4. Find the most recent performance fix in the git history. If a lint rule or check could stop that whole class of bug, propose it.
+
+Keep the change small and show me the measured numbers.`,
     },
     {
       slug: 'gtc-03-mock-the-boundary',
@@ -65,6 +89,8 @@ export const t3codeRound = defineRound({
         '“A test that needs a timeout to pass is wrong.” Testing rules from a repo that bans sleeps.',
       tag: 'Testing',
       readMinutes: 2,
+      problem: "Tests that mock your own logic, or sleep and hope, pass on your machine and flake or lie everywhere else.",
+      idea: "Fake only the true boundaries (network, processes, clock, randomness) and wait for milestones instead of sleeping.",
       hints: [
         'It talks to six different AI coding agents through their own CLIs.',
         'Its pitch: “bring your own subscription”.',
@@ -76,6 +102,16 @@ export const t3codeRound = defineRound({
         'apps/server/scripts/migrate-dev-db.ts',
         'oxlint-plugin-t3code/rules/no-test-in-loop.ts',
       ],
+      prompt: `Review this codebase's tests against the rule "fake the boundaries, not the logic."
+
+The idea: replace only true boundaries in tests (network, processes, clock, random IDs, filesystem) and run the real code everywhere else. Time and randomness should be injectable in production code, and tests should wait for milestones instead of sleeping.
+
+1. Find tests that mock our own modules or business logic, and tests that sleep or use timeouts to wait for something. List the worst offenders with file and line.
+2. Pick one module. Check whether its clock, random IDs and external calls can be injected. If not, propose the smallest way to make them injectable without changing behavior.
+3. Rewrite one or two of its tests: fake only the boundary, and replace sleeps with waiting on an explicit signal (a promise, an event, a drained queue).
+4. Run them several times to show they're stable.
+
+Don't rewrite the whole suite. Keep the change small and tell me what you'd do next.`,
     },
     {
       slug: 'gtc-04-pr-process-for-the-ai-era',
@@ -85,6 +121,8 @@ export const t3codeRound = defineRound({
         'When anyone can generate a 2,000-line PR in ten minutes, review time is what you protect.',
       tag: 'GitHub & PRs',
       readMinutes: 2,
+      problem: "Anyone can generate a 2,000-line PR in minutes, but reviewing it still takes hours.",
+      idea: "Make PRs show reasoning and evidence, load bot rules from main, and keep a short list of changes that always need a human.",
       hints: [
         'One of its maintainers is a well-known tech YouTuber.',
         'Over a thousand commits on main carry AI co-author trailers.',
@@ -98,6 +136,16 @@ export const t3codeRound = defineRound({
         '.macroscope/check-run-agents/ui-consistency.md',
         '.macroscope/approvability.md',
       ],
+      prompt: `Improve this repository's pull request process for a world where AI writes a lot of the code.
+
+The idea: PRs should explain their reasoning and evidence instead of ticking checkboxes. Bots that review or triage must load their rules from the main branch, never from the PR. Each AI reviewer gets one narrow job, and some changes always need a human.
+
+1. Look at .github/ (or your platform's equivalent): PR templates, CI workflows, bots and contributing docs. Summarize what exists.
+2. Propose a PR template with short sections: Problem, Change, Approval (a link to the issue or comment that approved the work), Verification (what was checked, what was seen, what couldn't be checked), and which model and tool helped, if any.
+3. Check every workflow that runs on pull requests. Flag any that run code or config from the PR branch with write permissions or secrets, for example through pull_request_target, and suggest safe fixes.
+4. Propose a short list of "always needs a human" triggers for this repo, such as dependency changes, auth, migrations and product defaults.
+
+Show me the changes as a diff and keep them small.`,
     },
     {
       slug: 'gtc-05-taste-as-lint-rules',
@@ -106,6 +154,8 @@ export const t3codeRound = defineRound({
       subtitle: "Review comments don't scale. A repo with 14 custom lint rules shows what does.",
       tag: 'DX & Tooling',
       readMinutes: 1,
+      problem: "The same review comments get written again and again, and still don't stick.",
+      idea: "The second time you write a comment, turn it into a lint rule with tests, exceptions, and suppressions that must explain themselves.",
       hints: [
         'It ships its own oxlint plugin.',
         'Its name is a letter followed by a number.',
@@ -118,6 +168,16 @@ export const t3codeRound = defineRound({
         'docs/internals/web-ui.md',
         'knip.jsonc',
       ],
+      prompt: `Turn repeated review feedback in this codebase into lint rules.
+
+The idea: when you write the same review comment a second time, encode it as a lint rule with tests and documented exceptions. Suppressions must explain themselves.
+
+1. Find candidates: rules mentioned in the style guide, agent guide or contributing docs, recurring fixes in the git history ("use X instead of Y"), and inconsistencies across the code. List the top three with examples.
+2. For each, check whether the existing linter already has a rule or option for it. Prefer configuring an existing rule over writing a custom one.
+3. Implement the best one: the rule or config, tests or fixtures showing what it flags and what it allows, and its exceptions spelled out.
+4. If the linter supports it, require a reason on every suppression comment.
+
+Fix the existing violations, or list them if there are too many. Keep the change small.`,
     },
     {
       slug: 'gtc-06-dev-setup-for-parallel-agents',
@@ -127,6 +187,8 @@ export const t3codeRound = defineRound({
         'Ports, databases, processes and URLs: everything shared becomes a collision once agents run in parallel.',
       tag: 'Dev setup',
       readMinutes: 2,
+      problem: "Run several agents on one laptop and everything shared collides: ports, databases, processes, URLs.",
+      idea: "Derive ports and state from each worktree, keep one origin, and never kill processes by pattern.",
       hints: [
         'Most of its contributions come from the app itself, controlled remotely.',
         'It creates a git worktree per task.',
@@ -139,6 +201,16 @@ export const t3codeRound = defineRound({
         'docs/operations/development.md',
         '.github/workflows/ci.yml',
       ],
+      prompt: `Make this project's local dev setup safe for several agents working in parallel, each in its own git worktree or checkout.
+
+The idea: anything shared on one machine becomes a collision when agents run in parallel: ports, databases, caches, background processes, URLs. Derive them from the worktree instead of hard-coding them.
+
+1. Find everything the dev setup shares: fixed ports, a single local database or data directory, global caches, PID files, and scripts that kill processes by name or pattern.
+2. Propose a scheme where each worktree gets its own values, for example ports derived from a hash of the worktree path and a gitignored data directory inside the worktree. The same worktree should get the same values on every run.
+3. Replace any "kill by pattern" with stopping only the processes this worktree started.
+4. Implement it in the dev scripts, print the chosen ports on startup, and document it in the README.
+
+Check that two copies of the repo can run the dev server at the same time. Keep the change small.`,
     },
     {
       slug: 'gtc-07-honest-ui',
@@ -148,6 +220,8 @@ export const t3codeRound = defineRound({
         'UX rules from a repo whose users stare at it all day and notice every lie the UI tells.',
       tag: 'UI / UX',
       readMinutes: 2,
+      problem: "Spinners that never stop, “connected” badges that aren't, and actions you can't undo teach users to distrust the UI.",
+      idea: "Treat every label as a promise: separate “connected” from “fresh”, never show cache as live, and give every action a way back.",
       hints: [
         'It shows live status for agents running on other machines.',
         'It reconnects across LAN, Tailscale, SSH and its own tunnel.',
@@ -159,6 +233,16 @@ export const t3codeRound = defineRound({
         'docs/internals/web-ui.md',
         'apps/web/src/components/chat/ComposerBanner.tsx',
       ],
+      prompt: `Audit this app's UI for status it can't back up.
+
+The idea: every label is a promise. "Connected" and "up to date" are different states. Cached data must never look live. Every action needs a way back. Derived status should come from one source of truth, not from each client's own clock.
+
+1. Find where the UI shows connection, loading, sync or freshness status, and check what each one is actually based on. A spinner that keeps spinning after an error, or "online" because a socket opened, are typical lies.
+2. Find cached or offline data and check whether it can be shown as if it were live, or overwrite newer data on reconnect.
+3. Find one-way doors: actions with no undo or reverse, like archive without unarchive or dismiss without restore.
+4. Pick the most misleading case and fix it, with a test for the state that used to lie.
+
+Report the rest as a short prioritized list. Keep the change small.`,
     },
     {
       slug: 'gtc-08-write-docs-for-agents',
@@ -168,12 +252,23 @@ export const t3codeRound = defineRound({
         'In this repo, the most frequent contributor is an AI agent running inside the app itself.',
       tag: 'AI-native engineering',
       readMinutes: 1,
+      problem: "Most agent guides are long lists of rules that agents misread or ignore.",
+      idea: "Write the guide like onboarding for a new hire: shared words, real dangers, a “hit every surface” checklist and an escape hatch.",
       hints: [
         'Its agent guide opens with a note from the founder.',
         "It's a GUI for coding agents, and it's used to build itself.",
         "I've already written about it on this blog.",
       ],
       sources: ['AGENTS.md', 'docs/internals/glossary.md', 'CONTRIBUTING.md'],
+      prompt: `Write or improve this repository's guide for AI coding agents (AGENTS.md, CLAUDE.md or similar).
+
+The idea: write it like onboarding for a sharp new hire: shared vocabulary, the few ways to cause real damage, a "did you hit every surface" checklist, and a clear escape hatch. Document decisions and traps, and let the code document itself.
+
+1. Read the existing guide, README and contributing docs, then explore the code. Summarize what an agent would most likely get wrong here.
+2. Draft a guide of at most about 150 lines with: a short glossary of the project's core terms; the commands to build, test and check a change, and which ones not to run; the real dangers (data loss, secrets, production, destructive commands); a checklist of every surface a change may need to touch; and what to do when a rule conflicts with the task (stop and ask).
+3. Leave out anything that restates the code, lists files or narrates control flow.
+
+Show me the draft before writing it. If a guide already exists, propose edits instead of a rewrite.`,
     },
   ],
   finale: {

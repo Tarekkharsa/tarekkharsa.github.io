@@ -34,8 +34,9 @@
     const button = document.createElement("button");
     button.type = "button";
     button.className = "copy-code";
-    button.textContent = "copy";
-    button.addEventListener("click", () => copy(pre.innerText, button, "copy"));
+    const label = pre.classList.contains("prompt-text") ? "copy prompt" : "copy";
+    button.textContent = label;
+    button.addEventListener("click", () => copy(pre.innerText, button, label));
     wrap.append(button);
   });
 
@@ -88,4 +89,12 @@
     a.textContent = "#";
     h.prepend(a);
   });
+
+  // Lesson demos are only needed on pages that have one.
+  if (document.querySelector("[data-demo]")) {
+    const script = document.createElement("script");
+    script.src = "/assets/demos.js";
+    script.defer = true;
+    document.head.append(script);
+  }
 })();
