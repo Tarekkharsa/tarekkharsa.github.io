@@ -1,29 +1,41 @@
-<p>Terminal apps have to answer a question most UIs never face: <strong>who owns the scrolling?</strong> If the terminal owns it, you get native scrollback, search and selection, but the app can't control much. If the app owns it, it can do more, but now it has to rebuild everything the terminal used to do for free.</p>
-<p>This repo doesn't pick one. It ships two renderers behind one interface, and each one respects its answer.</p>
+<p>Terminal apps have to answer a question most UIs never face: <strong>who owns the scrolling?</strong> If the terminal owns it, you get native scrollback, search and selection, but the app controls very little. If the app owns it, it can do more, but it has to rebuild everything the terminal used to do for free. This repo ships both, behind one interface, and each respects its answer.</p>
+
+<div class="demo">
+  <div class="demo-head">
+    <span class="demo-icon" aria-hidden="true">▶</span>
+    <div><p class="demo-title">Try it: differential rendering</p><p class="demo-sub">highlighted lines are the ones rewritten this frame</p></div>
+  </div>
+  <div class="demo-stage" data-demo="redraw">
+    <p class="demo-status">Typing rewrites one line. Changing line 3 rewrites from line 3 down. Resizing the terminal forces a full redraw, which is counted. On Termux, the keyboard changing the height doesn't trigger one, because it would replay the whole history.</p>
+  </div>
+</div>
 
 <h2>Two renderers, one interface</h2>
-<p>Components render to a shared <code>TUI</code> interface. You only pick the concrete renderer when you construct the app:</p>
-<ul>
-  <li><strong>Fullscreen</strong> (the default) uses the terminal's alternate screen, so the app owns the viewport. It therefore rebuilds what the terminal would normally do: mouse-wheel and keyboard scrolling, scrollbars you can drag, text selection that copies to the clipboard, clickable links, and jumps between your prompts. When it exits, it prints the complete conversation back into your normal scrollback.</li>
-  <li><strong>Regular mode</strong> renders into the main terminal buffer, so the terminal owns scrollback. The app doesn't capture the mouse, and fixed layout regions are deliberately unavailable, "because the terminal owns its scrollback."</li>
-</ul>
-<p>Neither mode half-owns the screen. That's where flicker, lost scrollback and broken selection come from.</p>
+<div class="compare-grid">
+  <div><p class="k">Fullscreen (default)</p><p>The terminal's alternate screen: the app owns the viewport, so it rebuilds mouse and keyboard scrolling, draggable scrollbars, selection that copies to the clipboard, clickable links and jumps between prompts. On exit it prints the complete conversation back into normal scrollback.</p></div>
+  <div><p class="k">Regular mode</p><p>The main terminal buffer: the terminal owns scrollback. The app doesn't capture the mouse, and fixed layout regions are deliberately unavailable, "because the terminal owns its scrollback."</p></div>
+</div>
+<p>Components render to a shared <code>TUI</code> interface; the concrete renderer is picked once, at construction. Neither mode half-owns the screen, which is where flicker, lost scrollback and broken selection come from.</p>
 
-<h2>Redraw as little as possible, and count when you can't</h2>
-<p>Both renderers are differential: they compare the new frame with the last one and rewrite only from the first changed line. Updates are wrapped in synchronized output (<code>CSI ?2026h</code> … <code>?2026l</code>), so the terminal paints the change once instead of mid-write.</p>
-<p>A full redraw is the expensive exception: clear the screen and the scrollback, then repaint everything. So the renderer <strong>counts</strong> them, and there's a test that fails if showing an edit tool's result triggers one:</p>
+<h2>The rendering rules</h2>
+<ol class="flow">
+  <li><strong>Diff against the last frame</strong>Render all components to lines, composite overlays, then rewrite only from the first changed line to the end.</li>
+  <li><strong>Paint atomically</strong>Every update is wrapped in synchronized output (<code>CSI ?2026h</code> … <code>?2026l</code>), so the terminal shows the change in one frame instead of mid-write.</li>
+  <li><strong>Full redraws only when correctness needs them</strong>A width change (wrapping changes everywhere), a height change, or a change above the visible viewport, which differential rendering can't reach.</li>
+  <li><strong>Except where a redraw would hurt</strong>On Termux, the software keyboard changes the height every time it opens. A full redraw there replays the entire history, so that case is skipped.</li>
+</ol>
+
+<h2>Count the expensive thing</h2>
+<p>Full redraws are counted (<code>fullRedraws</code>), and a test fails if showing an edit tool's result causes one:</p>
 <pre><code>const redrawsBefore = tui.fullRedraws
 // ...render the edit tool's diff...
 expect(tui.fullRedraws).toBe(redrawsBefore)</code></pre>
-<p>There's even a dev-only <code>/tui</code> command that prints the counter for the current session.</p>
-
-<h2>One special case</h2>
-<p>A terminal height change normally forces a full redraw. On Android's Termux, though, the height changes every time the on-screen keyboard opens or closes, and a full redraw there replays the entire history. So that case is skipped on Termux. It's a one-line exception with a comment, and it's what makes the app usable on a phone.</p>
+<p>A dev-only <code>/tui</code> command prints the counter for the current session. A screenshot test wouldn't notice a redraw that produces the same pixels; a counter does.</p>
 
 <h2>Every key is a setting</h2>
-<p>Shortcuts are named actions with defaults, like <code>app.model.select</code> on <code>ctrl+l</code>, and you can rebind or disable any of them in <code>keybindings.json</code>. The agent guide forbids hard-coded key checks for exactly that reason: a hard-coded key is a shortcut someone can't change.</p>
+<p>Shortcuts are named actions with defaults, like <code>app.model.select</code> on <code>ctrl+l</code>, and you can rebind or disable any of them in <code>keybindings.json</code>. The agent guide forbids hard-coded key checks for exactly that reason.</p>
 
 <div class="callout steal">
   <p class="callout-kicker">Steal this</p>
-  <p>Decide who owns each piece of UI and don't half-own it. Then count your most expensive operation, like full redraws, and assert on the count in tests. A counter catches regressions a screenshot never will.</p>
+  <p>Decide who owns each piece of UI and don't half-own it. Render differentially, paint atomically, and count your most expensive operation in tests. A counter catches regressions a screenshot never will.</p>
 </div>

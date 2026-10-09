@@ -1,4 +1,4 @@
-<p>This round was different: I didn't study a release. I studied a rewrite still in progress, on the default branch, before it ships. If you followed the hints (21 README translations, Bun, a server on port 4096, a team that also makes an infrastructure-as-code framework, Build and Plan agents, a glossary of banned words), you were right:</p>
+<p>This round was different: I didn't study a release. I studied a rewrite still in progress, on the default branch, before it ships. If you followed the hints (21 README translations, Bun, a server on port 4096, a team that also makes an infrastructure-as-code framework, Build and Plan agents, a summary template for compaction), you were right:</p>
 
 <div class="callout callout-big">
   <p class="callout-kicker">The codebase</p>
@@ -11,11 +11,11 @@
   <li><a href="/posts/gtc3-01-admit-then-run">Admit first, run later</a>: the <code>session_input</code> inbox, steer and queue.</li>
   <li><a href="/posts/gtc3-02-never-rewrite-the-system-prompt">Never rewrite the system prompt</a>: Context Epochs and mid-conversation updates.</li>
   <li><a href="/posts/gtc3-03-record-once-replay-forever">Record once, replay forever</a>: the <code>http-recorder</code> package.</li>
-  <li><a href="/posts/gtc3-04-lab-notebook-for-speed">A lab notebook for speed</a>: <code>perf/test-suite.md</code>.</li>
+  <li><a href="/posts/gtc3-04-bound-what-the-model-sees">Bound what the model sees</a>: the tool-output store, 2,000 lines or 50&nbsp;KB.</li>
   <li><a href="/posts/gtc3-05-one-api-even-in-process">One API, even in-process</a>: the embedded SDK's in-memory <code>fetch</code>.</li>
   <li><a href="/posts/gtc3-06-rebuild-on-the-main-branch">Rebuild on the main branch</a>: <code>specs/v2</code> and the schema changelog.</li>
   <li><a href="/posts/gtc3-07-configured-is-not-allowed">Configured is not allowed</a>: policy in one <code>findLast</code>.</li>
-  <li><a href="/posts/gtc3-08-ban-the-synonyms">Ban the synonyms</a>: <code>CONTEXT.md</code>.</li>
+  <li><a href="/posts/gtc3-08-compact-before-you-overflow">Compact before you overflow</a>: <code>session/compaction.ts</code>.</li>
 </ol>
 
 <p>The lessons describe v2. The tips below are for OpenCode as it ships today, checked against its docs. The leader key is <kbd>Ctrl</kbd>+<kbd>X</kbd> by default.</p>

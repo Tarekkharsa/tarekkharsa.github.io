@@ -1,0 +1,41 @@
+<p>Many agents handle long conversations reactively: send the request, get "context length exceeded" from the provider, then squash everything into a paragraph and retry. The summary is vague, the exact error string and file path from an hour ago are gone, and the agent starts guessing.</p>
+<p>This repo's rewrite compacts <strong>before</strong> the request stops fitting, and it treats the summary as a structured hand-off.</p>
+
+<div class="demo">
+  <div class="demo-head">
+    <span class="demo-icon" aria-hidden="true">▶</span>
+    <div><p class="demo-title">Try it: when compaction kicks in</p><p class="demo-sub">add turns, change the model window, make the summary fail</p></div>
+  </div>
+  <div class="demo-stage" data-demo="compaction">
+    <p class="demo-status">Before every model call, the estimated request is compared with the window minus room for the reply. Over it, older turns become a summary and the newest ~8k tokens stay word for word. If the summary fails, nothing changes.</p>
+  </div>
+</div>
+
+<h2>When to compact</h2>
+<pre><code>estimate({ system, messages, tools }) &gt; context - max(maxOutputTokens, buffer)</code></pre>
+<ol class="flow">
+  <li><strong>Estimate the whole request</strong>System prompt, messages <em>and</em> tool definitions, before calling the provider, not after it refuses.</li>
+  <li><strong>Reserve room for the reply</strong>The model's output budget or a 20,000-token buffer, whichever is larger. A request that fits but leaves no room to answer is still a failure.</li>
+  <li><strong>Check the summary fits too</strong>If the summarization prompt itself wouldn't fit in the window minus its own output budget, it doesn't try.</li>
+</ol>
+
+<h2>What to keep, and how to summarize</h2>
+<div class="compare-grid">
+  <div><p class="k">Recent turns, verbatim</p><p>Walking back from the newest message, about 8,000 tokens are kept word for word, so the current task's details survive exactly.</p></div>
+  <div><p class="k">Older turns, summarized</p><p>Everything before that goes to a summary with a fixed template: Objective, Important Details, Work State (Completed, Active, Blocked), Next Move, Relevant Files.</p></div>
+</div>
+<blockquote><p>Preserve exact file paths, symbols, commands, error strings, URLs, and identifiers when known.</p></blockquote>
+<p>Tool results inside the summarization input are trimmed to 2,000 characters each, so one huge output can't crowd out the conversation being summarized.</p>
+
+<h2>Compacting again</h2>
+<p>The second compaction merges with the first, with explicit rules instead of "summarize this":</p>
+<blockquote><p>The &lt;prior-summary&gt; is discarded after this: anything you do not carry into the new summary is lost. [...] Where they conflict, the conversation wins.</p></blockquote>
+<p>Objectives, constraints and decisions are carried forward even if the recent conversation doesn't mention them; finished work moves from Active to Completed.</p>
+
+<h2>Failure changes nothing</h2>
+<p>The start of a compaction is recorded durably; progress is live-only. The switch to the summary happens only from a completed summary event. A failed or empty summarization returns without cutting over, the full history stays stored, and after a successful one the runner continues the original pending turn with a fresh context baseline.</p>
+
+<div class="callout steal">
+  <p class="callout-kicker">Steal this</p>
+  <p>Check before every call whether the whole request still fits with room for the reply. Summarize only older turns, into a fixed template that preserves exact identifiers, keep recent turns verbatim, and only switch over once the summary exists.</p>
+</div>

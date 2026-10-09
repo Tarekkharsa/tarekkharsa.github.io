@@ -1,31 +1,41 @@
 <p>One line from this repo's guide stuck with me:</p>
 <blockquote><p>Our users drive agents all day and notice a dropped frame, a lying spinner, and a stale label.</p></blockquote>
-<p>These are the rules that follow from it.</p>
+<p>Underneath the UX rules is a state-modelling rule: a status label is a claim about the system, so the state behind it has to be precise enough to back it up.</p>
 
-<h2>"Reconnecting…" is a promise</h2>
-<p>Connection health and data freshness are tracked <em>separately</em>. A socket opening doesn't prove the server is usable; the client waits for the initial server config before it calls itself ready. If a data subscription fails on a healthy socket, the UI must not say "reconnecting", because no reconnect is coming.</p>
+<div class="demo">
+  <div class="demo-head">
+    <span class="demo-icon" aria-hidden="true">▶</span>
+    <div><p class="demo-title">Try it: naive vs honest status</p><p class="demo-sub">open or close the socket, receive the config, let the data age</p></div>
+  </div>
+  <div class="demo-stage" data-demo="honest">
+    <p class="demo-status">A naive badge says "Connected" as soon as a socket opens. An honest one tracks connection and freshness separately: "Connecting…" until the server's initial config arrives, and "cached" whenever the data on screen isn't live.</p>
+  </div>
+</div>
 
-<h2>Cached isn't live</h2>
-<p>Cached data stays readable offline, but it must never</p>
-<ul>
-  <li>imply a live connection, or</li>
-  <li>overwrite newer live data during a reconnect.</li>
-</ul>
-<p>Showing stale data is fine. Showing stale data as if it were live is the bug.</p>
+<h2>Two states, not one</h2>
+<div class="compare-grid">
+  <div><p class="k">Connection health</p><p>A socket opening doesn't prove the server is usable. The client waits for the initial server config before it calls itself ready.</p><p>If a data subscription fails on a healthy socket, the UI must not say "reconnecting", because no reconnect is coming.</p></div>
+  <div><p class="k">Data freshness</p><p>Cached data stays readable offline, but it must never imply a live connection, or overwrite newer live data during a reconnect.</p><p>Showing stale data is fine. Showing stale data as if it were live is the bug.</p></div>
+</div>
+
+<h2>The server owns derived state</h2>
+<p>If three devices show the same item, none of them should work out its status from its own clock. A status like "this thread is finished and can be tucked away" is evaluated on the server and stored. Clients just render it, so every device agrees, even one that was asleep when the status changed.</p>
 
 <h2>No one-way doors</h2>
 <blockquote><p>If you added a way in, add the way out and the way to see it. Snooze needs unsnooze. Close needs reopen. A one-way door is a bug.</p></blockquote>
-<p>In practice: settle/un-settle, snooze/wake, a five-second Undo after sidebar actions, and a shortcut that reopens the last closed tab.</p>
+<p>In practice: settle and un-settle, snooze and wake, a five-second Undo after sidebar actions, and a shortcut that reopens the last closed tab.</p>
 
 <h2>Hit every surface</h2>
 <blockquote><p>The most common defect in this repo is a change that works on the path you tested and is missing everywhere else.</p></blockquote>
-<p>Their checklist: entry points (chat, settings, command palette, keybinding), clients (web, desktop, mobile), each backend integration, AI agents reaching it through tools, reverse states, connection modes (local, remote, tunnel), and docs.</p>
-
-<h2>The server owns derived state</h2>
-<p>If three devices show the same item, none of them should work out its status from its own clock. Status such as "this thread is finished and can be tucked away" is evaluated on the server and stored. Clients just render it, so every device agrees.</p>
+<ol class="flow">
+  <li><strong>Entry points</strong>Chat, settings, command palette, keybindings.</li>
+  <li><strong>Clients and modes</strong>Web, desktop, mobile; local, remote and tunnel connections.</li>
+  <li><strong>Integrations and agents</strong>Each backend integration, and AI agents reaching the feature through tools.</li>
+  <li><strong>The reverse and the docs</strong>The way back out of every new state, and the docs that describe it.</li>
+</ol>
 
 <h2>Components built from slots</h2>
-<p>Their banner component exports small slots (<code>Root</code>, <code>Row</code>, <code>Icon</code>, <code>Content</code>, <code>Actions</code>, <code>Dismiss</code>), and each slot owns its styling. A new banner is a few lines with no classes of its own:</p>
+<p>Their banner component exports small slots, each owning its styling, so a new banner is a few lines with no classes of its own:</p>
 <pre><code>&lt;Banner.Root variant="info"&gt;
   &lt;Banner.Row&gt;
     &lt;Banner.Icon /&gt;
@@ -33,11 +43,9 @@
     &lt;Banner.Actions&gt;…&lt;/Banner.Actions&gt;
   &lt;/Banner.Row&gt;
 &lt;/Banner.Root&gt;</code></pre>
-
-<h2>No GPU-burning shimmer</h2>
-<p>No continuously repainting animations. Your 120&nbsp;Hz MacBook user will notice the fan before they notice the shimmer.</p>
+<p>And no continuously repainting animations: a 120&nbsp;Hz laptop user notices the fan before the shimmer.</p>
 
 <div class="callout steal">
   <p class="callout-kicker">Steal this</p>
-  <p>Every label is a promise. Keep "connected" and "fresh" as separate states, never let cache pose as live data, give every action a reverse, and let the server decide derived status so devices agree.</p>
+  <p>Every label is a promise. Model "connected" and "fresh" as separate states, never let cache pose as live data, give every action a reverse, and let the server decide derived status so devices agree.</p>
 </div>

@@ -2,7 +2,15 @@ import * as fs from 'node:fs'
 import * as assert from 'remix/assert'
 import { describe, it } from 'remix/test'
 
-import { postPath, posts, roundPosts, rounds, t3CodeServerGuide } from './content/posts.ts'
+import {
+  findPost,
+  movedPosts,
+  postPath,
+  posts,
+  roundPosts,
+  rounds,
+  t3CodeServerGuide,
+} from './content/posts.ts'
 import { piRound } from './content/rounds/pi.ts'
 import { t3codeRound } from './content/rounds/t3code.ts'
 import { router } from './router.tsx'
@@ -194,6 +202,20 @@ describe('updated posts', () => {
     let feed = (await get('/feed.xml')).body
     let entry = feed.slice(feed.indexOf(t3CodeServerGuide.slug))
     assert.match(entry, /<published>2026-09-28T00:00:00Z<\/published>\s*<updated>2026-10-09T00:00:00Z<\/updated>/)
+  })
+})
+
+describe('replaced lessons', () => {
+  it('forward their old URLs to the new lesson', async () => {
+    for (let [from, to] of Object.entries(movedPosts)) {
+      assert.equal(findPost(from), undefined, `${from} still exists`)
+      assert.ok(findPost(to), `${to} is missing`)
+      let { response, body } = await get(`/posts/${from}`)
+      assert.equal(response.status, 200, from)
+      assert.match(body, new RegExp(`<meta http-equiv="refresh" content="0; url=/posts/${to}"`), from)
+      assert.match(body, new RegExp(`<link rel="canonical" href="${site.origin}/posts/${to}"`), from)
+      assert.match(body, /<meta name="robots" content="noindex"/, from)
+    }
   })
 })
 

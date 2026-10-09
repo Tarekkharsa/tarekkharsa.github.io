@@ -18,7 +18,7 @@ export const piRound = defineRound({
   hintZero:
     "It's open source, it's small on purpose, and it expects you to bend it to your own workflow.",
   pitch:
-    'A core that lets you replace its own features, import budgets, tests with a fake model, PRs closed by default, lockfile gates, and more. Each post ends with hints.',
+    'A core that lets you replace its own features, import budgets, append-only session trees, an edit tool built for sloppy models, and more. Each post ends with hints.',
   lessons: [
     {
       slug: 'gtc2-01-small-replaceable-core',
@@ -114,35 +114,35 @@ The idea: replace the external dependency (an LLM, a payment API, any third-part
 Name new regression tests after the issue they fix. Keep the change small.`,
     },
     {
-      slug: 'gtc2-04-closed-by-default',
+      slug: "gtc2-04-never-mutate-history",
       lesson: 4,
-      title: 'Closed by default',
-      subtitle: "New contributors' issues and PRs auto-close until a maintainer replies “lgtm”.",
-      tag: 'GitHub & PRs',
-      readMinutes: 2,
-      problem: "Popular repos now get more issues and PRs, many written by agents, than maintainers can read.",
-      idea: "Close new contributors' issues and PRs by default, review them daily, and approve people with a one-word comment.",
+      title: "Never mutate history",
+      subtitle: "Sessions as an append-only tree: branches, summaries and even edits are new entries.",
+      tag: "Data model",
+      readMinutes: 3,
+      problem: "Agents rewrite the conversation to branch, compact or hide a message, and lose what actually happened: you can't go back, audit it or replay it.",
+      idea: "Store each session as an append-only tree of entries, and build the model's context as a projection of the active branch.",
       hints: [
-        'Its maintainers created a famous Java game framework and a famous Python web framework.',
-        'Its approved contributors are listed in a plain text file in the repo.',
-        'A maintainer lets you open PRs by replying “lgtm”.',
+        "Its maintainers created a famous Java game framework and a famous Python web framework.",
+        "Its sessions are JSONL files where every line points to its parent.",
+        "Its compaction entries record the first entry they kept.",
       ],
       sources: [
-        'CONTRIBUTING.md',
-        '.github/workflows/pr-gate.yml',
-        '.github/workflows/approve-contributor.yml',
-        '.github/APPROVED_CONTRIBUTORS',
+        "packages/coding-agent/docs/session-format.md",
+        "packages/coding-agent/src/core/session-manager.ts",
+        "packages/coding-agent/docs/compaction.md",
+        "packages/coding-agent/docs/sessions.md",
       ],
-      prompt: `Set up a contributor gate for this GitHub repository, for when issues and PRs outnumber the reviewers.
+      prompt: `Make this app's history append-only, and derive what each consumer sees as a projection.
 
-The idea: issues and PRs from new contributors are closed automatically with a friendly explanation. Maintainers review the closed ones regularly and reopen the good ones. Approval is a one-word maintainer comment, and approved contributors are listed in a plain text file in the repo, always read from the default branch.
+The idea: never update or delete history in place. Every change (a branch, a summary, an edit, a hide) is a new entry pointing at its parent. The current view is built by walking from the active leaf back to the root and applying those entries, so you can always go back, audit and replay.
 
-1. Look at the existing workflows, issue templates and contributing guide, and summarize the current process.
-2. Propose the gate: an APPROVED_CONTRIBUTORS file format, a workflow that closes issues and PRs from unlisted authors with a comment, and a workflow that adds an author when a maintainer with write access replies with an approval word.
-3. Make sure the gate reads the approval file from the default branch, never from the PR, and that maintainers and trusted bots are exempt.
-4. Update CONTRIBUTING.md to explain the process and why it exists, in a friendly tone.
+1. Find the data this app mutates in place that users or the system may need to revisit: conversation or chat history, documents, orders, workflow state. Show me the tables or files and the code paths that UPDATE or DELETE them.
+2. Tell me whether an append-only model fits. If the data is truly disposable or the volume makes it impractical, say so and stop.
+3. If it fits, propose the smallest version: entries with id, parentId, type and timestamp; a pointer to the current leaf; and a projection function that walks leaf to root and applies summary or edit entries. Edits should be new entries that target an earlier one, and the latest one on the active branch wins.
+4. Implement it for one entity, with tests for: branching from an earlier entry without losing the old branch, an edit that changes the projection but not the raw history, and rebuilding the same projection after a restart.
 
-Ask me before enabling it: it changes how people experience the project.`,
+Plan migration of existing data separately, and keep the change small.`,
     },
     {
       slug: 'gtc2-05-lockfile-is-code',
@@ -177,29 +177,35 @@ The idea: treat dependency and lockfile changes as reviewed code. Pin exact vers
 Before changing CI, show me any dependency that breaks without its install script.`,
     },
     {
-      slug: 'gtc2-06-many-agents-one-checkout',
+      slug: "gtc2-06-tool-a-model-cant-misuse",
       lesson: 6,
-      title: 'Many agents, one checkout',
-      subtitle: 'The git rules you need when several agents edit the same working tree.',
-      tag: 'Dev setup',
-      readMinutes: 2,
-      problem: "When several agents share one working tree, a single git add -A or git stash can wipe out another agent's work.",
-      idea: "Ban the git commands that act on everything, and make every commit list its own files.",
+      title: "Design a tool a model can't misuse",
+      subtitle: "Exact match first, fuzzy match second, loud errors, and one queue per file.",
+      tag: "Agent tools",
+      readMinutes: 3,
+      problem: "Models call edit tools with curly quotes, trailing spaces, snippets that appear twice and overlapping changes, and a naive find-and-replace silently edits the wrong place or corrupts the file.",
+      idea: "Match exactly first, fuzzy-match only on normalized text, reject anything ambiguous with an error the model can act on, and serialize writes to the same file.",
       hints: [
-        'Its agent guide assumes several agents are editing the same checkout at once.',
-        'Its agent guide bans git stash.',
-        'Its prompt templates live in a hidden folder named after the project.',
+        "Its edit tool tries an exact match before a fuzzy one.",
+        "It runs edits to the same file one at a time, but edits to different files in parallel.",
+        "Its prompt templates live in a hidden folder named after the project.",
       ],
-      sources: ['AGENTS.md', '.pi/prompts/wr.md', '.pi/prompts/'],
-      prompt: `Add git safety rules to this repository's agent guide, for when several agents work in the same checkout.
+      sources: [
+        "packages/coding-agent/src/core/tools/edit-diff.ts",
+        "packages/coding-agent/src/core/tools/edit.ts",
+        "packages/coding-agent/src/core/tools/file-mutation-queue.ts",
+        "scripts/edit-tool-stats.mjs",
+      ],
+      prompt: `Harden the tools this project exposes to an LLM so a model can't misuse them.
 
-The idea: when more than one agent edits the same working tree, any git command that acts on "everything" can destroy another agent's work. Each agent commits only its own files, staged by explicit path.
+The idea: treat model input as sloppy but well-meaning. Validate strictly, match exactly first and fuzzily only on normalized text, reject ambiguous calls with an error that tells the model how to fix them, preserve everything you didn't mean to change, and serialize side effects that touch the same resource.
 
-1. Read the existing agent guide (AGENTS.md, CLAUDE.md or similar) and the contributing docs.
-2. Add a short "Git" section: commit only files you changed in this session, staged with explicit paths; run git status before committing; never run git add -A, git add ., git stash, git reset --hard, git checkout ., git clean -fd or git commit --no-verify; on a rebase conflict in a file you didn't touch, abort and ask; never force push; review PRs with gh pr diff or git show instead of switching branches; write throwaway scripts to /tmp.
-3. If the repo has pre-commit hooks, say which of these rules could be enforced there rather than only written down.
+1. Find the tools or functions this project lets a model call (edit, write, search, SQL, API actions). If there are none, tell me and stop.
+2. For the most dangerous one, list how a model could misuse it: ambiguous targets, duplicates, overlapping operations, whitespace or Unicode differences (smart quotes, dashes, non-breaking spaces, line endings, BOMs), concurrent calls on the same resource, and no-op calls.
+3. Propose fixes: exact match first, then a fuzzy match on normalized text that still rewrites only the lines it touched; errors that say what was wrong and what to send instead ("found 3 occurrences, add more context"); and a per-resource queue so two calls on the same file or row can't interleave.
+4. Implement them, with tests for each misuse case. If the tool's calls are logged, add a small script that groups failures by error kind, so you can see which mistakes models actually make.
 
-Keep the section short and in the guide's existing tone.`,
+Keep the tool's interface unchanged unless a change removes a whole class of errors.`,
     },
     {
       slug: 'gtc2-07-who-owns-the-scrollback',

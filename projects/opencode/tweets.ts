@@ -62,12 +62,12 @@ The team behind it also makes an infrastructure-as-code framework.`,
   4: {
     teaser: `${T} round 3, lesson 4 🕵️
 
-This repo speeds up its tests like a scientist: one metric, one row per hypothesis, before / after / keep or discard.
+One noisy command can dump megabytes into an agent's context.
 
-And a "Dead Ends" table, so nobody tries the same idea twice.
+This rewrite caps every tool result at 2,000 lines or 50 KB, keeps the head AND the tail, and saves the full output to a file the model can open.
 
 Which repo? 👇`,
-    reply: `Best part: the suite went 225s → 187s, then a safety review gave back 15s to restore coverage. Seconds lost, right call.
+    reply: `Tools may shape their own output, but the registry enforces the final limit for all of them. Cuts never split a UTF-8 character.
 
 ${lessonUrl(4)}`,
     hint: `${T} round 3, lesson 4 hint:
@@ -122,15 +122,12 @@ It has two built-in primary agents, you switch between them with Tab, and one as
   8: {
     teaser: `${T} round 3, lesson 8 🕵️
 
-This repo's glossary tells you which words NOT to use.
+Most agents compact after the provider says "too long".
 
-System Context. Avoid: system prompt.
-Page. Avoid: response envelope.
-
-24 terms, 9 banned synonyms, for humans and agents alike.
+This one checks BEFORE every call. If the request won't fit with room for a reply, older turns become a fixed-template summary and the last ~8k tokens stay verbatim.
 
 Which repo? 👇`,
-    reply: `Vocabulary rots before code does. Agents spread whichever word they saw last.
+    reply: `And a failed summary changes nothing: the switch happens only from a completed summary.
 
 ${lessonUrl(8)}`,
     hint: `Last ${T} round 3 hint:
@@ -172,11 +169,11 @@ Who got it? 👇🧵`,
 1. Admit the prompt, run it later
 2. Never rewrite the system prompt
 3. Record HTTP once, replay forever
-4. A lab notebook for speed
+4. Bound what the model sees
 5. One API, even in-process
 6. Rebuild on the main branch
 7. Configured is not allowed
-8. Ban the synonyms`,
+8. Compact before you overflow`,
   `The lessons are v2. The finale's 20 tips are for OpenCode today. A few favorites 👇`,
   `🧭 Tab switches between Build and Plan. Plan asks before every edit and shell command, so it's a safe place to think.`,
   `↩️ /undo (ctrl+x u) removes the last message AND reverts its file changes. /redo brings them back. Needs a git repo.`,

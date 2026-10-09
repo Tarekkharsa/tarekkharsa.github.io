@@ -1,26 +1,35 @@
-<p>Model providers cache the start of your request. If the system prompt is byte-for-byte the same as last turn, you pay less and wait less. Most agents break that cache all the time without noticing: the current date, the git branch, the open files or the active rules get re-rendered into the system prompt on every turn.</p>
-<p>This repo's rewrite treats the system prompt as something you <strong>never rewrite</strong> mid-conversation.</p>
+<p>Model providers cache the start of a request. If the prefix is byte-for-byte the same as last turn, you pay a fraction of the price and wait less. Many agents break that cache every turn without noticing, because the date, the git branch or the active rules are re-rendered into the system prompt.</p>
 
-<h2>Freeze the baseline</h2>
-<p>At the start of a <strong>Context Epoch</strong>, the runtime renders the full system context once. That baseline then stays "the immutable provider-cache baseline" until something that really requires a new one: a completed compaction, moving the session, or an incompatible change.</p>
+<div class="demo">
+  <div class="demo-head">
+    <span class="demo-icon" aria-hidden="true">▶</span>
+    <div><p class="demo-title">Try it: what the cache can reuse</p><p class="demo-sub">green is served from the provider's cache, red is paid in full</p></div>
+  </div>
+  <div class="demo-stage" data-demo="cache">
+    <p class="demo-status">If the system prompt changes every turn, nothing before the change can be reused, so every request is paid in full. Freeze the prompt and append small updates instead, and each turn only pays for what's new.</p>
+  </div>
+</div>
 
-<h2>Append what changed</h2>
-<p>The context is built from typed <strong>Context Sources</strong>, each with a stable key, a JSON codec and pure renderers. The runtime keeps a snapshot of the last value it showed the model for each source. When one changes, it doesn't edit the baseline. It appends a <strong>Mid-Conversation System Message</strong> with the newly effective state. Roughly, with made-up sources:</p>
-<pre><code>turn 1   [baseline: rules, environment, branch=main]  user  assistant
-turn 2                                                  user  assistant
-turn 3   [update: branch is now fix-login]              user  assistant
-         ^ appended, so everything before it stays cached</code></pre>
+<h2>The model</h2>
+<ol class="flow">
+  <li><strong>Typed context sources</strong>The system context is built from <strong>Context Sources</strong>, each with a stable namespaced key, a JSON codec, a loader and pure renderers for the baseline, an update and, if needed, a removal.</li>
+  <li><strong>A frozen baseline per epoch</strong>At the start of a <strong>Context Epoch</strong> the full context is rendered once and becomes "the immutable provider-cache baseline", until a completed compaction, a session move or an incompatible change.</li>
+  <li><strong>A snapshot of what the model saw</strong>A hidden JSON snapshot stores the last value admitted for each source, so the runtime can tell exactly what changed.</li>
+  <li><strong>Appended updates</strong>When a source changes, a <strong>Mid-Conversation System Message</strong> with its newly effective state is appended at the next safe boundary. The baseline is never edited.</li>
+</ol>
 
-<h2>The rules that make it work</h2>
-<ul>
-  <li><strong>Lazy, not pushed.</strong> Changes are "sampled and admitted lazily at a Safe Provider-Turn Boundary, never pushed asynchronously when their source changes."</li>
-  <li><strong>One message per boundary.</strong> Changes from several sources at the same boundary combine into a single update.</li>
-  <li><strong>Deterministic order.</strong> Producers run concurrently but combine in stable key order, so the same state always renders the same text. Duplicate keys fail.</li>
-  <li><strong>Stale beats missing.</strong> If a source temporarily can't be read, the previous value stays in effect and nothing is emitted. That's different from a source that's really gone, which can emit removal text.</li>
-  <li><strong>Exact text is stored.</strong> The update persists the exact text sent to the model, so replay is faithful.</li>
-</ul>
+<h2>The rules that make it correct</h2>
+<div class="compare-grid">
+  <div><p class="k">Lazy, not pushed</p><p>Changes are "sampled and admitted lazily at a Safe Provider-Turn Boundary, never pushed asynchronously when their source changes."</p></div>
+  <div><p class="k">Deterministic</p><p>Producers run concurrently but combine in stable key order; duplicate keys fail. Changes at one boundary combine into a single message.</p></div>
+  <div><p class="k">Stale beats missing</p><p>If a source can't be read right now, the previous value stays in effect and nothing is emitted. A source that's really gone can emit removal text.</p></div>
+  <div><p class="k">Atomic and replayable</p><p>The snapshot advances in the same step as the durable update message, which stores the exact text the model was sent.</p></div>
+</div>
+
+<h2>Where the epoch ends</h2>
+<p>Compaction starts a new epoch with a freshly rendered baseline and snapshot; earlier update messages stay as audit history but leave the model's view. If the initial context can't be loaded, the first turn is blocked rather than persisting an incomplete baseline, and the prompt stays in the inbox to retry.</p>
 
 <div class="callout steal">
   <p class="callout-kicker">Steal this</p>
-  <p>Render the system prompt once per epoch and never edit it. Track what the model last saw for each piece of context, and append changes at turn boundaries. Your cache hit rate, and your bill, will thank you.</p>
+  <p>Render the system prompt once per epoch and never edit it. Track what the model last saw for each piece of context, append changes at turn boundaries in a stable order, and let compaction be the only thing that starts a new baseline.</p>
 </div>

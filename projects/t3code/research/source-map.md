@@ -86,3 +86,18 @@ Paths are relative to [`pingdotgg/t3code`](https://github.com/pingdotgg/t3code) 
 All from `docs/user/`: `keybindings.md`, `composer.md`, `thread-sidebar.md`,
 `remote-access.md`, `outside-agents.md`, `project-settings.md`, `snap-shot.md`,
 `html-renders.md`, `portable-handoffs.md`, `source-control.md`, `devices.md`, `usage.md`.
+
+## 2026-10-09 rewrite: lessons 4 and 8 (same titles, deeper engineering)
+
+Checked against `pingdotgg/t3code` at `101f8b2f5` (2026-10-09).
+
+- Lesson 4, `pull_request_target` rule ("may fetch untrusted PR commits only as passive git
+  data ... use pull_request plus workflow_run for that pattern instead"), size by
+  `git diff --numstat` with test pathspecs excluded: `.github/workflows/pr-size.yml`
+- Lesson 4, native fingerprint computed for PR and base in one job, base re-synced to the
+  base lockfile, "the signal has to fire before merge, not after":
+  `.github/workflows/mobile-fingerprint-check.yml`
+- Lesson 8, "The three ways to hurt yourself" (kill by pattern, live install, baked
+  origins), test data seeding ("Copy in, never symlink"), verification budget, bot
+  babysitting, mobile client as a build step, founder note, rule-conflict escape hatch:
+  `AGENTS.md`

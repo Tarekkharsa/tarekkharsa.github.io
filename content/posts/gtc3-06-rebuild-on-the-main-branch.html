@@ -1,20 +1,27 @@
-<p>The classic way to build a version 2 is a long-lived branch. It starts clean, falls behind, and eventually becomes a merge nobody wants to do. This repo tried that. Its <code>2.0</code> branch ends at a commit called "2.0 exploration", from April. Everything on it has been merged, and it's now <strong>4,760 commits behind</strong> the default branch.</p>
-<p>The rewrite actually happens on the default branch, next to v1.</p>
+<p>The classic way to build a version 2 is a long-lived branch. It starts clean, falls behind, and becomes a merge nobody wants to do. This repo tried that: its <code>2.0</code> branch ends at a commit called "2.0 exploration", from April. Everything on it has been merged, and it's now <strong>4,760 commits behind</strong> the default branch.</p>
+<p>The real rewrite happens on the default branch, next to v1, and it's engineered so both can be live at once.</p>
 
-<h2>v2 lives beside v1</h2>
-<p>New code sits in clearly named places, like <code>specs/v2</code>, <code>test/v2</code>, v2 plugin and SDK folders and a <code>session/v2</code> page in the app, while v1 keeps shipping releases. A bridge publishes prompts made through v1 as v2 events, so v2 sees them during the transition. The planning doc is refreshingly honest about why:</p>
-<blockquote><p>ok we need to work towards a launch of v2 so we can get out of this rebuild phase</p></blockquote>
+<h2>Two versions, one database</h2>
+<ol class="flow">
+  <li><strong>Clear names, side by side</strong>New code lives in places like <code>specs/v2</code>, <code>test/v2</code>, the v2 plugin and SDK folders and a <code>session/v2</code> page in the app, while v1 keeps shipping releases.</li>
+  <li><strong>A bridge between them</strong>A shadow bridge publishes prompts made through v1 as the same v2 events, so v2's projections see the conversation during the transition.</li>
+  <li><strong>Disposable on one side only</strong>Experimental v2 events, projections and inputs may be reset when their shape changes. Canonical v1 <code>session</code>, <code>message</code> and <code>part</code> rows are always preserved.</li>
+</ol>
 
 <h2>A dated log of every contract change</h2>
-<p>A schema changelog records every v2 change to the database, durable events, projected messages, HTTP API or generated SDK: 28 dated entries. Each says <strong>why</strong> the contract changed and <strong>what existing data needs</strong>:</p>
+<p>A schema changelog records each v2 change to the database, durable events, projected messages, HTTP API or generated SDK: 28 dated entries, each with why it changed and whether consumers or stored data need compatibility handling. Commit messages for those changes are meant to carry the same summary.</p>
 <blockquote><p>Reset experimental V2 events, projections, inputs, Context Epochs, and synchronized workspace state while preserving canonical V1 <code>session</code>, <code>message</code>, and <code>part</code> rows.</p></blockquote>
-<p>Experimental v2 data is allowed to be thrown away. v1 data never is.</p>
+<p>Durable event names carry a version number, like <code>session.next.prompt.admitted.1</code>, and changes to unpublished experimental events are logged with what happens to data already stored.</p>
 
 <h2>Port nothing by default</h2>
-<p>The config review goes through the legacy schema field by field, and each one gets a verdict: <strong>12 keep, 14 remove, 13 redesign</strong>, each with a reason. <code>logLevel</code> is removed because "no config consumer exists". The server settings are removed because location config loads after the server is already running. The old <code>config.json</code> filename isn't supported in v2.</p>
-<p>Design options that lost are kept too, marked as history, so the next person can see what was considered.</p>
+<p>The legacy config schema was reviewed field by field: <strong>12 keep, 14 remove, 13 redesign</strong>, each with a reason.</p>
+<div class="compare-grid">
+  <div><p class="k">Removed: <code>logLevel</code></p><p>"No config consumer exists and logging initializes from CLI input."</p></div>
+  <div><p class="k">Removed: <code>server</code></p><p>Location config is loaded after the server is already running, so it could never take effect.</p></div>
+</div>
+<p>The old <code>config.json</code> filename isn't supported in v2, and design options that lost are kept in the specs as history. The planning doc is refreshingly honest about the goal: "ok we need to work towards a launch of v2 so we can get out of this rebuild phase".</p>
 
 <div class="callout steal">
   <p class="callout-kicker">Steal this</p>
-  <p>Grow the next version on your main branch, behind clear names, instead of on a branch that drifts. Keep a dated log of every contract change with its compatibility story, and make every legacy setting earn its way into the new version.</p>
+  <p>Grow the next version on your main branch behind clear names, bridge the old writes into the new model, version every durable contract, log every change with its data impact, and make every legacy setting earn its way in.</p>
 </div>

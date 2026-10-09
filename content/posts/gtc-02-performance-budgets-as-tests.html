@@ -1,48 +1,30 @@
-<p>Most teams find performance regressions the same way: a user complains. This codebase finds them in <code>vp test</code>, because the budget is written down as a number and asserted.</p>
-
-<h2>1. Write the budget as an assertion</h2>
+<h2>Write the budget as an assertion</h2>
 <pre><code>describe("thread transport payload budget", () =&gt; {
   // …
   expect(projectedBoundedRpcJsonBytes / fullRpcJsonBytes).toBeLessThanOrEqual(0.02);
 });</code></pre>
-<p>The targets are concrete: cold-opening a conversation loads about <strong>75 recent rows and roughly 1&nbsp;MiB</strong>. Reconnect catch-up replays at most <strong>128 events or 1&nbsp;MiB</strong> before it falls back to a snapshot. If someone adds a field that bloats the payload, the test fails on their machine.</p>
+<p>The targets are concrete numbers, not "fast enough":</p>
+<div class="compare-grid">
+  <div><p class="k">Cold open</p><p>Opening a conversation loads about <strong>75 recent rows and roughly 1&nbsp;MiB</strong>.</p></div>
+  <div><p class="k">Reconnect catch-up</p><p>Replays at most <strong>128 events or 1&nbsp;MiB</strong>, then falls back to a snapshot.</p></div>
+</div>
+<p>If someone adds a field that bloats the payload, the test fails on their machine, before review. A ratio is better than an absolute size here: it stays meaningful as the fixture data grows.</p>
 
-<h2>2. Benchmark the path users actually run</h2>
-<p>The performance doc has a warning I hadn't seen written down before: the old benchmark fixtures seeded data in the <em>previous</em> format, and running them against the new client "can produce reassuring timings while missing the active transport path."</p>
-<p>A benchmark that measures the wrong path is worse than having none, because it tells you you're fine.</p>
+<h2>Benchmark the path users actually run</h2>
+<p>The performance doc warns that old benchmark fixtures seeded data in the <em>previous</em> format, and running them against the new client "can produce reassuring timings while missing the active transport path." A benchmark that measures the wrong path is worse than none, because it tells you you're fine.</p>
 
-<h2>3. Fix it, then make it impossible</h2>
-<p>My favorite pair of PRs in the repo:</p>
-<ul>
-  <li><strong>PR #15265</strong>: a one-line change. A broad CSS <code>:has()</code> selector made <em>every DOM change restyle the whole page</em>.</li>
-  <li><strong>PR #15274</strong>: a lint rule that flags those selectors, so nobody can write one again.</li>
-</ul>
+<h2>Five patterns from the commit log</h2>
+<ol class="flow">
+  <li><strong>Fix it, then make it impossible</strong>PR #15265 was a one-line fix: a broad CSS <code>:has()</code> selector made every DOM change restyle the whole page. PR #15274 added a lint rule that flags those selectors, so the whole class of bug is gone.</li>
+  <li><strong>"Did anything change?" before "what changed?"</strong>Watching pull requests used to read each PR in full on every pass. Now it checks a cheap one-point fingerprint first and reads in full only when it moves: <strong>about 90% fewer GitHub API points</strong> (#16270). It's the ETag idea applied to a polling loop.</li>
+  <li><strong>Per batch, not per item</strong>Background branch lookups share one GitHub query per sweep (#16760). <code>PATH</code> is scanned once per command, not on every spawn (#12600). Streamed tool output no longer persists a snapshot per chunk (#16682).</li>
+  <li><strong>Keep heavy data off the wire</strong>Raw command output, tool result bodies and inline diffs are never pushed over the socket. Stored events keep everything; the client fetches a body only when someone opens it.</li>
+  <li><strong>Skip work nobody can see</strong>Timers pause on hidden mobile screens (#15397), the command palette is virtualized (#15266), live git and PR queries are leased to visible rows plus a small overscan, and an unchanged poll returns the <em>same array</em> so subscribers don't re-render.</li>
+</ol>
 
-<h2>4. Ask "did anything change?" before "what changed?"</h2>
-<p>Watching pull requests used to read each PR in full on every pass. Now it checks a cheap one-point fingerprint first and does the full read only when the fingerprint moves. Result: <strong>about 90% fewer GitHub API points</strong> (PR #16270). It's the ETag idea applied to a polling loop.</p>
-
-<h2>5. Per batch, not per item</h2>
-<ul>
-  <li>Background branch lookups share <strong>one</strong> GitHub query per sweep (#16760).</li>
-  <li>Scan <code>PATH</code> once per command, not on every spawn (#12600).</li>
-  <li>Stop persisting a snapshot for every streamed chunk of tool output (#16682).</li>
-</ul>
-
-<h2>6. Keep heavy data off the wire</h2>
-<p>Raw command output, tool result bodies and inline file diffs are never sent over the socket, even small ones. The stored events keep everything, and the client asks for a body only when someone opens it. Store everything, send what the screen needs.</p>
-
-<h2>7. Skip work nobody can see</h2>
-<ul>
-  <li>Pause elapsed-time timers on hidden mobile screens (#15397).</li>
-  <li>Virtualize command palette results (#15266).</li>
-  <li>Lease live git/PR queries to the visible rows plus a small overscan.</li>
-  <li>When a poll comes back unchanged, return the <em>same array</em> so React subscribers don't re-render.</li>
-  <li>No continuously repainting animations. They peg the GPU on 120&nbsp;Hz displays.</li>
-</ul>
-
-<h2>Bonus: reconnects that don't stampede</h2>
+<h2>Reconnects that don't stampede</h2>
 <blockquote><p>Without jitter, every client of a restarted server reconnects in the same second; with a short cap, a client that can never connect retries all day.</p></blockquote>
-<p>So: jittered exponential backoff, capped at five minutes, reset only after a connection stays up.</p>
+<p>So: jittered exponential backoff, capped at five minutes, reset only after a connection has stayed up. The reset rule matters: resetting on connect would let a flapping server pull every client back into a tight loop.</p>
 
 <div class="callout steal">
   <p class="callout-kicker">Steal this</p>

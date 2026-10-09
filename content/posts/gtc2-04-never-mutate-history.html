@@ -1,0 +1,50 @@
+<p>An agent session looks like a list of messages, and most tools store it as one. Then you want to go back three messages and try something else, or compact a long conversation, or hide a huge tool result from the model, and the list gets rewritten. What actually happened is gone.</p>
+<p>This repo never rewrites a session. It's an <strong>append-only tree</strong>, and the conversation the model sees is a projection of it.</p>
+
+<div class="demo">
+  <div class="demo-head">
+    <span class="demo-icon" aria-hidden="true">▶</span>
+    <div><p class="demo-title">Try it: branch, compact, hide</p><p class="demo-sub">every action appends an entry; the right side is what the model sees</p></div>
+  </div>
+  <div class="demo-stage" data-demo="sessiontree">
+    <p class="demo-status">Branching moves the leaf to an earlier entry and appends from there; the old branch stays in the file. Compaction appends a summary entry that records the first entry it kept. Hiding a message appends a context edit. The model's context is rebuilt by walking from the leaf to the root.</p>
+  </div>
+</div>
+
+<h2>The data model</h2>
+<p>A session is a JSONL file. After a header line, every line is an entry with an <code>id</code> and a <code>parentId</code>:</p>
+<pre><code>{"type":"message","id":"a1b2c3d4","parentId":null,...}
+{"type":"message","id":"b2c3d4e5","parentId":"a1b2c3d4",...}
+{"type":"compaction","id":"f6g7h8i9","parentId":"e5f6g7h8",
+ "summary":"User discussed X, Y, Z...","firstKeptEntryId":"c3d4e5f6","tokensBefore":50000}
+{"type":"context_edit","id":"g6h7i8j9","parentId":"f6g7h8i9","targetId":"c3d4e5f6","replacement":null}</code></pre>
+<p>The "leaf" is the current position. Branching from an earlier entry just makes a new child of it, so alternatives live side by side in one file.</p>
+
+<h2>Every change is a new entry</h2>
+<div class="compare-grid">
+  <div><p class="k">Compaction</p><p>Stores a summary, <code>firstKeptEntryId</code> and a full system-prompt and tool checkpoint. Older entries are replaced <em>in the context</em>, not in the file.</p></div>
+  <div><p class="k">Branch summary</p><p>When you leave a branch, a summary of the abandoned path is attached where the new branch continues, so its findings aren't lost.</p></div>
+  <div><p class="k">Context edit</p><p>Hides or replaces one earlier entry in future model context. "The target entry and its metadata remain unchanged in raw history, UI, exports, and session accounting."</p></div>
+  <div><p class="k">System messages</p><p>Prompt and tool changes are appended as patches (sections by name, tools added or removed). Replaying them yields the current prompt; there's no separate mutable state.</p></div>
+</div>
+
+<h2>The projection</h2>
+<ol class="flow">
+  <li><strong>Walk the path</strong>From the leaf back to the root, collecting every entry on the active branch.</li>
+  <li><strong>Apply the latest compaction</strong>Use its checkpoint and summary, then the entries from <code>firstKeptEntryId</code> up to it, then everything after it.</li>
+  <li><strong>Apply context edits</strong>For each target, the latest edit on the active branch wins. Edits are branch-relative: go back before an edit and the original reappears.</li>
+  <li><strong>Convert to messages</strong>Entries that don't participate in context (usage, extension state, labels) are kept for the UI and accounting but produce no model message.</li>
+</ol>
+
+<h2>What you get for free</h2>
+<ul>
+  <li><strong>Undo across everything:</strong> any earlier point is reachable, including before a compaction.</li>
+  <li><strong>Honest accounting:</strong> usage and cost include summaries and cache warming, because those are entries too.</li>
+  <li><strong>Safe evolution:</strong> the format is versioned (v1 linear, v2 tree, v3 renamed roles) and old files are migrated on load.</li>
+  <li><strong>Grep-able history:</strong> a session is a text file you can parse in a few lines.</li>
+</ul>
+
+<div class="callout steal">
+  <p class="callout-kicker">Steal this</p>
+  <p>Never mutate history. Make every change (a branch, a summary, an edit) a new entry pointing at its parent, and build each view as a projection of the active path. Undo, audit and replay stop being features you have to add.</p>
+</div>

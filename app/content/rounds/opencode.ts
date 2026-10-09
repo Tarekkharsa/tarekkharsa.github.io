@@ -21,7 +21,7 @@ export const opencodeRound = defineRound({
   hintZero:
     "It's open source, it's very popular, and it's in the middle of rebuilding its own core.",
   pitch:
-    'A durable prompt inbox, a system prompt that never gets rewritten, HTTP cassettes instead of mocks, a lab notebook for speed, and more, from a rewrite in progress.',
+    'A durable prompt inbox, a system prompt that never gets rewritten, bounded tool output, compaction before overflow, and more, from a rewrite in progress.',
   lessons: [
     {
       slug: 'gtc3-01-admit-then-run',
@@ -115,30 +115,34 @@ The idea: record real HTTP traffic once, save it as a reviewable file, and repla
 Never record against production with real customer data. Keep the change small.`,
     },
     {
-      slug: 'gtc3-04-lab-notebook-for-speed',
+      slug: "gtc3-04-bound-what-the-model-sees",
       lesson: 4,
-      title: 'Keep a lab notebook for speed work',
-      subtitle: 'Every hypothesis gets a before, an after and a decision. Dead ends included.',
-      tag: 'DX & Tooling',
-      readMinutes: 2,
-      problem: "Speed-up work gets tried, half-measured and forgotten, and then the same ideas get tried again.",
-      idea: "Run it as experiments: one metric, one row per hypothesis with before, after and a decision, plus a list of dead ends.",
+      title: "Bound what the model sees",
+      subtitle: "One size limit per tool result: keep the head and the tail, save the rest to a file.",
+      tag: "Context engineering",
+      readMinutes: 3,
+      problem: "One noisy command can dump megabytes of output into the conversation, filling the context window and burying the part that mattered.",
+      idea: "Cap every tool result with one limit, keep its beginning and end, and save the full output to a file the model can open if it needs more.",
       hints: [
-        'Its full test suite took close to four minutes before the speed-up work.',
-        'It has its own curated model gateway.',
-        'Its second-busiest committer is its own GitHub app.',
+        "It caps every tool result at 2,000 lines or 50 KB, whichever comes first.",
+        "It has its own curated model gateway.",
+        "Its second-busiest committer is its own GitHub app.",
       ],
-      sources: ['perf/test-suite.md', 'packages/opencode/package.json'],
-      prompt: `Speed up this project's test suite like an experiment, and keep a lab notebook.
+      sources: [
+        "packages/core/src/tool-output-store.ts",
+        "packages/core/src/tool/registry.ts",
+        "CONTEXT.md",
+      ],
+      prompt: `Put a hard, central limit on how much tool or command output this app sends to an LLM.
 
-The idea: one metric, one written hypothesis per change, before and after numbers, and a decision. Dead ends are recorded too, so nobody tries them again. Never trade coverage for speed.
+The idea: every tool result goes through one choke point that enforces a single limit (lines or bytes, whichever comes first). Oversized output keeps its beginning and end with a clear marker in between, and the complete output is saved to a file whose path the model can open later. Tools may summarize their own output first, but the central limit always has the final say.
 
-1. Measure the full suite's wall-clock time and find the slowest files. Report the numbers.
-2. Create perf/test-suite.md (or similar) with the goal, the metric, the benchmark command, signals to look for (sleeps, repeated setup, serial tests, heavy fixtures), and two tables: hypotheses (hypothesis, change, before, after, decision) and dead ends.
-3. Try the three most promising hypotheses one at a time. Measure each as the median of several runs, and record keep or discard with a reason.
-4. Keep only changes that don't reduce coverage or hide failures.
+1. Find every place where tool, command, API or file output is added to a model request. Tell me whether there's one central place that limits size, or none.
+2. Measure or estimate the worst cases: the largest outputs these tools can produce today.
+3. Propose one choke point with a configurable limit (start with 2,000 lines or 50 KB). It keeps the first and last halves, inserts a marker like "... output truncated; full content saved to <path> ...", and writes the full text to a file that is never overwritten and is cleaned up after a few days. Count bytes in UTF-8 and never cut a character in half.
+4. Implement it, with tests for: output under the limit (unchanged), over the line limit, over the byte limit with multi-byte characters, and a saved file containing the full output.
 
-Show me the notebook and the final full-suite time.`,
+Keep structured results unchanged. Only the text the model sees is bounded.`,
     },
     {
       slug: 'gtc3-05-one-api-even-in-process',
@@ -223,30 +227,34 @@ The idea: configuration says how to use something (endpoints, keys, options). Po
 No conditions, roles or approval flows for now. Keep the change small.`,
     },
     {
-      slug: 'gtc3-08-ban-the-synonyms',
+      slug: "gtc3-08-compact-before-you-overflow",
       lesson: 8,
-      title: 'Ban the synonyms',
-      subtitle: 'A glossary that tells humans and agents which words not to use.',
-      tag: 'AI-native engineering',
-      readMinutes: 2,
-      problem: "Three words for one concept turn into three slightly different concepts, and agents spread whichever word they saw last.",
-      idea: "Keep a glossary with one name per concept, and an “Avoid:” line listing the synonyms not to use.",
+      title: "Compact before you overflow",
+      subtitle: "Summarize old turns before the request stops fitting, keep recent ones word for word.",
+      tag: "AI-native engineering",
+      readMinutes: 3,
+      problem: "Many agents compact only after the provider rejects a request as too long, then squash everything into a vague paragraph and lose exact paths, errors and decisions.",
+      idea: "Before every model call, check whether the request still fits with room for the reply. If not, summarize only the older turns into a fixed template and keep recent turns verbatim.",
       hints: [
-        'Its glossary has 24 terms, and 9 of them list words to avoid.',
-        'Its config file is named after the product, as .json or .jsonc.',
-        'Its name is “code” with the opposite of “closed” in front.',
+        "Its compaction summaries always follow the same Markdown template.",
+        "Its config file is named after the product, as .json or .jsonc.",
+        "Its name is “code” with the opposite of “closed” in front.",
       ],
-      sources: ['CONTEXT.md', 'AGENTS.md'],
-      prompt: `Write a glossary of this project's core concepts that tells humans and agents which words to avoid.
+      sources: [
+        "packages/core/src/session/compaction.ts",
+        "specs/v2/schema-changelog.md",
+        "packages/core/src/session/context-epoch.ts",
+      ],
+      prompt: `Add proactive context compaction to this app's LLM conversations.
 
-The idea: vocabulary drifts before code does. For each core term, write a one-sentence definition and an "Avoid:" line listing the tempting synonyms that blur the design. Add the key relationships between terms as one-sentence rules.
+The idea: before every model call, estimate the full request (system prompt, messages, tool definitions). If it no longer fits in the context window minus room for the reply, summarize the older turns into a fixed template, keep the most recent turns word for word, and switch to the summary only once it was produced successfully.
 
-1. Explore the code, docs and issues, and list the 10 to 20 domain terms that matter most. For each, find the synonyms already in use, such as job, task and run, or user, account and member.
-2. Propose one name per concept, a one-sentence definition and an Avoid line. Prefer the term the code already uses most.
-3. Add five to ten relationship rules, such as "A Task belongs to exactly one Project".
-4. Save it as CONTEXT.md or GLOSSARY.md at the repo root, and link it from the agent guide.
+1. Find where conversation history is assembled for model calls, and what happens today when it gets too long (a provider error, silent truncation, or nothing).
+2. If conversations here never get long, say so and stop.
+3. Propose: a pre-call check (estimated request > context window - max(reply budget, safety buffer)); a split that keeps the newest turns up to a token budget verbatim; a summary prompt with fixed sections (objective, important details, work done, active, blocked, next move, relevant files) that must preserve exact paths, commands, errors and identifiers; and merge rules for updating an earlier summary (carry forward, the newer conversation wins on conflicts).
+4. Implement it so a failed or empty summary changes nothing, and the original history stays stored. Test: a request just under and just over the limit, a second compaction that merges the first summary, and a failed summarization call.
 
-Don't rename code yet. List the inconsistent names you found as follow-ups.`,
+Keep the estimate cheap. Approximate token counts are fine.`,
     },
   ],
   finale: {

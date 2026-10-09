@@ -1,29 +1,38 @@
-<p>Here's a performance bug that no profiler flags and no test catches. You import one small function:</p>
-<pre><code>import { reduceLaneSnapshot } from "@scope/agent-core";</code></pre>
-<p>The function is one file, 6 KB. But the package's entry point is a barrel (an <code>index.ts</code> that re-exports everything), so Node evaluates the whole graph behind it: <strong>106 files</strong>. A server in the same repo loaded 112 files just to list some file headers.</p>
+<p>Here's a performance bug no profiler flags and no test catches: importing one small function made Node evaluate <strong>106 files</strong>. The function was one file, 6&nbsp;KB. The package entry point was a barrel, an <code>index.ts</code> that re-exports everything, and importing through it evaluates the whole graph behind it.</p>
+
+<div class="demo">
+  <div class="demo-head">
+    <span class="demo-icon" aria-hidden="true">▶</span>
+    <div><p class="demo-title">Try it: what an import drags in</p><p class="demo-sub">switch between the barrel and a narrow subpath, and between two ways to import a type</p></div>
+  </div>
+  <div class="demo-stage" data-demo="imports">
+    <p class="demo-status">Through the barrel: 106 files for one function. Through a narrow subpath: one file. But <code>import { type X } from "barrel"</code> still emits a runtime import and brings the barrel back; only <code>import type { X }</code> is fully erased.</p>
+  </div>
+</div>
 
 <h2>The fix, and the guardrail</h2>
-<p>The fix was ordinary: narrow subpath exports, so callers can import <code>./harness/session</code> instead of the barrel. That took one module graph from 42 files to 19, and the server from <strong>112 files / 98 MB to 28 files / 69 MB</strong>.</p>
-<p>The interesting part is what stops it from coming back. A script runs on every commit, walks the value-import graph of each declared entry point, and fails when it grows past a budget or reaches a forbidden file:</p>
+<p>The fix was ordinary: narrow subpath exports, each mirroring its source path, so callers import <code>./harness/session</code> instead of the barrel. That took one graph from 42 files to 19, and a server process from <strong>112 files / 98&nbsp;MB to 28 files / 69&nbsp;MB</strong>.</p>
+<p>The guardrail is what's worth copying. A script runs on every commit, walks the value-import graph of each declared entry point, and fails when it exceeds its budget or reaches a forbidden file:</p>
 <pre><code>"./models": {
   maxFiles: 15,
   forbid: ["providers/", "models.generated.ts", "index.ts", ...],
 },</code></pre>
-<p>Its header explains the idea better than I can:</p>
 <blockquote><p>Entry points are cost contracts. [...] one stray <code>export *</code> can silently make a narrow entry drag an entire barrel [...] and nothing fails until someone measures a process.</p></blockquote>
 
-<h2>It paid for itself immediately</h2>
-<p>The first run caught two regressions hiding in plain sight:</p>
-<pre><code>import { type Usage } from "./types";</code></pre>
-<p>That looks type-only, but it isn't. Only <code>import type { Usage }</code> is erased completely; the inline <code>type</code> form still emits a runtime import of the module. Through a barrel, that's the whole package.</p>
+<h2>How the check works</h2>
+<ol class="flow">
+  <li><strong>Start from the exports map</strong>The package's <code>exports</code> is the only list of public entry points, so the budgets are keyed by it. A budget for an export that doesn't exist fails too.</li>
+  <li><strong>Follow value imports only</strong><code>import type</code> and <code>export type</code> are erased before Node runs, so they're skipped. Imports across workspace packages are followed into their source.</li>
+  <li><strong>Compare against two limits</strong>A file count, and a list of paths the entry must never reach, like the provider code or the generated model list. On failure it prints the whole graph, so the bad import is visible.</li>
+</ol>
+<p>It paid for itself on the first run, catching two lines written as <code>import { type Usage } from "…"</code>, which looks type-only but emits a runtime import of the module.</p>
 
 <h2>Why count files, not milliseconds</h2>
-<ul>
-  <li><strong>It's deterministic.</strong> A file count doesn't flake on a slow CI machine.</li>
-  <li><strong>It's cheap.</strong> It only reads import statements, nothing runs, so it fits in the pre-commit check instead of a nightly benchmark.</li>
-  <li><strong>It points at the cause.</strong> The failure lists the files the entry reached, so you see the bad import, not just "startup got slower".</li>
-</ul>
-<p>The same repo checks that some of its packages still bundle for the browser, for the same reason: what a module drags in is part of its interface.</p>
+<div class="compare-grid">
+  <div><p class="k">Deterministic</p><p>A file count doesn't flake on a slow CI machine, so it can block a commit.</p></div>
+  <div><p class="k">Points at the cause</p><p>The failure lists the files reached, not just "startup got slower".</p></div>
+</div>
+<p>The same repo also checks that some packages still bundle for the browser: what a module drags in is part of its interface.</p>
 
 <div class="callout steal">
   <p class="callout-kicker">Steal this</p>

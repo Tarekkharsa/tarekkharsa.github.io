@@ -1,18 +1,16 @@
-<p>Supply-chain attacks rarely arrive through code anyone reads. They arrive through a dependency bump in a lockfile nobody opens, or a <code>postinstall</code> script that runs on every developer's machine. This repo's agent guide has a one-line policy for that:</p>
+<p>Supply-chain attacks rarely arrive through code anyone reads. They arrive through a dependency bump in a lockfile nobody opens, or a <code>postinstall</code> script that runs on every developer's machine and every CI runner. This repo's policy is one line:</p>
 <blockquote><p>Treat npm dep and lockfile changes as reviewed code.</p></blockquote>
-<p>Then it backs the line up with tooling.</p>
+<p>The engineering is in how each attack path gets closed.</p>
 
-<h2>What that looks like</h2>
-<ul>
-  <li><strong>Exact versions only.</strong> Every direct dependency is pinned (no <code>^</code> or <code>~</code>), and a script fails the check if one isn't.</li>
-  <li><strong>No install scripts by default.</strong> Installs run with <code>--ignore-scripts</code>, locally and in CI.</li>
-  <li><strong>A three-entry allowlist.</strong> In the pinned install that users get, exactly three dependencies may run install scripts, and each one has a written reason. esbuild's, for example: "postinstall selects and verifies the platform-specific esbuild binary."</li>
-  <li><strong>An allowlist that can't rot.</strong> If an allowlisted package disappears from the tree, the check fails and asks you to remove its entry.</li>
-  <li><strong>Pinned installs for users too.</strong> The curl installer pins every transitive dependency. Plain <code>npm install -g</code> doesn't, and the README says so.</li>
-</ul>
+<h2>Every path a dependency can take, and its gate</h2>
+<div class="compare-grid">
+  <div><p class="k">A silent upgrade</p><p><strong>Exact versions only.</strong> Every direct dependency is pinned (no <code>^</code> or <code>~</code>), and a script fails the check if one isn't.</p></div>
+  <div><p class="k">Code at install time</p><p><strong>No install scripts by default.</strong> Installs run with <code>--ignore-scripts</code>, locally and in CI.</p></div>
+  <div><p class="k">A real need for a script</p><p><strong>A three-entry allowlist</strong> for the install users get, each with a reason, like esbuild's "postinstall selects and verifies the platform-specific esbuild binary."</p></div>
+  <div><p class="k">A lockfile change in passing</p><p><strong>A pre-commit gate</strong> blocks any commit that stages the lockfile unless you confirm it with an environment variable.</p></div>
+</div>
 
-<h2>A lockfile commit has to be on purpose</h2>
-<p>A pre-commit hook blocks any commit that stages the lockfile, and prints a review checklist instead:</p>
+<h2>The lockfile gate, in detail</h2>
 <pre><code>package-lock.json is staged.
 
 Review lockfile changes before committing:
@@ -25,16 +23,23 @@ Detected package version changes:
 
 If this lockfile change is intentional, commit with:
   …_ALLOW_LOCKFILE_CHANGE=1 git commit ...</code></pre>
-<p>Agents can't slip a dependency change into an unrelated commit, and humans can't either. Changes that only touch the repo's own workspace packages pass through, so the gate stays quiet when nothing external changed.</p>
+<ol class="flow">
+  <li><strong>Diff, don't guess</strong>It compares the lockfile at <code>HEAD</code> with the staged one, entry by entry, and lists what was added, removed or changed.</li>
+  <li><strong>Quiet when nothing external changed</strong>Changes that only touch the repo's own workspace packages pass through, so the gate doesn't train people to ignore it.</li>
+  <li><strong>A checklist, not just a block</strong>Age gates (refusing versions published too recently to have been vetted) and new lifecycle scripts are what most attacks rely on, so the hook asks about exactly those.</li>
+</ol>
+<p>Agents can't slip a dependency change into an unrelated commit, and neither can humans.</p>
 
-<h2>And after it ships</h2>
+<h2>Lists that can't rot</h2>
 <ul>
-  <li>A nightly <code>npm audit</code> fails on moderate advisories or worse. Accepting one requires naming the package and explaining why it doesn't apply.</li>
+  <li>If an allowlisted install-script package disappears from the tree, the check fails and asks you to remove its entry.</li>
+  <li>A nightly <code>npm audit</code> fails on moderate advisories or worse. Accepting one requires naming the package and explaining why it doesn't apply, and the script warns about accepted entries that no longer match.</li>
   <li>The same job runs <code>npm audit signatures</code> to verify registry signatures.</li>
-  <li>One dependency gets a rule of its own: before updating <code>undici</code>, read its changelog and check whether anything affects the app.</li>
+  <li>The curl installer pins every transitive dependency for users; plain <code>npm install -g</code> doesn't, and the README says so.</li>
 </ul>
+<p>One dependency has a rule of its own: before updating <code>undici</code>, the HTTP client underneath Node's <code>fetch</code>, read its changelog and check whether anything affects the app.</p>
 
 <div class="callout steal">
   <p class="callout-kicker">Steal this</p>
-  <p>Make dependency changes loud. Pin exact versions, turn off install scripts and allowlist the few that need them with a reason, and block lockfile commits unless someone says "yes, on purpose." It costs minutes, and it's where supply-chain attacks actually land.</p>
+  <p>Make dependency changes loud. Pin exact versions, turn off install scripts and allowlist the few that need them with a reason, block lockfile commits unless someone says "yes, on purpose," and make every exception list fail when it goes stale.</p>
 </div>

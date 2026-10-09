@@ -33,6 +33,15 @@ docs (`node_modules/remix/INDEX.md`) rather than relying on memory.
 - `content/posts/<slug>.html`: the hand-written post body, inserted verbatim.
 - `app/pages/`, `app/ui/`: page components and shared pieces (`remix/component` JSX, not React).
 - `public/`: copied to `dist/` unchanged (`site.css`, `site.js`, icons, OG images).
+- `public/assets/demos.js`: interactive lesson demos in plain JS (no framework). `site.js`
+  loads it only on pages with a `[data-demo]` element, and every demo replaces a static
+  fallback paragraph, so lessons read fine without JavaScript.
+- Lesson format: `problem` and `idea` (the "In short" card) and `prompt` (the "Use it in
+  your code" card) live in the round file; the body has an optional demo, then `.flow` step
+  cards and `.compare-grid` comparisons, then "Steal this". Lessons must teach real
+  engineering from the repo, verified in its source, and never name the answer.
+- Replaced lessons: add `old-slug -> new-slug` to `movedPosts` in `app/content/posts.ts`;
+  the old URL becomes a forwarding page.
 
 ## Verify
 

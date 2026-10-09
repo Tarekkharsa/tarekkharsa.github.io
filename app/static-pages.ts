@@ -1,4 +1,4 @@
-import { postPath, posts } from './content/posts.ts'
+import { movedPosts, postPath, posts } from './content/posts.ts'
 import { routes } from './routes.ts'
 
 export interface StaticPage {
@@ -17,6 +17,7 @@ export function staticPages(): StaticPage[] {
     // Written as posts/<slug>.html: GitHub Pages serves it at /posts/<slug> (the canonical URL)
     // and at the old /posts/<slug>.html, so links shared before clean URLs keep working.
     ...posts.map((post) => ({ path: postPath(post), file: `posts/${post.slug}.html`, status: 200 })),
+    ...Object.keys(movedPosts).map((slug) => ({ path: `/posts/${slug}`, file: `posts/${slug}.html`, status: 200 })),
     { path: routes.feed.href(), file: 'feed.xml', status: 200 },
     { path: routes.sitemap.href(), file: 'sitemap.xml', status: 200 },
     // GitHub Pages serves /404.html for any missing path.

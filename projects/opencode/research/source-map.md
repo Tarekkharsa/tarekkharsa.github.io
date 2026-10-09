@@ -49,11 +49,16 @@ v2 code moves fast and paths may change before release.
   `packages/core/test/session-runner-recorded.test.ts`, `packages/llm/test/recorded-test.ts`
 - "Avoid mocks as much as possible": `AGENTS.md` ("Testing")
 
-## 4. A lab notebook for speed
+## 4. Bound what the model sees (replaced "A lab notebook for speed" on 2026-10-09)
 
-- Goal, single metric line, hypothesis table, dead ends, full-suite 225s / 187s / 202s:
-  `perf/test-suite.md`
-- `bench:test`, `profile:test`: `packages/opencode/package.json`
+- `MAX_LINES = 2_000`, `MAX_BYTES = 50 * 1024`, `RETENTION = 7 days`, head/tail preview,
+  byte-safe `takePrefix`/`takeSuffix`, marker reserved inside the limit, files written with
+  flag `wx` and an ascending ID, `tool_output.max_lines`/`max_bytes` config:
+  `packages/core/src/tool-output-store.ts`
+- The registry bounds every tool result and returns typed `outputPaths`:
+  `packages/core/src/tool/registry.ts`
+- Model Tool Output, Managed Tool Output File, one aggregate limit, provider-independent,
+  head and tail kept, structured result unchanged: `CONTEXT.md`
 
 ## 5. One API, even in-process
 
@@ -78,10 +83,16 @@ v2 code moves fast and paths may change before release.
 - `findLast` evaluation, `allow` / `deny`: `packages/core/src/policy.ts`
 - User docs: `packages/web/src/content/docs/policies.mdx`
 
-## 8. Ban the synonyms
+## 8. Compact before you overflow (replaced "Ban the synonyms" on 2026-10-09)
 
-- 24 terms, 9 with `_Avoid_`: `CONTEXT.md`
-- Good/Bad style rules written for agents: `AGENTS.md`
+- Trigger `estimate(system, messages, tools) > context - max(output, buffer)`,
+  `DEFAULT_BUFFER = 20_000`, `DEFAULT_KEEP_TOKENS = 8_000`, tool results trimmed to 2,000
+  characters, summary prompt must fit in `context - summaryOutput`, summary template,
+  update/merge instructions, failed or empty summary returns without cutover:
+  `packages/core/src/session/compaction.ts`
+- Durable start, live-only progress, cutover only from a completed summary, continue the
+  pending turn after compaction: `specs/v2/schema-changelog.md` (2026-06-05 entry)
+- Fresh baseline after compaction: `packages/core/src/session/context-epoch.ts`, `CONTEXT.md`
 
 ## Finale tips
 

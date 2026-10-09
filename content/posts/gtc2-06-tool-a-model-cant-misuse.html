@@ -1,0 +1,40 @@
+<p>An edit tool for an LLM looks trivial: find <code>oldText</code>, replace it with <code>newText</code>. Then real models use it. They copy text with curly quotes where the file has straight ones, drop trailing spaces, send a snippet that appears twice, send two edits that overlap, and call it twice on the same file at once. A naive find-and-replace edits the wrong place, or corrupts the file, and says "done".</p>
+<p>This repo's edit tool is built around those failures.</p>
+
+<div class="demo">
+  <div class="demo-head">
+    <span class="demo-icon" aria-hidden="true">▶</span>
+    <div><p class="demo-title">Try it: five edit calls a model really sends</p><p class="demo-sub">the same matching rules as the real tool, on a small file</p></div>
+  </div>
+  <div class="demo-stage" data-demo="edittool">
+    <p class="demo-status">An exact, unique match is applied. A near miss (straight quotes against curly ones) is matched on normalized text, and only the touched line is rewritten. Text that appears twice, overlapping edits and text that isn't there are rejected with an error that says how to fix the call.</p>
+  </div>
+</div>
+
+<h2>The matching pipeline</h2>
+<ol class="flow">
+  <li><strong>Normalize what the model can't see</strong>Line endings are converted to LF, and a UTF-8 BOM is stripped first, because "the model will not include an invisible BOM in oldText." Both are restored when writing.</li>
+  <li><strong>Exact match first</strong>Every edit is matched against the <em>original</em> content, not after earlier edits are applied, so the result doesn't depend on edit order.</li>
+  <li><strong>Fuzzy match only on normalized text</strong>If an exact match fails, both sides are normalized: NFKC, trailing whitespace per line, smart quotes, Unicode dashes and special spaces to ASCII. The match happens in that space.</li>
+  <li><strong>Write back only what changed</strong>A fuzzy match must not rewrite the whole file in normalized form. Each replacement is widened to the lines it touches, and every other line is copied back from the original, byte for byte.</li>
+</ol>
+
+<h2>Errors are part of the interface</h2>
+<p>When the tool refuses, the message tells the model what to send next:</p>
+<pre><code>Found 2 occurrences of edits[0] in app.ts. Each oldText must be unique.
+Please provide more context to make it unique.
+
+edits[0] and edits[1] overlap in app.ts. Merge them into one edit
+or target disjoint regions.</code></pre>
+<p>The tool description carries the same rules up front: one call with several non-overlapping edits per file, each matched against the original. Errors that are specific are errors a model can recover from in one retry.</p>
+
+<h2>One queue per file</h2>
+<p>Agents run tools in parallel. Two edits to the same file at the same time would read the same original and the second write would silently drop the first. So every mutation goes through a queue keyed by the file's <strong>real path</strong> (symlinks resolved): calls on the same file run one after another, calls on different files still run in parallel.</p>
+
+<h2>Measured, not guessed</h2>
+<p>A script reads real session transcripts and groups failed edit calls by kind: file not found, text not found, multiple occurrences, no changes, invalid input, overlapping edits. It also measures how much unchanged context models pad their edits with. The fixes in the tool's history (fuzzy quotes and dashes, BOMs, preserving untouched lines in fuzzy edits) are the kind of failure that data surfaces.</p>
+
+<div class="callout steal">
+  <p class="callout-kicker">Steal this</p>
+  <p>Design tools for sloppy but well-meaning callers. Match exactly first and fuzzily only on normalized text, write back only what changed, reject ambiguity with an error that says what to send instead, serialize writes per resource, and measure failures from real transcripts.</p>
+</div>

@@ -96,6 +96,17 @@ export function roundOf(post: SeriesPost): Round {
   return round
 }
 
+/**
+ * Lessons replaced after they were published, old slug -> new slug. The old URL keeps
+ * working as a small page that forwards to the replacement.
+ */
+export const movedPosts: Record<string, string> = {
+  'gtc2-04-closed-by-default': 'gtc2-04-never-mutate-history',
+  'gtc2-06-many-agents-one-checkout': 'gtc2-06-tool-a-model-cant-misuse',
+  'gtc3-04-lab-notebook-for-speed': 'gtc3-04-bound-what-the-model-sees',
+  'gtc3-08-ban-the-synonyms': 'gtc3-08-compact-before-you-overflow',
+}
+
 export function findPost(slug: string): Post | undefined {
   return posts.find((post) => post.slug === slug)
 }

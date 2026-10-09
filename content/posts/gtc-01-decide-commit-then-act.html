@@ -1,40 +1,33 @@
-<p>Picture this: an AI agent is halfway through editing your repo when the app crashes. Or the user's laptop sleeps. Or their phone reconnects from a train tunnel and retries the last request. <strong>What's actually true now?</strong></p>
-<p>Most apps can't answer that cleanly. This codebase can, because every change goes through the same three steps.</p>
+<div class="demo">
+  <div class="demo-head">
+    <span class="demo-icon" aria-hidden="true">▶</span>
+    <div><p class="demo-title">Try it: crash in the middle</p><p class="demo-sub">the same requests against a naive handler and an outbox</p></div>
+  </div>
+  <div class="demo-stage" data-demo="outbox">
+    <p class="demo-status">A naive handler saves the order and then sends the email. If it crashes in between, the email is lost and nothing remembers it was owed. With an outbox, the intent to send is committed together with the order, and a worker sends it after the commit, even after a restart.</p>
+  </div>
+</div>
 
 <h2>The pattern</h2>
-<pre><code>client request ──▶ command
-                     │
-                     ▼
-  1. DECIDE   pure function: (state, command) → events      no I/O at all
-                     │
-                     ▼
-  2. COMMIT   ONE database transaction writes:
-                events + read models + command receipt + outbox
-                     │   (only after commit)
-                     ▼
-  3. ACT      a worker runs the outbox effects
-              (start the agent, take a git checkpoint, …)
-              and feeds results back in as new commands</code></pre>
+<ol class="flow">
+  <li><strong>Decide, with no I/O</strong>A pure function turns <code>(state, command)</code> into events. It never touches the network, the filesystem or a subprocess, so you can unit-test it, replay it, and it can't hang on a slow API while holding a lock.</li>
+  <li><strong>Commit facts and intent together</strong>One database transaction writes the events, the read models the UI reads, a <em>command receipt</em>, and the <em>outbox</em>: a record of side effects that still need to run.</li>
+  <li><strong>Act after commit</strong>A worker picks up outbox rows and does the slow, failure-prone work (start the agent, take a git checkpoint). Results come back as new commands, through the same loop.</li>
+</ol>
 
-<h3>1. Decide without I/O</h3>
-<p>The orchestrator takes the current state and a command and returns events. It never touches the network, the filesystem or a subprocess. You can unit-test it, replay it, and it can't hang on a slow API call while holding a lock.</p>
-
-<h3>2. Commit facts and intent together</h3>
-<p>One transaction writes the events, the read models the UI reads, a <em>command receipt</em>, and the <em>outbox</em>: a record of side effects that still need to run. That buys three things:</p>
-<ul>
-  <li><strong>Read models can't get ahead of the log.</strong> They commit in the same transaction.</li>
-  <li><strong>Retries are idempotent.</strong> A replayed command finds its receipt and returns the same result.</li>
-  <li><strong>Crashes don't lose work.</strong> If the process dies right after commit, the intent to "start the agent" is already saved.</li>
-</ul>
-
-<h3>3. Act after commit</h3>
-<p>A worker picks up outbox effects and does the slow, failure-prone work. Results come back in as new commands, which go through the same decide → commit loop.</p>
+<h2>What the one transaction buys you</h2>
+<div class="compare-grid">
+  <div><p class="k">Read models can't lead</p><p>They commit in the same transaction as the events, so the UI never shows something the log doesn't have.</p></div>
+  <div><p class="k">Retries are idempotent</p><p>A replayed command finds its receipt and returns the same result, instead of doing the work twice.</p></div>
+  <div><p class="k">Crashes keep intent</p><p>If the process dies right after commit, "start the agent" is already saved in the outbox.</p></div>
+  <div><p class="k">I/O can't corrupt state</p><p>The slow part runs outside the transaction, so a timeout can't leave half-written rows.</p></div>
+</div>
 
 <h2>The consequence most apps get wrong</h2>
 <blockquote><p>A command acknowledgement means the <em>intent</em> committed, not that the work finished.</p></blockquote>
 <p>If your UI treats "request accepted" as "done", you ship a lying spinner. Here, "accepted", "agent running" and "follow-up work settled" are separate states. A late checkpoint isn't even allowed to stretch the recorded duration of the agent's turn.</p>
 
-<h2>Two more traps the docs call out</h2>
+<h2>Two traps the docs call out</h2>
 <ul>
   <li><strong>Your schema has a past.</strong> Every stored event must still decode on replay. A schema change affects every old database on its next startup, not just the newest client.</li>
   <li><strong>Not every effect can replay.</strong> Work tied to a provider process that died is retired during recovery, before new work starts.</li>

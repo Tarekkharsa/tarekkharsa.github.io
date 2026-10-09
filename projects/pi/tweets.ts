@@ -66,12 +66,12 @@ Its test script starts from an empty environment and adds back only an allowlist
   4: {
     teaser: `${T} round 2, lesson 4 🕵️
 
-New contributors' issues and PRs here are closed on arrival.
+This agent never rewrites a session.
 
-Maintainers read them daily, reopen the good ones, and approve you with one word: "lgtm".
+Branching, compaction, even hiding a message from the model: each one is a NEW line in a JSONL tree. What the model sees is a projection of the active branch.
 
-A bot writes your name into a plain text file. Which repo? 👇`,
-    reply: `"You must understand your code." And AI can help triage, but "it is not trusted to make final maintainer decisions."
+Which repo? 👇`,
+    reply: `Compaction stores a summary and the ID of the first entry it kept. The older entries stay in the file, so you can always go back.
 
 ${lessonUrl(4)}`,
     hint: `${T} round 2, lesson 4 hint:
@@ -98,19 +98,12 @@ You can run it straight from GitHub with nix run.`,
   6: {
     teaser: `${T} round 2, lesson 6 🕵️
 
-Round 1's repo gave every agent its own worktree.
+Models send edits with curly quotes, snippets that appear twice and overlapping changes.
 
-This one assumes several agents edit the SAME checkout, and bans:
-
-git add -A
-git stash
-git reset --hard
-git clean -fd
+This edit tool matches exactly first, fuzzily second, rewrites only touched lines, and rejects ambiguity with a fixable error.
 
 Which repo? 👇`,
-    reply: `Every commit names its own files. Rebase conflict in a file you didn't touch? Abort and ask.
-
-(It saved me while writing this series.)
+    reply: `Plus one queue per file (keyed by real path), so parallel edits can't drop each other, and a script that groups failed edits from real transcripts.
 
 ${lessonUrl(6)}`,
     hint: `${T} round 2, lesson 6 hint:
@@ -186,9 +179,9 @@ Who got it? 👇🧵`,
 1. A small, replaceable core
 2. Entry points are cost contracts
 3. A fake model + an empty env
-4. Closed by default
+4. Never mutate history
 5. The lockfile is code
-6. Many agents, one checkout
+6. A tool a model can't misuse
 7. Who owns the scrollback
 8. Measure your docs`,
   `Reading the repo taught me how it's built. Using it taught me the tricks.

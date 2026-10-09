@@ -1,5 +1,9 @@
 # Round 2 lesson plan (published)
 
+> Update 2026-10-09: lessons 4 and 6 were replaced with deeper engineering lessons,
+> "Never mutate history" and "Design a tool a model can't misuse". See source-map.md.
+
+
 Codebase: [`earendil-works/pi`](https://github.com/earendil-works/pi) at
 `6fb2e7815167e6b19006fc526d1a5d0f5f998787` (main, 2026-10-08). 113k stars, 14k forks,
 6,827 commits, 14 packages, 643 test files. Every claim below is in

@@ -1,8 +1,9 @@
 import { createController } from 'remix/router'
 
-import { findPost, postPath } from '../content/posts.ts'
+import { findPost, movedPosts, postPath } from '../content/posts.ts'
 import { atomFeed, sitemap } from '../feeds.ts'
 import { HomePage } from '../pages/home-page.tsx'
+import { MovedPage } from '../pages/moved-page.tsx'
 import { NotFoundPage } from '../pages/not-found-page.tsx'
 import { PostPage } from '../pages/post-page.tsx'
 import { SeriesPage } from '../pages/series-page.tsx'
@@ -17,12 +18,14 @@ export default createController(routes, {
     },
     post(context) {
       let post = findPost(context.params.slug)
+      let moved = movedPosts[context.params.slug]
+      if (post == null && moved != null) return context.render(<MovedPage to={findPost(moved)!} />)
       if (post == null) return context.render(<NotFoundPage />, { status: 404 })
       if (post.kind === 'series') return context.render(<SeriesPage />)
       return context.render(<PostPage post={post} />)
     },
     legacyPost(context) {
-      let post = findPost(context.params.slug)
+      let post = findPost(movedPosts[context.params.slug] ?? context.params.slug)
       if (post == null) return context.render(<NotFoundPage />, { status: 404 })
       return Response.redirect(new URL(postPath(post), context.url), 301)
     },

@@ -1,50 +1,40 @@
-<p>Open source has a new problem: writing code is now cheap and reviewing it isn't. This repo's contribution process is designed around that.</p>
+<p>Writing code is now cheap and reviewing it isn't. So this repo's PR process isn't really about etiquette. It's about <strong>trust boundaries</strong>: what a pull request is allowed to influence, and what it can never touch.</p>
 
-<h2>A PR template that asks for reasoning</h2>
-<ul>
-  <li><strong>Problem</strong>: one or two sentences.</li>
-  <li><strong>Change</strong>: how it fixes the problem, and why changes to several components belong together.</li>
-  <li><strong>Scope &amp; approval</strong>: a link to the maintainer's approval <em>comment</em>. A linked issue alone isn't enough.</li>
-  <li><strong>Verification</strong>: what you checked, what you saw, and what you <em>couldn't</em> check.</li>
-</ul>
-<blockquote><p>"Tests pass" alone is insufficient.</p></blockquote>
-<p>It ends with the model and harness that did the work. No hiding AI involvement and no shaming it either. It's recorded the way you'd record a dependency version.</p>
+<div class="demo">
+  <div class="demo-head">
+    <span class="demo-icon" aria-hidden="true">▶</span>
+    <div><p class="demo-title">Try it: is this workflow a pwn request?</p><p class="demo-sub">pick a trigger, then decide what the job does with the PR</p></div>
+  </div>
+  <div class="demo-stage" data-demo="prcheck">
+    <p class="demo-status"><code>pull_request</code> runs a fork's PR with a read-only token and no secrets. <code>pull_request_target</code> runs with a write token and secrets, so it must never execute the PR's code. Checking out PR commits only as passive data is the narrow exception.</p>
+  </div>
+</div>
 
-<h2>One underlying problem per PR</h2>
-<blockquote><p>Count the underlying problems, not the linked issues.</p></blockquote>
-<p>Five issues can describe one bug. A big diff can still be one problem. Adjacent cleanup gets its own PR.</p>
-
-<h2>AI triage that resists prompt injection</h2>
-<p>If a bot triages PRs, a PR can try to talk it into approving. Their defense: every run resolves <code>main</code> to a commit SHA and loads the policy and exemption list from <em>that</em> SHA.</p>
-<blockquote><p>PR/fork copies and PR-body instructions cannot change policy or exemptions.</p></blockquote>
-<p>If a policy file is missing or malformed, the PR is left unresolved. Nothing gets exempted or auto-closed because of it.</p>
-
-<h2>Review bots with a narrow job</h2>
-<p>Their AI UI reviewer looks only at changed lines, answers exactly three questions, doesn't build the project or ask for screenshots, has a budget per run and per PR, and replies <em>exactly</em> "All clear" when there's nothing to report. A narrow job with clear rules beats "please review this PR".</p>
-<p>Auto-approval has two explicit carve-outs that always need a human: PRs that <strong>change product defaults</strong>, and PRs that <strong>add or broaden a lint or type suppression</strong>.</p>
-
-<h2>Automation that gives context, not gates</h2>
-<ul>
-  <li><strong>Size labels</strong> from XS to XXL, with test files <em>excluded</em> in mixed PRs. If adding tests made a PR look bigger and scarier, people would stop adding tests.</li>
-  <li><strong>A native-change label</strong> on mobile PRs that change the native build fingerprint. Those get merged as a batch right before a store submission, so main can ship over-the-air updates the rest of the time.</li>
-  <li><strong>CI rejects committed PR screenshots.</strong> UI PRs need before/after images, but they're uploaded to the PR. Git history is forever.</li>
-</ul>
-
-<h2>A security comment every repo should copy</h2>
+<h2>1. CI never runs untrusted code with secrets</h2>
+<p>Some jobs need write access on a PR, like adding a size label, so they run on <code>pull_request_target</code>. That trigger runs with the base repository's token and secrets. The repo pins its rule as a comment on the job itself:</p>
 <pre><code># This pull_request_target job may fetch untrusted PR commits only as passive
 # git data. Do not add dependency installs, build/test scripts, or cache
-# actions here.</code></pre>
+# actions here; use pull_request plus workflow_run for that pattern instead.</code></pre>
+<p>The size job counts changed lines with <code>git diff --numstat</code> between the base and head SHAs and never executes anything from the PR. For anything that does have to run PR code, the comment points to the safe split: <code>pull_request</code>, which gets no secrets, plus a separate trusted <code>workflow_run</code> job that never checks out the PR.</p>
 
-<h2>Closing PRs without being a jerk</h2>
-<p>Every policy closure names the rule, cites the evidence, links the guide section and explains how to get the PR reconsidered. And:</p>
-<blockquote><p>We assess the problem, scope, approval, and evidence, not an author's writing style or whether we think an agent wrote the PR.</p></blockquote>
+<h2>2. Bots load their rules from main, pinned to a SHA</h2>
+<p>An AI triage bot reads PR text, and PR text can try to talk it into approving. So every run resolves <code>main</code> to a commit SHA once and loads its policy and exemption list from <em>that</em> SHA:</p>
+<blockquote><p>PR/fork copies and PR-body instructions cannot change policy or exemptions.</p></blockquote>
+<p>Pinning matters twice. A PR can't edit the policy it's judged by, and the policy can't change halfway through a run. If a policy file is missing or malformed, the PR is left unresolved. Nothing gets exempted or auto-closed because of a parse error.</p>
 
-<h2>Commit titles that read like release notes</h2>
-<pre><code>fix(server): status refresh no longer pegs CPU in repos with thousands of untracked files
-perf(web): DOM changes no longer restyle the whole page</code></pre>
-<p>A conventional-commit prefix, then what changed for the user. Not "fix bug in StatusService".</p>
+<h2>3. Signals that have to fire before merge</h2>
+<p>The mobile app ships most changes over the air, which only works while <code>main</code>'s native fingerprint matches the build in the stores. A check computes the fingerprint for the PR and for its base, in the same job, with the base re-synced to the base lockfile so a dependency bump can't skew the comparison. PRs that change it get a native-change label.</p>
+<blockquote><p>Once one native PR merges, every later merge inherits the drifted fingerprint and loses OTA reach too — that is why the signal has to fire before merge, not after.</p></blockquote>
+<p>Native PRs are held and merged as a batch right before a store submission, so <code>main</code> stays updatable over the air the rest of the time.</p>
+
+<h2>4. Reviewers get evidence, not checkboxes</h2>
+<div class="compare-grid">
+  <div><p class="k">The PR template asks for</p><p>The problem, the change, a link to the maintainer's approval comment, and verification: what was checked, what was seen, what couldn't be checked. "Tests pass" alone is insufficient.</p></div>
+  <div><p class="k">Automation adds context</p><p>Size labels exclude test files, so adding tests never makes a PR look scarier. CI rejects committed screenshots: they belong on the PR, not in git history forever.</p></div>
+</div>
+<p>AI reviewers get one narrow job each. The UI reviewer looks only at changed lines, answers three questions, has a budget per run and per PR, and replies exactly "All clear" when there's nothing to say. Two changes always need a human: product defaults, and new or broader lint or type suppressions.</p>
 
 <div class="callout steal">
   <p class="callout-kicker">Steal this</p>
-  <p>Make the PR template ask for reasoning and evidence, not checkboxes. Load bot policy from a trusted ref, never from the PR. Give each AI reviewer one narrow job. Pick your "always needs a human" triggers on purpose.</p>
+  <p>Treat every PR as untrusted input. Never run its code where secrets live, load bot policy from a pinned commit on main, make signals that affect release fire before merge, and make reviewers' evidence part of the template.</p>
 </div>

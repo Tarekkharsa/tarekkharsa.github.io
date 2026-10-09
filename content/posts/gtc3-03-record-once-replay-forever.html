@@ -1,22 +1,28 @@
-<p>Hand-written HTTP mocks lie in a quiet way: they return the response you <em>think</em> the provider sends. Streaming chunk boundaries, retry headers, odd status codes and WebSocket frame order all get simplified away, and those are exactly where provider bugs live. The agent guide's first testing rule is "Avoid mocks as much as possible."</p>
+<p>Hand-written HTTP mocks lie in a quiet way: they return the response you <em>think</em> the provider sends. Streaming chunk boundaries, retry headers, odd status codes and WebSocket frame order get simplified away, and those are exactly where provider bugs live. The agent guide's first testing rule is "Avoid mocks as much as possible."</p>
 <p>So the repo built a recorder, and published it as its own package.</p>
 
 <h2>Record once, replay after</h2>
-<p>A test wraps its HTTP client in a recorder layer with a cassette name. The first local run calls the real API and saves the exchange as JSON. Every later run replays it, and the application code can't tell the difference:</p>
 <pre><code>it.effect("loads a user", () =&gt;
   getUser.pipe(Effect.provide(HttpRecorder.http("users/get-one"))),
 )
-// first run:  calls the API, writes recordings/users/get-one.json
-// later runs: replays the cassette, no network</code></pre>
-<p>It covers WebSockets too: replay releases server frames until the next recorded client frame, then waits for the app to send a matching one. Chronology is part of the test.</p>
+// first local run: calls the API, writes recordings/users/get-one.json
+// later runs:      replays the cassette, no network</code></pre>
+<ol class="flow">
+  <li><strong>Cassette recorded?</strong>Replay it. Application code can't tell whether a response is live or replayed.</li>
+  <li><strong>Missing, running locally?</strong>Call the real service once and save the exchange as a reviewable JSON file.</li>
+  <li><strong>Missing, on CI?</strong>Fail. When <code>CI=true</code> a missing cassette is an error, never a live call, so tests can't quietly start hitting the network.</li>
+</ol>
 
-<h2>Three details that keep it honest</h2>
-<ul>
-  <li><strong>CI never records.</strong> When <code>CI=true</code>, a missing cassette is a failure, not a live call. Tests can't quietly start hitting the network.</li>
-  <li><strong>No overwrite mode.</strong> To refresh a recording, you delete its file and rerun the test. "Deletion makes the set of recordings being refreshed visible and reviewable."</li>
-  <li><strong>Redacted by default.</strong> Most headers are dropped and common credentials in headers, URLs and JSON bodies are redacted before anything hits disk. You can add your own fields, like an account ID in the URL.</li>
-</ul>
-<p>The repo uses it for real provider streams in its core and LLM packages, the place where mocks would be most misleading.</p>
+<h2>The details that keep it honest</h2>
+<div class="compare-grid">
+  <div><p class="k">No overwrite mode</p><p>To refresh a recording you delete its file and rerun. "Deletion makes the set of recordings being refreshed visible and reviewable."</p></div>
+  <div><p class="k">Redacted before disk</p><p>Most headers are dropped, and credentials in headers, URLs and JSON bodies are redacted by default. You extend it for your own fields, like an account ID in a path.</p></div>
+  <div><p class="k">WebSockets in order</p><p>Replay releases server frames until the next recorded client frame, then waits for the app to send a matching one. Chronology is part of the test.</p></div>
+  <div><p class="k">Binary-safe</p><p>Binary frames are stored losslessly as base64, and client and server frame kinds must match on replay.</p></div>
+</div>
+
+<h2>Where it's used</h2>
+<p>Recorded tests cover real provider streams in the core, LLM and main application packages, the place where mocks would be most misleading: a chat stream's exact chunking, a provider's error shape, a WebSocket transport's message order.</p>
 
 <div class="callout steal">
   <p class="callout-kicker">Steal this</p>

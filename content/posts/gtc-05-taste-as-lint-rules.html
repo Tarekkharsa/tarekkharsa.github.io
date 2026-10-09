@@ -1,38 +1,38 @@
-<p>When most of your contributors are AI agents, a review comment is the least scalable thing you have. You write it, the agent fixes it, and the next agent makes the same mistake tomorrow.</p>
-<p>This repo puts its taste in a custom lint plugin instead. Fourteen rules, each with its own test file.</p>
+<p>When most of your contributors are AI agents, a review comment is the least scalable thing you have. You write it, the agent fixes it, and the next agent makes the same mistake tomorrow. This repo encodes its taste as a custom lint plugin instead: <strong>fourteen rules, each with its own test file</strong>.</p>
 
-<h2>Some of the rules</h2>
+<h2>Each rule encodes a real failure</h2>
 <table>
-  <thead><tr><th>Rule</th><th>The taste behind it</th></tr></thead>
+  <thead><tr><th>Rule</th><th>The failure it prevents</th></tr></thead>
   <tbody>
-    <tr><td><code>require-suppression-reason</code></td><td>Every <code>eslint-disable</code> or <code>@ts-ignore</code> must say <em>why</em></td></tr>
-    <tr><td><code>no-unscoped-has</code></td><td>No CSS <code>:has()</code> variants that restyle the whole page</td></tr>
-    <tr><td><code>no-native-title-tooltip</code></td><td>Use the styled Tooltip, not <code>title=""</code></td></tr>
-    <tr><td><code>no-test-in-loop</code></td><td>Use <code>it.each</code>, not a <code>for</code> loop around <code>it</code></td></tr>
-    <tr><td><code>no-rpc-permission-bypass</code></td><td>Client mutations go through permission-checked commands</td></tr>
-    <tr><td><code>no-hermes-unsupported-apis</code></td><td>The mobile JS engine can't run every web API</td></tr>
-    <tr><td><code>no-inline-schema-compile</code></td><td>Compile schemas once, not on every call</td></tr>
-    <tr><td><code>no-raw-mcp-registration</code></td><td>Agent tools must declare who may call them</td></tr>
-    <tr><td><code>prefer-catch-tags</code></td><td>Handle typed errors explicitly</td></tr>
+    <tr><td><code>no-unscoped-has</code></td><td>A broad CSS <code>:has()</code> variant makes every DOM change restyle the whole page</td></tr>
+    <tr><td><code>no-inline-schema-compile</code></td><td>Compiling a validation schema on every call instead of once</td></tr>
+    <tr><td><code>no-hermes-unsupported-apis</code></td><td>Shared code using web APIs the mobile JS engine can't run</td></tr>
+    <tr><td><code>no-rpc-permission-bypass</code></td><td>Client mutations skipping the permission-checked command path</td></tr>
+    <tr><td><code>no-raw-mcp-registration</code></td><td>Agent tools registered without declaring who may call them</td></tr>
+    <tr><td><code>prefer-catch-tags</code></td><td>Catch-all error handling that hides which typed error happened</td></tr>
+    <tr><td><code>no-test-in-loop</code></td><td>Tests declared in a <code>for</code> loop instead of <code>it.each</code></td></tr>
+    <tr><td><code>no-native-title-tooltip</code></td><td>Native <code>title=""</code> tooltips instead of the styled component</td></tr>
+    <tr><td><code>require-suppression-reason</code></td><td>An <code>eslint-disable</code> or <code>@ts-ignore</code> with no explanation</td></tr>
   </tbody>
 </table>
+<p>Half of these are performance, portability or security bugs, not style. A lint rule is the cheapest place to stop a bug class: it runs before tests and review, on every change, for every contributor.</p>
 
 <h2>Good rules know their exceptions</h2>
-<p>The tooltip rule is my favorite example. It bans <code>title</code> as a tooltip on regular elements, but it still allows <code>title</code> on <code>iframe</code>, <code>embed</code>, <code>object</code> and friends, where the attribute is the <em>accessible name</em>, not a tooltip. A blunt rule would have broken accessibility.</p>
+<p>The tooltip rule bans <code>title</code> as a tooltip on regular elements, but still allows it on <code>iframe</code>, <code>embed</code>, <code>object</code>, <code>frame</code> and <code>math</code>, where the attribute is the element's <em>accessible name</em>, not a tooltip. A blunt rule would have broken accessibility. Each exception is spelled out in the rule and covered by its tests.</p>
 
 <h2>Silencing a tool should cost something</h2>
-<ul>
-  <li>Lint enforces a reason on every suppression: a <code>-- reason</code> suffix or a comment on the line above.</li>
-  <li>Any PR that adds a suppression can't be auto-approved. A human has to look.</li>
-</ul>
+<ol class="flow">
+  <li><strong>A reason is mandatory</strong>Every suppression needs a <code>-- reason</code> suffix or a comment on the line above. Lint enforces it.</li>
+  <li><strong>A human has to look</strong>Any PR that adds or broadens a suppression can't be auto-approved.</li>
+</ol>
 
 <h2>Design systems need enforcement too</h2>
-<p>A rule called <code>shadcn/no-restyle</code> stops you from restyling a shared <code>&lt;Button&gt;</code> with <code>className</code>. You pick a <code>variant</code> or <code>size</code>. If none fits, you add a variant to the component. Layout classes (width, margin, position) go on the parent. That's how a design system stays consistent with hundreds of contributors.</p>
+<p><code>shadcn/no-restyle</code> stops you restyling a shared <code>&lt;Button&gt;</code> with <code>className</code>. You pick a <code>variant</code> or <code>size</code>, or you add a variant to the component. Layout classes (width, margin, position) go on the parent. That's how a design system stays consistent with hundreds of contributors.</p>
 
 <h2>Dead code fails CI</h2>
-<p><code>knip</code> runs in CI, and an export nobody imports fails the build. No "might need this later" exports, refactors actually delete the old files, and there are no re-export shims.</p>
+<p><code>knip</code> runs in CI, and an export nobody imports fails the build. No "might need this later" exports, refactors actually delete old files, and there are no re-export shims.</p>
 
 <div class="callout steal">
   <p class="callout-kicker">Steal this</p>
-  <p>Each time you write the same review comment for the second time, write a lint rule instead, with tests and with the exceptions spelled out. Make suppressions explain themselves and need a human to approve.</p>
+  <p>Each time you write the same review comment a second time, write a lint rule instead, with tests and with the exceptions spelled out. Make suppressions explain themselves and need a human to approve.</p>
 </div>

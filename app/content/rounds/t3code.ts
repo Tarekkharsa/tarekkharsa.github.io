@@ -121,8 +121,8 @@ Don't rewrite the whole suite. Keep the change small and tell me what you'd do n
         'When anyone can generate a 2,000-line PR in ten minutes, review time is what you protect.',
       tag: 'GitHub & PRs',
       readMinutes: 2,
-      problem: "Anyone can generate a 2,000-line PR in minutes, but reviewing it still takes hours.",
-      idea: "Make PRs show reasoning and evidence, load bot rules from main, and keep a short list of changes that always need a human.",
+      problem: "Anyone can now open a PR, and PRs can carry code, config and text written to manipulate bots. CI that runs that code with secrets, or bots that read their rules from the PR, can be taken over.",
+      idea: "Treat every PR as untrusted input: never run its code where secrets live, load bot policy from a pinned commit on main, and make reviewers' evidence part of the template.",
       hints: [
         'One of its maintainers is a well-known tech YouTuber.',
         'Over a thousand commits on main carry AI co-author trailers.',
@@ -136,16 +136,16 @@ Don't rewrite the whole suite. Keep the change small and tell me what you'd do n
         '.macroscope/check-run-agents/ui-consistency.md',
         '.macroscope/approvability.md',
       ],
-      prompt: `Improve this repository's pull request process for a world where AI writes a lot of the code.
+      prompt: `Audit this repository's CI and bots for trust-boundary problems with untrusted pull requests.
 
-The idea: PRs should explain their reasoning and evidence instead of ticking checkboxes. Bots that review or triage must load their rules from the main branch, never from the PR. Each AI reviewer gets one narrow job, and some changes always need a human.
+The idea: a pull request is untrusted input. Workflows with secrets or a write token must never execute PR code, bots must load their rules from a pinned commit on the default branch (never from the PR), and signals that affect releases must fire before merge.
 
-1. Look at .github/ (or your platform's equivalent): PR templates, CI workflows, bots and contributing docs. Summarize what exists.
-2. Propose a PR template with short sections: Problem, Change, Approval (a link to the issue or comment that approved the work), Verification (what was checked, what was seen, what couldn't be checked), and which model and tool helped, if any.
-3. Check every workflow that runs on pull requests. Flag any that run code or config from the PR branch with write permissions or secrets, for example through pull_request_target, and suggest safe fixes.
-4. Propose a short list of "always needs a human" triggers for this repo, such as dependency changes, auth, migrations and product defaults.
+1. List every workflow that runs on pull requests, with its trigger (pull_request, pull_request_target, workflow_run, issue_comment), its permissions, the secrets it can reach, and whether it checks out or executes code from the PR head.
+2. Flag every "pwn request": a pull_request_target or similarly privileged job that checks out the PR's code and runs installs, builds, tests, scripts or caches. For each one, propose the safe split: pull_request with no secrets for running PR code, plus a separate trusted workflow_run job that only consumes its results.
+3. Find bots or AI reviewers that read configuration or prompts. Make them resolve the default branch to a commit SHA once per run and load policy from that SHA, so a PR can't edit the rules it's judged by. A missing or malformed policy must leave the PR unresolved, never approve it.
+4. Propose a short PR template section for evidence: what was verified, what was seen, what couldn't be checked.
 
-Show me the changes as a diff and keep them small.`,
+Show me the findings first, worst first, before changing any workflow.`,
     },
     {
       slug: 'gtc-05-taste-as-lint-rules',
@@ -252,23 +252,24 @@ Report the rest as a short prioritized list. Keep the change small.`,
         'In this repo, the most frequent contributor is an AI agent running inside the app itself.',
       tag: 'AI-native engineering',
       readMinutes: 1,
-      problem: "Most agent guides are long lists of rules that agents misread or ignore.",
-      idea: "Write the guide like onboarding for a new hire: shared words, real dangers, a “hit every surface” checklist and an escape hatch.",
+      problem: "The agent changing this repo usually runs inside the product it's changing, next to real data and other agents. One pkill, one write to the wrong database or one baked-in URL can break the developer's machine.",
+      idea: "Write the agent guide as the system's real failure modes, each with the mechanism and the safe alternative, and make data flow one way into sandboxes.",
       hints: [
         'Its agent guide opens with a note from the founder.',
         "It's a GUI for coding agents, and it's used to build itself.",
         "I've already written about it on this blog.",
       ],
       sources: ['AGENTS.md', 'docs/internals/glossary.md', 'CONTRIBUTING.md'],
-      prompt: `Write or improve this repository's guide for AI coding agents (AGENTS.md, CLAUDE.md or similar).
+      prompt: `Write the "ways to hurt yourself" section of this repository's agent guide (AGENTS.md, CLAUDE.md or similar).
 
-The idea: write it like onboarding for a sharp new hire: shared vocabulary, the few ways to cause real damage, a "did you hit every surface" checklist, and a clear escape hatch. Document decisions and traps, and let the code document itself.
+The idea: an agent working here runs on a real developer machine, often next to real data, other agents and the developer's own running app. The useful guide isn't a style guide; it's the system's real failure modes, each with the mechanism behind it and the safe command to use instead.
 
-1. Read the existing guide, README and contributing docs, then explore the code. Summarize what an agent would most likely get wrong here.
-2. Draft a guide of at most about 150 lines with: a short glossary of the project's core terms; the commands to build, test and check a change, and which ones not to run; the real dangers (data loss, secrets, production, destructive commands); a checklist of every surface a change may need to touch; and what to do when a rule conflicts with the task (stop and ask).
-3. Leave out anything that restates the code, lists files or narrates control flow.
+1. Explore how this project runs locally: dev servers, ports, background processes, databases and data directories, caches, environment variables that get baked into builds, and anything that talks to production or a shared service.
+2. List the concrete ways an agent could cause damage here. Typical ones: killing processes by name or pattern (the agent's own command line often contains the worktree path), writing to a real or shared database, deleting caches or data directories, baking local URLs or secrets into a bundle, pushing to a shared branch.
+3. For each, write three lines: the rule, the mechanism (why it breaks), and the safe alternative with the exact command, for example "kill only the PID you started, or the owner of your port after checking its working directory".
+4. If the project needs realistic test data, design a one-way seeding step: copy a read-only snapshot into the agent's sandbox, drop anything that could trigger real side effects (scheduled jobs, pending work, credentials), and never symlink back.
 
-Show me the draft before writing it. If a guide already exists, propose edits instead of a rewrite.`,
+Keep it short and concrete, and show me the draft before writing the file.`,
     },
   ],
   finale: {

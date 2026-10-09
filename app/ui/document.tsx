@@ -24,6 +24,8 @@ export interface DocumentProps {
   /** Show the reading progress bar. */
   progress?: boolean
   nav?: NavSection
+  /** Extra tags at the end of <head>. */
+  head?: RemixNode
   children?: RemixNode
 }
 
@@ -32,7 +34,7 @@ const themeScript = `try{const t=localStorage.getItem("theme");if(t)document.doc
 
 export function Document(handle: Handle<DocumentProps>) {
   return () => {
-    let { path, title, description, og, jsonLd, noindex, progress, nav, children } = handle.props
+    let { path, title, description, og, jsonLd, noindex, progress, nav, head, children } = handle.props
     let url = path == null ? undefined : absoluteUrl(path)
 
     return (
@@ -66,6 +68,7 @@ export function Document(handle: Handle<DocumentProps>) {
           <link rel="stylesheet" href="/assets/site.css" />
           <script src="/assets/site.js" defer />
           <script data-goatcounter={site.analytics.endpoint} async src={site.analytics.script} />
+          {head}
         </head>
         <body>
           <a class="skip" href="#content">

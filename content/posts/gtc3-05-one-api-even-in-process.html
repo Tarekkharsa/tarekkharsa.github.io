@@ -1,26 +1,27 @@
-<p>Most tools that have both a server and an embeddable SDK end up with two APIs. The HTTP one is used by remote clients. The "local" one calls internal functions directly, because it's faster and easier. Slowly they drift: a validation that only runs over HTTP, a field that only the local path returns, an auth check one of them skips.</p>
+<p>Most tools with both a server and an embeddable SDK end up with two APIs. The HTTP one is used by remote clients. The "local" one calls internal functions directly, because it's faster and easier. Slowly they drift: a validation that only runs over HTTP, a field only the local path returns, an auth check one of them skips.</p>
 <p>This repo's next SDK refuses to have a second API.</p>
 
 <h2>A fetch that never leaves the process</h2>
-<p>The embedded client builds the real server routes, turns them into a web handler, and hands the normal generated client a <code>fetch</code> function that calls that handler directly:</p>
 <pre><code>const web = HttpRouter.toWebHandler(createEmbeddedRoutes(), { ... })
 
 const fetch = (input, init) =&gt; web.handler(new Request(input, init))
 
 const client = yield* Client.make({ baseUrl: "http://[name].local" })
   .pipe(Effect.provideService(FetchHttpClient.Fetch, fetch))</code></pre>
-<p>Every embedded call is a real <code>Request</code> going through the same router and handlers as a remote one. Only the transport is in-memory. The project's glossary even warns against calling it a "local implementation".</p>
+<ol class="flow">
+  <li><strong>Build the real routes</strong>The embedded host builds the same server routes and turns them into a web handler, scoped so it's disposed when the host is.</li>
+  <li><strong>Swap only the transport</strong>The generated client is given a <code>fetch</code> that calls the handler directly with a real <code>Request</code>. The base URL is a local hostname that never resolves on a network.</li>
+  <li><strong>Add only what's truly local</strong>The embedded host extends the client with same-process capabilities, like registering application tools, instead of reimplementing the API.</li>
+</ol>
+<p>Every embedded call goes through the same router and handlers as a remote one. The glossary even warns against calling it a "local implementation": it isn't one.</p>
 
-<h2>Generated, never hand-written</h2>
-<ul>
-  <li>The public HTTP API is the source of truth. Promise and Effect clients are <strong>generated</strong> from it, and the agent guide says never to edit the generated folders by hand.</li>
-  <li>A runtime-neutral "SDK Contract IR" sits in between, so independent SDK generators can each choose their own value model and runtime from the same definition.</li>
-  <li>Even pagination is one shape everywhere: a <strong>Page</strong> of <code>items</code> with opaque <code>previous</code> and <code>next</code> cursor links.</li>
-</ul>
-
-<h2>Direction is a rule</h2>
-<blockquote><p>Keep runtime dependencies directed from Schema to Core and Protocol, then from Core and Protocol to Server. Client runtime code may depend on Schema and Protocol but never Core or Server.</p></blockquote>
-<p>The client can't take a shortcut into the server's internals: the rule says it never imports them.</p>
+<h2>One source of truth, generated outward</h2>
+<div class="compare-grid">
+  <div><p class="k">Generated clients</p><p>Promise and Effect clients are generated from the public HTTP API. The agent guide says never to edit the generated folders by hand; change the API and regenerate.</p></div>
+  <div><p class="k">A contract IR</p><p>A runtime-neutral compiled form of the API sits in between, so independent SDK generators can each choose their own value model and runtime.</p></div>
+  <div><p class="k">One page shape</p><p>Pagination is a <strong>Page</strong> everywhere: <code>items</code> plus opaque <code>previous</code> and <code>next</code> cursor links for the same query in either direction.</p></div>
+  <div><p class="k">Directed dependencies</p><p>"Client runtime code may depend on Schema and Protocol but never Core or Server." The client can't take a shortcut into server internals.</p></div>
+</div>
 
 <div class="callout steal">
   <p class="callout-kicker">Steal this</p>

@@ -48,14 +48,17 @@ repo moves fast (520 commits in the month before this snapshot).
 - MCP conformance against a baseline: `.github/workflows/ci.yml` (`mcp-conformance`),
   `packages/coding-agent/test/mcp-conformance/baseline.json`
 
-## 4. Closed by default
+## 4. Never mutate history (replaced "Closed by default" on 2026-10-09)
 
-- Auto-close, daily review, `lgtmi` / `lgtm`, weekend rule, one-screen issues, own voice,
-  AI triage FAQ, "guardrail against burnout and tracker spam": `CONTRIBUTING.md`
-- Gate reads `.github/APPROVED_CONTRIBUTORS` from the default branch:
-  `.github/workflows/pr-gate.yml`, `.github/workflows/issue-gate.yml`
-- Approval comment parsing and writing the file: `.github/workflows/approve-contributor.yml`
-- 270 approved entries: `grep -vcE '^\s*(#|$)' .github/APPROVED_CONTRIBUTORS`
+- JSONL entries with `id`/`parentId`, leaf, branching, versions v1→v3 migrated on load,
+  compaction (`summary`, `firstKeptEntryId`, `tokensBefore`, system checkpoint),
+  `context_edit` (branch-relative, latest wins, raw history unchanged), `branch_summary`,
+  system messages as patches, usage entries, context building steps:
+  `packages/coding-agent/docs/session-format.md`
+- Entry types and `SessionManager`: `packages/coding-agent/src/core/session-manager.ts`
+- Compaction keeps the original entries: `packages/coding-agent/docs/sessions.md`,
+  `packages/coding-agent/docs/compaction.md`
+- libGDX/Flask hint: carried over from the original lesson 4 (see "Repo facts")
 
 ## 5. Lockfile as code
 
@@ -72,12 +75,20 @@ repo moves fast (520 commits in the month before this snapshot).
 - Installer pins all dependencies; npm install does not: `README.md` ("Getting started")
 - `nix run github:earendil-works/pi/stable`: `README.md` ("Run with Nix")
 
-## 6. Many agents, one checkout
+## 6. Design a tool a model can't misuse (replaced "Many agents, one checkout" on 2026-10-09)
 
-- All git rules and the "Multiple pi sessions" quote: `AGENTS.md` ("Git")
-- Review PRs without switching branches: `AGENTS.md` ("Issues and PRs")
-- Ad-hoc scripts in `/tmp`: `AGENTS.md` ("Commands")
-- Prompt templates: `.pi/prompts/`
+- LF normalization, BOM stripped before matching and restored on write:
+  `packages/coding-agent/src/core/tools/edit.ts`
+- Exact then fuzzy matching (NFKC, trailing whitespace, smart quotes, dashes, special
+  spaces), all edits matched against the original, duplicate and overlap errors, untouched
+  lines copied back in fuzzy mode: `packages/coding-agent/src/core/tools/edit-diff.ts`
+  (`normalizeForFuzzyMatch`, `applyEditsToNormalizedContent`,
+  `applyReplacementsPreservingUnchangedLines`)
+- Per-file queue keyed by `realpath`: `packages/coding-agent/src/core/tools/file-mutation-queue.ts`
+- Failure kinds and edit "inflation" from real sessions: `scripts/edit-tool-stats.mjs`
+  (`classifyErrorKind`, `analyzeToolArguments`)
+- Fix history: `git log -- packages/coding-agent/src/core/tools/edit-diff.ts` (#713 fuzzy
+  matching, BOM handling, "preserve untouched lines in fuzzy edit")
 
 ## 7. Don't fight the terminal
 

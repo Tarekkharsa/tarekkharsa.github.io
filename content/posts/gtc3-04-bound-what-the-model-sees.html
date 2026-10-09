@@ -1,0 +1,34 @@
+<p>An agent runs <code>npm test</code>, a build, or a <code>grep</code> over a big repo, and one tool result is suddenly megabytes of text. If it all goes into the conversation, it fills the context window, costs a fortune on every later turn, and buries the one line that mattered.</p>
+<p>This repo's rewrite puts every tool result through one choke point with one limit.</p>
+
+<div class="demo">
+  <div class="demo-head">
+    <span class="demo-icon" aria-hidden="true">▶</span>
+    <div><p class="demo-title">Try it: 2,000 lines or 50 KB</p><p class="demo-sub">change the output size and line width; see what the model gets</p></div>
+  </div>
+  <div class="demo-stage" data-demo="bound">
+    <p class="demo-status">Output under both limits passes through unchanged. Over either one, the model gets the beginning and the end with a marker in between, and the full text is saved to a file whose path is in the marker.</p>
+  </div>
+<pre><code>... output truncated; full content saved to &lt;data&gt;/tool-output/tool_01J… ...</code></pre>
+</div>
+
+<h2>The rules</h2>
+<ol class="flow">
+  <li><strong>One aggregate limit per tool result</strong>The configured maximum lines or UTF-8 bytes, whichever is reached first: 2,000 lines or 50&nbsp;KB by default. It's provider-independent; token pressure is handled later, by context assembly and compaction.</li>
+  <li><strong>Tools shape, the registry enforces</strong>A tool may first turn its output into something more useful for the model. The tool registry applies the final limit to every tool, so no tool can forget.</li>
+  <li><strong>Keep both ends</strong>Generic truncation keeps the first half and the last half of the allowed lines. For build and test output, the end is usually where the error is.</li>
+  <li><strong>Lose nothing</strong>The complete text is written to a managed tool-output file, and its path appears in the visible marker <em>and</em> as a typed field, so the model (or a later tool call) can open it.</li>
+</ol>
+
+<h2>The careful parts</h2>
+<div class="compare-grid">
+  <div><p class="k">Byte-safe cuts</p><p>Head and tail are cut by UTF-8 byte size one character at a time, so a multi-byte character is never split in half.</p></div>
+  <div><p class="k">The marker fits too</p><p>Room for the marker is reserved inside the limit, so the bounded result itself never exceeds it.</p></div>
+  <div><p class="k">Files are never overwritten</p><p>Each file gets a new ascending ID and is created with an exclusive flag. Old ones are cleaned up after a 7-day retention.</p></div>
+  <div><p class="k">Structure untouched</p><p>Only the text the model sees is bounded. The tool's validated structured result is never modified.</p></div>
+</div>
+
+<div class="callout steal">
+  <p class="callout-kicker">Steal this</p>
+  <p>Put every tool result through one choke point with one limit. Keep the beginning and the end, save the rest to a file whose path the model can see, cut on character boundaries, and never let a tool opt out.</p>
+</div>

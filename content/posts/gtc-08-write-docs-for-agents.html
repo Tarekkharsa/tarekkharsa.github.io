@@ -1,32 +1,43 @@
 <blockquote><p>Most … contributions will come from [the app] itself, often controlled remotely.</p></blockquote>
-<p>That sentence changes how you write docs. This repo's <code>AGENTS.md</code> reads like onboarding for a sharp new hire who has never seen the codebase and will start shipping in five minutes.</p>
+<p>That sentence changes everything. The agent editing this repo is usually <strong>running inside the product it's changing</strong>, on a developer's machine, next to their real data and other agents. So the agent guide isn't a style guide. It's a list of the system's real failure modes, each with the mechanism behind it and a safe alternative.</p>
 
-<h2>What's in it</h2>
+<div class="demo">
+  <div class="demo-head">
+    <span class="demo-icon" aria-hidden="true">▶</span>
+    <div><p class="demo-title">Try it: stop your stuck dev server</p><p class="demo-sub">three ways to kill a process, on a machine shared with other agents</p></div>
+  </div>
+  <div class="demo-stage" data-demo="killpattern">
+    <p class="demo-status"><code>pkill -f</code> matches the full command line. Your own agent's command line contains the worktree path, so killing by that pattern kills you. Killing by a tool name hits other agents' servers. The safe way: find the process listening on your port and confirm its working directory is your worktree.</p>
+  </div>
+</div>
+
+<h2>The three ways to hurt yourself</h2>
+<ol class="flow">
+  <li><strong>Killing by pattern</strong>Never <code>pkill -f</code>, <code>pgrep | kill</code>, or kill a PID you found by matching a name, path or worktree string. "Your own agent process has this worktree's path in its argv, and this machine runs several other dev servers at once." Kill only a PID you captured at spawn, or the owner of your port from <code>ss -H -ltnp</code> after confirming <code>/proc/&lt;pid&gt;/cwd</code> is your worktree.</li>
+  <li><strong>Writing to the live install</strong>The developer's real database is in use while you work. Reading and copying from it are fine; starting a server against it, opening it read-write, or "cleaning it up" is not.</li>
+  <li><strong>Baking in origins</strong>Setting <code>VITE_HTTP_URL</code> or <code>VITE_WS_URL</code> for dev bakes <code>localhost</code> into the bundle and "silently breaks every remote browser." Dev is single-origin; Vite proxies <code>/api</code>, <code>/ws</code>, <code>/oauth</code> and <code>/.well-known</code>.</li>
+</ol>
+
+<h2>Data flows one way</h2>
+<p>"An empty database is a bad test", so the guide tells agents to seed their worktree from real data, through a script that keeps the safety properties:</p>
+<div class="compare-grid">
+  <div><p class="k">What it does</p><p>Rebuilds the worktree's database from a <strong>read-only snapshot</strong> of the real one, keeping recent projects and their stopped threads.</p></div>
+  <div><p class="k">What it drops</p><p>Scheduled tasks, pending work and auth sessions, "so your dev server never runs the developer's agents."</p></div>
+</div>
+<blockquote><p>Copy in, never symlink. Data flows one way: into your sandbox, never back out.</p></blockquote>
+
+<h2>Verification has a budget</h2>
 <ul>
-  <li><strong>A glossary.</strong> <em>Environment</em>, <em>project</em>, <em>thread</em>, <em>turn</em>, <em>command</em>, <em>event</em>, <em>projection</em>, <em>outbox</em>: each means exactly one thing. When humans and agents use the same words, half the bugs never get written.</li>
-  <li><strong>"The three ways to hurt yourself."</strong> Killing processes by pattern, writing to the live install, baking origins into the bundle. Short, concrete and memorable.</li>
-  <li><strong>"Hit every surface."</strong> The checklist from Lesson 7.</li>
-  <li><strong>Verification limits.</strong> Run the smallest proof that the change works. No repo-wide checks; CI owns those.</li>
-  <li><strong>Safety around real data.</strong> Read the user's real database, copy from it, never write to it.</li>
+  <li><strong>Smallest proof that the change works:</strong> the tests you touched, targeted lint and typecheck for your scope. CI owns the full suite.</li>
+  <li><strong>Bot findings get verified against the source.</strong> Fix real ones, dismiss false positives with a written reason, and stop when the bots are green on the latest commit.</li>
+  <li><strong>A missing mobile client is a build step, not a blocker:</strong> a script checks the native fingerprint and builds only when needed.</li>
 </ul>
 
-<h2>Rules for the docs themselves</h2>
-<ul>
-  <li>Internal docs record <strong>decisions, constraints spanning components, and traps</strong> that are hard to find in the source.</li>
-  <li>No feature catalogs, no field lists, no narrated control flow. Agents can read the code.</li>
-  <li>When a decision changes, <strong>rewrite</strong> the text. Don't append another account of the new behavior.</li>
-  <li>Before adding a paragraph, ask: <em>what would a maintainer get wrong without it?</em></li>
-</ul>
-
-<h2>The note from the founder</h2>
+<h2>And an escape hatch</h2>
 <blockquote><p>Do not preserve complexity just because it already exists. Do not introduce machinery because it looks architecturally impressive. Understand the real constraint, then fight for the smallest model that makes the correct behavior unsurprising.</p></blockquote>
-<p>Channel both "measure twice, cut once" and "YAGNI". I've reread that paragraph more than any other in the repo.</p>
-
-<h2>Rules as guidance, with an escape hatch</h2>
-<blockquote><p>If a rule here fights the task in front of you, say so loudly and get a human sign-off before breaking it.</p></blockquote>
-<p>Most "rules for AI" files are long lists of MUSTs. This one gives good defaults and says exactly what to do when one of them is wrong.</p>
+<p>When a rule fights the task, the agent says so and gets a human sign-off before breaking it. Rules with a stated mechanism are easy to apply to new cases; rules without one get misapplied.</p>
 
 <div class="callout steal">
   <p class="callout-kicker">Steal this</p>
-  <p>Write your agent guide like onboarding for a new hire: shared vocabulary, the few ways to cause real damage, a "did you hit every surface" checklist, and a clear escape hatch. Keep docs for decisions and traps; let the code document itself.</p>
+  <p>Write your agent guide as a list of your system's real failure modes: the mechanism, the safe alternative, and the command to use instead. Make data flow one way into sandboxes, and give verification a budget.</p>
 </div>
