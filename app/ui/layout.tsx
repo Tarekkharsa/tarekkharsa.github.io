@@ -25,12 +25,6 @@ export function SiteHeader(handle: Handle<{ current?: NavSection }>) {
             <a href={postPath(seriesIndex)} aria-current={currentFor('series')}>
               series
             </a>
-            <a class="hide-sm" href={site.social.github}>
-              github
-            </a>
-            <a class="hide-sm" href={routes.feed.href()}>
-              rss
-            </a>
             <button class="theme-toggle" type="button" aria-label="Toggle dark mode">
               <SunIcon />
               <MoonIcon />

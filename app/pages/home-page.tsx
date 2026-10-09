@@ -33,13 +33,15 @@ export function HomePage() {
     >
       <main id="content">
         <section class="hero hero-split">
-          <div class="hero-text">
+          <div class="hero-head">
             <p class="prompt">
               <span class="dollar">$</span> whoami
             </p>
             <h1>
               Tarek Kharsa<span class="accent">.</span>
             </h1>
+          </div>
+          <div class="hero-body">
             <p class="lede">
               Full-stack software engineer working on <strong>AI infrastructure</strong>. Years of
               shipping <strong>TypeScript</strong>: React front-ends, Node back-ends, and the
@@ -70,7 +72,7 @@ export function HomePage() {
                 <span />
                 <span />
               </span>
-              <span>~/tarek.jpg</span>
+              <span class="portrait-name">~/tarek.jpg</span>
             </div>
             <img
               src={site.photo.path}
@@ -88,7 +90,10 @@ export function HomePage() {
             Featured series
           </h2>
           <a class="feature" href={postPath(seriesIndex)}>
-            <p class="kicker">{`🕵️ #GuessTheCodebase · round ${latestRound.number} is live`}</p>
+            <p class="kicker">
+              <span>🕵️ #GuessTheCodebase</span>
+              <span class="live">{`round ${latestRound.number} is live`}</span>
+            </p>
             <h3>8 new lessons from a different open-source repo. Guess which one.</h3>
             <p>{latestRound.pitch}</p>
             <div class="steps" aria-hidden="true">
