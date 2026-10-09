@@ -11,6 +11,8 @@ export const site = {
     twitter: 'https://twitter.com/tarekkh1997',
   },
   copyrightYear: 2026,
+  /** 400×400 portrait, shown in the home hero and post bylines. */
+  photo: { path: '/assets/tarek.jpg', alt: 'Tarek Kharsa' },
 } as const
 
 /** Turns a site-relative path into the absolute URL used by canonical, OG and feed tags. */

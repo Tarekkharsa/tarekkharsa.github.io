@@ -9,6 +9,7 @@ const personJsonLd = {
   name: site.name,
   url: absoluteUrl('/'),
   jobTitle: site.jobTitle,
+  image: absoluteUrl(site.photo.path),
   sameAs: [site.social.github, site.social.twitter],
 }
 
@@ -30,12 +31,24 @@ export function HomePage() {
     >
       <main id="content">
         <section class="hero">
-          <p class="prompt">
-            <span class="dollar">$</span> whoami
-          </p>
-          <h1>
-            Tarek Kharsa<span class="accent">.</span>
-          </h1>
+          <div class="hero-head">
+            <img
+              class="avatar"
+              src={site.photo.path}
+              alt={site.photo.alt}
+              width="400"
+              height="400"
+              fetchpriority="high"
+            />
+            <div>
+              <p class="prompt">
+                <span class="dollar">$</span> whoami
+              </p>
+              <h1>
+                Tarek Kharsa<span class="accent">.</span>
+              </h1>
+            </div>
+          </div>
           <p class="lede">
             Full-stack software engineer working on <strong>AI infrastructure</strong>. Years of
             shipping <strong>TypeScript</strong>: React front-ends, Node back-ends, and the

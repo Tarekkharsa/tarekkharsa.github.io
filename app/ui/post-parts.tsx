@@ -63,6 +63,26 @@ export function PostMeta(handle: Handle<{ post: Post; extra?: string }>) {
   }
 }
 
+export function Byline() {
+  return () => (
+    <p class="byline">
+      <img
+        class="avatar-sm"
+        src={site.photo.path}
+        alt=""
+        width="400"
+        height="400"
+        decoding="async"
+      />
+      <span>
+        by <a href={routes.home.href()}>{site.name}</a>
+        <span aria-hidden="true"> · </span>
+        <a href={site.social.twitter}>{`@${site.twitterHandle}`}</a>
+      </span>
+    </p>
+  )
+}
+
 export function PostHeader(handle: Handle<{ post: Post; extra?: string; heading?: RemixNode }>) {
   return () => {
     let { post, extra, heading } = handle.props
@@ -71,6 +91,7 @@ export function PostHeader(handle: Handle<{ post: Post; extra?: string; heading?
         <PostMeta post={post} extra={extra} />
         <h1>{heading ?? post.heading ?? post.title}</h1>
         <p class="subtitle">{post.subtitle}</p>
+        <Byline />
       </header>
     )
   }
