@@ -1,4 +1,4 @@
-import { latestDate, postUrl, posts } from './content/posts.ts'
+import { latestDate, modifiedDate, postUrl, posts } from './content/posts.ts'
 import { absoluteUrl, site } from './site.ts'
 import { isoTimestamp } from './ui/document.tsx'
 
@@ -22,7 +22,7 @@ export function atomFeed(): string {
     <link href="${xml(url)}"/>
     <id>${xml(url)}</id>
     <published>${isoTimestamp(post.date)}</published>
-    <updated>${isoTimestamp(post.date)}</updated>
+    <updated>${isoTimestamp(modifiedDate(post))}</updated>
     <summary>${xml(feed.summary)}</summary>
   </entry>`
   })
@@ -46,7 +46,7 @@ ${entries.join('\n')}
 export function sitemap(): string {
   let urls = [
     { loc: absoluteUrl('/'), lastmod: latestDate() },
-    ...indexedPosts().map((post) => ({ loc: postUrl(post), lastmod: post.date })),
+    ...indexedPosts().map((post) => ({ loc: postUrl(post), lastmod: modifiedDate(post) })),
   ]
 
   return `<?xml version="1.0" encoding="UTF-8"?>

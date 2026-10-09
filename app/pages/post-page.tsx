@@ -2,6 +2,7 @@ import type { Handle } from 'remix/component'
 
 import {
   author,
+  modifiedDate,
   postPath,
   postUrl,
   seriesIndex,
@@ -77,7 +78,7 @@ function blogPosting(post: ArticlePost) {
     description: post.description,
     image: absoluteUrl(post.image.path),
     datePublished: isoTimestamp(post.date),
-    dateModified: isoTimestamp(post.date),
+    dateModified: isoTimestamp(modifiedDate(post)),
     author,
     ...(post.kind === 'guide'
       ? {}

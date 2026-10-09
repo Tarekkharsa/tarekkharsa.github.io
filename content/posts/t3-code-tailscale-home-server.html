@@ -1,47 +1,41 @@
 <p>My Linux PC runs <a href="https://github.com/pingdotgg/t3code">T3 Code</a> as a background service, all the time. <a href="https://tailscale.com">Tailscale</a> connects it privately to my MacBook and my Android phone. Nothing is open to the public internet.</p>
+<blockquote><p><strong>Updated October 2026:</strong> T3 Code now handles two things this guide used to do by hand, so the setup is shorter. It turns on lingering when you install the service, and <code>t3 pair --tailscale</code> sets up Tailscale Serve permanently. Followed the old version? See <a href="#coming-from-the-first-version-of-this-guide">the cleanup note</a>.</p></blockquote>
 <p><strong>You need:</strong></p>
 <ul>
-  <li>A Linux PC (I used Ubuntu)</li>
-  <li>Node.js</li>
+  <li>A Linux PC with systemd (I used Ubuntu)</li>
   <li>Tailscale on the PC <em>and</em> on every device you want to connect from</li>
+  <li>Node.js only if your agent CLIs need it (Codex installs with npm)</li>
 </ul>
 
-<h2>Step 1: Install T3 Code as a service</h2>
-<pre><code>npm i -g t3
-t3 service install
-loginctl enable-linger $USER</code></pre>
-<p>This installs T3 Code, runs it as a background service, and starts it at boot, even if nobody logs in. Check it:</p>
-<pre><code>t3 service status</code></pre>
-<p>You should see <code>Status: installed</code>.</p>
+<h2>Step 1: Install T3 Code</h2>
+<pre><code>curl -fsSL https://t3.codes/install.sh | sh</code></pre>
+<p>This puts <code>t3</code> in <code>~/.local/bin</code>. If you get <code>t3: command not found</code>, add the <code>PATH</code> line the installer prints to your shell config and open a new terminal.</p>
+<p>Want the nightly build instead?</p>
+<pre><code>curl -fsSL https://t3.codes/install.sh | T3CODE_CHANNEL=nightly sh</code></pre>
 
 <hr>
 
-<h2>Step 2: Turn on Tailscale Serve</h2>
-<p>First, let your own user manage Tailscale Serve:</p>
+<h2>Step 2: Run it as a service</h2>
+<pre><code>t3 service install
+t3 service status</code></pre>
+<p>You should see <code>Status: installed · t3@&lt;version&gt;</code>. The service starts at boot and keeps running after you log out, even if nobody ever logs in.</p>
+<blockquote><p>If install says lingering is disabled, it couldn't turn it on without admin rights. Run only this with sudo, then run <code>t3 service install</code> again as your normal user:</p></blockquote>
+<pre><code>sudo loginctl enable-linger "$(id -un)"</code></pre>
+<p>Don't run <code>t3</code> itself with sudo. That creates a separate install that belongs to root.</p>
+
+<hr>
+
+<h2>Step 3: Publish it on your tailnet and pair</h2>
+<p>Let your own user manage Tailscale Serve (one time):</p>
 <pre><code>sudo tailscale set --operator=$USER</code></pre>
-<p>Then add a small settings file (a systemd drop-in) to the T3 service:</p>
-<pre><code>mkdir -p ~/.config/systemd/user/t3code.service.d
-
-cat &gt; ~/.config/systemd/user/t3code.service.d/tailscale.conf &lt;&lt;EOF
-[Service]
-Environment=T3CODE_TAILSCALE_SERVE=1
-Environment=PATH=$HOME/.local/bin:$(dirname $(which node)):/usr/local/bin:/usr/bin:/bin:/snap/bin
-EOF
-
-systemctl --user daemon-reload
-systemctl --user restart t3code</code></pre>
-<p>This file survives T3 updates. The <code>PATH</code> line matters because the service can't otherwise see where Node CLIs (like Codex) are installed. If you switch Node versions with <code>nvm</code>, run it again.</p>
-<p>Check it:</p>
-<pre><code>tailscale serve status</code></pre>
-<p>You should see a private address like <code>https://my-pc.tailXXXXX.ts.net</code>. The first HTTPS certificate can take a few seconds, so if it doesn't load right away, wait and try again.</p>
-
-<hr>
-
-<h2>Step 3: Pair your laptop and phone</h2>
-<p>On the PC:</p>
+<p>Then, on the PC:</p>
 <pre><code>t3 pair --tailscale</code></pre>
-<p>In the T3 Code app, go to <strong>Add Environment → Remote link</strong>, then paste the link or scan the QR code.</p>
-<blockquote><p>The code expires after 5 minutes. Need more time? Use <code>t3 pair --tailscale --ttl 1h</code>.</p></blockquote>
+<p>This does two things. It maps a private HTTPS address like <code>https://my-pc.tailXXXXX.ts.net</code> to the service, and that mapping survives restarts. Then it prints a pairing link and QR code.</p>
+<p>In the T3 Code app, add an environment (<strong>Settings → Connections</strong> on the web and desktop apps, <strong>Settings → Environments</strong> on mobile), then paste the link or scan the QR code.</p>
+<blockquote><p>A pairing link works once and expires after 5 minutes. Need more time? <code>t3 pair --tailscale --ttl 1h</code>. Run it again for each new device; devices you already paired reconnect on their own.</p></blockquote>
+<p>Check the mapping any time with:</p>
+<pre><code>tailscale serve status</code></pre>
+<p>The first HTTPS certificate can take a few seconds, so if the address doesn't load right away, wait and try again.</p>
 
 <h3>Can't connect?</h3>
 <p>If you see something like this, your device can't reach the PC:</p>
@@ -51,7 +45,8 @@ systemctl --user restart t3code</code></pre>
   <li>Tailscale is <em>Connected</em> on the device.</li>
   <li><strong>Mac:</strong> Tailscale menu → Settings → turn on <strong>Use Tailscale DNS</strong>.</li>
   <li><strong>Android:</strong> Settings → Private DNS → <strong>Off</strong>. "Automatic" didn't work for me.</li>
-  <li>The pairing code hasn't expired.</li>
+  <li>The pairing link hasn't expired or already been used.</li>
+  <li><code>t3 service status</code> on the PC says it's installed and running.</li>
 </ol>
 
 <hr>
@@ -60,7 +55,17 @@ systemctl --user restart t3code</code></pre>
 <p>T3 Code runs agents through their command-line tools, so install them on the PC. For Codex:</p>
 <pre><code>npm i -g @openai/codex
 codex login status</code></pre>
-<p>The <code>PATH</code> line from Step 2 lets the service find them.</p>
+<p>When the service starts, T3 Code reads <code>PATH</code> from your login shell, so CLIs installed through <code>nvm</code> or into <code>~/.local/bin</code> are usually found. If an agent still shows as not installed, give the service the path explicitly:</p>
+<pre><code>mkdir -p ~/.config/systemd/user/t3code.service.d
+
+cat &gt; ~/.config/systemd/user/t3code.service.d/path.conf &lt;&lt;EOF
+[Service]
+Environment=PATH=$HOME/.local/bin:$(dirname $(which node)):/usr/local/bin:/usr/bin:/bin:/snap/bin
+EOF
+
+systemctl --user daemon-reload
+t3 service restart</code></pre>
+<p>This file survives T3 updates. If you switch Node versions with <code>nvm</code>, run it again.</p>
 
 <hr>
 
@@ -72,9 +77,21 @@ codex login status</code></pre>
 <hr>
 
 <h2>Updating T3 Code</h2>
-<p><strong>Golden rule:</strong> keep the PC, the <code>t3</code> command and all your apps on the <strong>same channel</strong>, and run updates on the PC itself:</p>
+<p><strong>Golden rule:</strong> keep the PC, the <code>t3</code> command and all your apps on the <strong>same channel</strong>. A client and server on different versions refuse to connect instead of half-working.</p>
+<p>On the PC:</p>
 <pre><code>t3 update --channel nightly --yes</code></pre>
-<p><em>(Use <code>stable</code>, <code>preview</code> or <code>nightly</code>, whichever your other devices use.)</em></p>
+<p><em>(Use <code>stable</code>, <code>preview</code> or <code>nightly</code>, whichever your other devices use. Without <code>--yes</code>, it asks before restarting the service.)</em></p>
+<p>You don't always need a terminal: when the PC falls behind, the app shows an update notice, and <strong>Update server</strong> updates the background service remotely.</p>
+<blockquote><p>Updates restart the server, which interrupts running agents. Turn on <strong>Settings → General → Continue threads after restarts</strong> to have supported threads pick up where they left off.</p></blockquote>
+
+<hr>
+
+<h2 id="coming-from-the-first-version-of-this-guide">Coming from the first version of this guide?</h2>
+<p>The first version added a systemd drop-in with <code>T3CODE_TAILSCALE_SERVE=1</code>. You don't need it anymore: <code>t3 pair --tailscale</code> keeps the mapping on its own. Remove that line from <code>~/.config/systemd/user/t3code.service.d/tailscale.conf</code>. Keep the <code>PATH</code> line only if your agents need it (Step 4), or delete the file. Then:</p>
+<pre><code>systemctl --user daemon-reload
+t3 service restart
+t3 pair --tailscale</code></pre>
+<p>The separate <code>loginctl enable-linger</code> step is now part of <code>t3 service install</code>, so you can skip it on new machines.</p>
 
 <hr>
 

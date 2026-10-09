@@ -18,6 +18,8 @@ interface BasePost {
   subtitle: string
   /** Publication date, YYYY-MM-DD. */
   date: string
+  /** Last meaningful content update, YYYY-MM-DD. Shown in the header and used as dateModified. */
+  updated?: string
   tag: string
   readMinutes?: number
   image: { path: string; alt: string }
@@ -315,8 +317,9 @@ export const t3CodeServerGuide: GuidePost = {
     'Run T3 Code on a Linux PC and reach it privately from your laptop and phone with Tailscale. A short, step-by-step guide.',
   subtitle: 'A short, step-by-step guide.',
   date: '2026-09-28',
+  updated: '2026-10-09',
   tag: 'Guide',
-  readMinutes: 2,
+  readMinutes: 3,
   image: {
     path: '/assets/og/t3-code-tailscale-home-server.png',
     alt: 'Turning my Linux PC into a T3 Code server — T3 Code + Tailscale guide by Tarek Kharsa',
@@ -365,8 +368,13 @@ export function seriesNeighbors(post: SeriesPost): { prev?: SeriesPost; next?: S
   return { prev: seriesPosts[index - 1], next: seriesPosts[index + 1] }
 }
 
+/** The last time a post changed: its update date, or its publication date. */
+export function modifiedDate(post: Pick<Post, 'date' | 'updated'>): string {
+  return post.updated ?? post.date
+}
+
 export function latestDate(): string {
-  return posts.map((post) => post.date).sort().at(-1) ?? SERIES_DATE
+  return posts.map(modifiedDate).sort().at(-1) ?? SERIES_DATE
 }
 
 const bodyCache = new Map<string, string>()

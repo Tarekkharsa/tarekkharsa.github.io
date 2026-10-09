@@ -57,6 +57,11 @@ export function PostMeta(handle: Handle<{ post: Post; extra?: string }>) {
         <span class="tag">{post.tag}</span>
         {extra ? <span>{extra}</span> : null}
         <time datetime={post.date}>{formatDay(post.date)}</time>
+        {post.updated ? (
+          <span>
+            Updated <time datetime={post.updated}>{formatDay(post.updated)}</time>
+          </span>
+        ) : null}
         {post.readMinutes ? <span>{`${post.readMinutes} min read`}</span> : null}
       </p>
     )

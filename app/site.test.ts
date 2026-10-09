@@ -2,7 +2,7 @@ import * as fs from 'node:fs'
 import * as assert from 'remix/assert'
 import { describe, it } from 'remix/test'
 
-import { finale, lessons, postPath, posts } from './content/posts.ts'
+import { finale, lessons, postPath, posts, t3CodeServerGuide } from './content/posts.ts'
 import { router } from './router.tsx'
 import { site } from './site.ts'
 import { staticPages } from './static-pages.ts'
@@ -68,6 +68,19 @@ describe('Guess the codebase series', () => {
     let { body } = await get(postPath(lessons.at(-1)!))
     let next = body.match(/<a [^>]*class="next"[^>]*>/)?.[0] ?? ''
     assert.match(next, new RegExp(`href="${postPath(finale)}"`))
+  })
+})
+
+describe('updated posts', () => {
+  it('show the update date and use it as the modified date', async () => {
+    let { body } = await get(postPath(t3CodeServerGuide))
+    assert.match(body, /Updated <time datetime="2026-10-09">/)
+    assert.match(body, /"dateModified": ?"2026-10-09T00:00:00Z"/)
+    assert.match(body, /"datePublished": ?"2026-09-28T00:00:00Z"/)
+
+    let feed = (await get('/feed.xml')).body
+    let entry = feed.slice(feed.indexOf(t3CodeServerGuide.slug))
+    assert.match(entry, /<published>2026-09-28T00:00:00Z<\/published>\s*<updated>2026-10-09T00:00:00Z<\/updated>/)
   })
 })
 
