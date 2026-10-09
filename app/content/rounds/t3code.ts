@@ -1,21 +1,19 @@
 import { defineRound } from '../series.ts'
 
-/** Round 1, published 2026-10-09. Its URLs, images and text are already shared: don't change them. */
+/** Round 1, published 2026-10-09. Its URLs are already shared: don't change the slugs. */
 export const t3codeRound = defineRound({
   number: 1,
   date: '2026-10-09',
   slugPrefix: 'gtc',
-  answer: {
+  codebase: {
     name: 'T3 Code',
     repo: 'pingdotgg/t3code',
     url: 'https://github.com/pingdotgg/t3code',
     blobBase: 'https://github.com/pingdotgg/t3code/blob/main/',
     blurb: 'the open-source GUI for coding agents',
   },
-  hintZero:
-    "It's open source, it has hundreds of thousands of users, and the people building it use it to build it.",
   pitch:
-    'Architecture, performance budgets, testing without sleeps, PR processes for the AI era, lint rules as taste, and more. Each post ends with hints.',
+    'Architecture, performance budgets as tests, testing without sleeps, a PR process for the AI era, lint rules as taste, and more.',
   lessons: [
     {
       slug: 'gtc-01-decide-commit-then-act',
@@ -27,11 +25,6 @@ export const t3codeRound = defineRound({
       readMinutes: 2,
       problem: "When a request saves data and then calls another service, a crash or retry in between leaves the app in a state nobody planned for.",
       idea: "Decide with a pure function, commit the facts and the intended side effects in one transaction, then run the side effects afterwards.",
-      hints: [
-        "It's open source and has over 400,000 users.",
-        'The same server drives a web app, a desktop app and a mobile app.',
-        'Its server is event-sourced and written in TypeScript.',
-      ],
       sources: [
         'docs/internals/overview.md',
         'apps/server/src/orchestration-v2/Orchestrator.ts',
@@ -59,11 +52,6 @@ Don't introduce an event-sourcing framework. Keep the change small and tell me h
       readMinutes: 2,
       problem: "Most teams find performance regressions when a user complains.",
       idea: "Write each budget down as a number and assert it in a unit test, on the path users actually run.",
-      hints: [
-        'Its maintainers list “performance without compromise” as a value they never trade away.',
-        'Its users run AI agents all day, and the docs say they notice a single dropped frame.',
-        'Its server is built on the Effect library.',
-      ],
       sources: [
         'docs/internals/performance-regressions.md',
         'apps/server/src/orchestration-v2/ThreadTransportPerformance.test.ts',
@@ -91,11 +79,6 @@ Keep the change small and show me the measured numbers.`,
       readMinutes: 2,
       problem: "Tests that mock your own logic, or sleep and hope, pass on your machine and flake or lie everywhere else.",
       idea: "Fake only the true boundaries (network, processes, clock, randomness) and wait for milestones instead of sleeping.",
-      hints: [
-        'It talks to six different AI coding agents through their own CLIs.',
-        'Its pitch: “bring your own subscription”.',
-        'Every agent turn ends with a hidden git ref so you can diff and restore.',
-      ],
       sources: [
         'docs/orchestration-v2/testing-strategy.md',
         'packages/shared/src/DrainableWorker.ts',
@@ -123,11 +106,6 @@ Don't rewrite the whole suite. Keep the change small and tell me what you'd do n
       readMinutes: 2,
       problem: "Anyone can now open a PR, and PRs can carry code, config and text written to manipulate bots. CI that runs that code with secrets, or bots that read their rules from the PR, can be taken over.",
       idea: "Treat every PR as untrusted input: never run its code where secrets live, load bot policy from a pinned commit on main, and make reviewers' evidence part of the template.",
-      hints: [
-        'One of its maintainers is a well-known tech YouTuber.',
-        'Over a thousand commits on main carry AI co-author trailers.',
-        'Its AI triage bot loads its rules from main, never from the PR.',
-      ],
       sources: [
         'CONTRIBUTING.md',
         '.github/pull_request_template.md',
@@ -156,11 +134,6 @@ Show me the findings first, worst first, before changing any workflow.`,
       readMinutes: 1,
       problem: "The same review comments get written again and again, and still don't stick.",
       idea: "The second time you write a comment, turn it into a lint rule with tests, exceptions, and suppressions that must explain themselves.",
-      hints: [
-        'It ships its own oxlint plugin.',
-        'Its name is a letter followed by a number.',
-        'Its desktop app wraps the web app in Electron.',
-      ],
       sources: [
         'oxlint-plugin-t3code/rules/',
         'oxlint-plugin-t3code/rules/no-native-title-tooltip.ts',
@@ -189,11 +162,6 @@ Fix the existing violations, or list them if there are too many. Keep the change
       readMinutes: 2,
       problem: "Run several agents on one laptop and everything shared collides: ports, databases, processes, URLs.",
       idea: "Derive ports and state from each worktree, keep one origin, and never kill processes by pattern.",
-      hints: [
-        'Most of its contributions come from the app itself, controlled remotely.',
-        'It creates a git worktree per task.',
-        'You can install it with a three-character npx command.',
-      ],
       sources: [
         'scripts/dev-runner.ts',
         'scripts/setup-worktree.ts',
@@ -222,11 +190,6 @@ Check that two copies of the repo can run the dev server at the same time. Keep 
       readMinutes: 2,
       problem: "Spinners that never stop, “connected” badges that aren't, and actions you can't undo teach users to distrust the UI.",
       idea: "Treat every label as a promise: separate “connected” from “fresh”, never show cache as live, and give every action a way back.",
-      hints: [
-        'It shows live status for agents running on other machines.',
-        'It reconnects across LAN, Tailscale, SSH and its own tunnel.',
-        'Its mobile app is React Native and shares a client runtime with the web app.',
-      ],
       sources: [
         'docs/internals/connection-runtime.md',
         'AGENTS.md',
@@ -254,11 +217,6 @@ Report the rest as a short prioritized list. Keep the change small.`,
       readMinutes: 1,
       problem: "The agent changing this repo usually runs inside the product it's changing, next to real data and other agents. One pkill, one write to the wrong database or one baked-in URL can break the developer's machine.",
       idea: "Write the agent guide as the system's real failure modes, each with the mechanism and the safe alternative, and make data flow one way into sandboxes.",
-      hints: [
-        'Its agent guide opens with a note from the founder.',
-        "It's a GUI for coding agents, and it's used to build itself.",
-        "I've already written about it on this blog.",
-      ],
       sources: ['AGENTS.md', 'docs/internals/glossary.md', 'CONTRIBUTING.md'],
       prompt: `Write the "ways to hurt yourself" section of this repository's agent guide (AGENTS.md, CLAUDE.md or similar).
 
@@ -274,16 +232,13 @@ Keep it short and concrete, and show me the draft before writing the file.`,
   ],
   finale: {
     slug: 'gtc-reveal-t3-code-power-user-tips',
-    title: 'The reveal: it was T3 Code (plus 30 power-user tips)',
-    teaser: 'The reveal + 30 power-user tips',
-    description:
-      "All eight #GuessTheCodebase lessons came from T3 Code. Here's the repo, plus 30 power-user tips for using it every day.",
-    subtitle:
-      "All eight lessons came from one open-source repo. Here it is, and here's how to get the most out of it.",
-    tag: 'Finale',
+    title: 'T3 Code: 30 power-user tips',
+    teaser: '30 power-user tips',
+    description: '30 power-user tips for T3 Code, the open-source GUI for coding agents, plus a recap of the eight engineering lessons from its source.',
+    subtitle: 'Keyboard shortcuts, remote environments and workflow tricks, from using it every day.',
+    tag: 'Tips',
     readMinutes: 5,
-    image: { path: '/assets/og/gtc-reveal.png', alt: 'Guess the codebase: the reveal. It was T3 Code.' },
-    shareText:
-      'The #GuessTheCodebase answer: it was T3 Code. 8 engineering lessons, plus 30 power-user tips:',
+    image: { path: '/assets/og/gtc-reveal.png', alt: 'T3 Code: 30 power-user tips' },
+    shareText: '30 power-user tips for T3 Code, plus 8 engineering lessons from its source:',
   },
 })

@@ -5,17 +5,17 @@ import { opencodeRound } from './rounds/opencode.ts'
 import { piRound } from './rounds/pi.ts'
 import { t3codeRound } from './rounds/t3code.ts'
 import { series } from './series.ts'
-import type { GuidePost, LessonPost, Post, Round, SeriesIndexPost, SeriesPost } from './types.ts'
+import type { GuidePost, Post, Round, SeriesIndexPost, SeriesPost } from './types.ts'
 
 export { LESSONS_PER_ROUND, series } from './series.ts'
 export type * from './types.ts'
 
 /**
  * Every page under /posts/ is registered here. The prose body of each post lives in
- * content/posts/<slug>.html; everything around it (head tags, series navigation, hints,
+ * content/posts/<slug>.html; everything around it (head tags, series navigation, source links,
  * pager, share buttons, feed and sitemap entries) is generated from this metadata.
  *
- * Guess the codebase rounds live in ./rounds/, one file per repo.
+ * Each round of lessons lives in ./rounds/, one file per codebase.
  */
 
 /** Newest first. */
@@ -24,28 +24,23 @@ export const rounds: Round[] = [opencodeRound, piRound, t3codeRound]
 export const seriesIndex: SeriesIndexPost = {
   kind: 'series',
   slug: series.slug,
-  title: 'Guess the codebase',
+  title: series.name,
   description:
-    'Engineering lessons from great open-source codebases, eight per round: architecture, performance, testing, PRs, tooling, dev setup, UX and AI-native docs. Guess which repo.',
-  subtitle: 'Each round: eight engineering lessons from one open-source repo. You guess which one.',
+    'Engineering lessons from reading great open-source codebases cover to cover: architecture, performance, testing, PRs, tooling and docs for AI agents, each verified in the source and linked to it.',
+  subtitle:
+    'I read one open-source codebase cover to cover, then write up eight things it does better than most. Every claim links to the code.',
   date: '2026-10-09',
   tag: 'Series',
   image: {
     path: '/assets/og/gtc-series.png',
-    alt: 'Guess the codebase: engineering lessons from great open-source repos, 8 per round',
+    alt: 'Lessons from great codebases: engineering lessons from open-source repos, 8 per codebase',
   },
   shareText:
-    '🕵️ #GuessTheCodebase: engineering lessons from great open-source repos, 8 per round. Guess which one.',
+    'Engineering lessons from great open-source codebases, 8 per repo, every claim linked to the source:',
   indexed: true,
   feed: {
-    title: 'Guess the codebase: engineering lessons from open-source repos, 8 per round',
-    summary: 'A series: eight engineering lessons from one open-source codebase per round. Guess which repo.',
-  },
-  listing: {
-    tag: 'series',
-    title: 'Guess the codebase',
-    summary:
-      'Eight engineering lessons from one open-source repo per round, on architecture, performance, testing, PRs and more. Round 3 is live.',
+    title: 'Lessons from great codebases',
+    summary: 'Eight engineering lessons per open-source codebase, each verified in the source and linked to it.',
   },
 }
 
@@ -117,13 +112,6 @@ export function postPath(post: Pick<Post, 'slug'>): string {
 
 export function postUrl(post: Pick<Post, 'slug'>): string {
   return absoluteUrl(postPath(post))
-}
-
-/** Hints from every earlier lesson in the same round. */
-export function earlierHints(post: LessonPost): string[] {
-  return roundOf(post)
-    .lessons.filter((other) => other.lesson < post.lesson)
-    .flatMap((other) => other.hints)
 }
 
 export function seriesNeighbors(post: SeriesPost): { prev?: SeriesPost; next?: SeriesPost } {

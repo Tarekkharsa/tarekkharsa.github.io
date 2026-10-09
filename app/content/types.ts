@@ -28,7 +28,7 @@ export interface GuidePost extends BasePost {
   headline?: string
 }
 
-/** The Guess the codebase hub: rules, and every round's lessons. */
+/** The lessons hub: every codebase studied, with its lessons. */
 export interface SeriesIndexPost extends BasePost {
   kind: 'series'
 }
@@ -41,20 +41,20 @@ export interface LessonPost extends BasePost {
   problem: string
   /** "In short" card: the idea that fixes it, in one sentence. */
   idea: string
-  hints: [string, string, string]
-  /** Paths in the answer repo, shown when the reader gives up. */
+  /** Paths in the studied repo that back the lesson, listed under "Read the source". */
   sources: string[]
   /**
    * A prompt readers paste into their coding agent to apply the lesson to their own code.
-   * It must not name the answer repo.
+   * It describes the idea, not the studied repo, so it works in any codebase.
    */
   prompt: string
 }
 
+/** The last page of a round: power-user tips for the codebase the lessons came from. */
 export interface FinalePost extends BasePost {
   kind: 'finale'
   round: number
-  /** How the series pages refer to it, e.g. "The reveal + 30 power-user tips". */
+  /** How the series pages refer to it, e.g. "30 power-user tips". */
   teaser: string
 }
 
@@ -62,24 +62,22 @@ export type Post = GuidePost | SeriesIndexPost | LessonPost | FinalePost
 export type SeriesPost = LessonPost | FinalePost
 
 /** The open-source repo a round's lessons come from. */
-export interface Answer {
+export interface Codebase {
   name: string
   /** owner/name on GitHub. */
   repo: string
   url: string
-  /** Prefix for "where to look" links; lesson sources are appended to it. */
+  /** Prefix for "Read the source" links; lesson sources are appended to it. */
   blobBase: string
   /** Short description, used after the name: "T3 Code (pingdotgg/t3code), <blurb>." */
   blurb: string
 }
 
-/** One round of Guess the codebase: eight lessons from one repo, then the reveal. */
+/** One round: eight lessons from one codebase, then power-user tips for it. */
 export interface Round {
   number: number
-  answer: Answer
-  /** Published on the hub before any lesson, vaguer than every lesson hint. */
-  hintZero: string
-  /** One or two sentences for the home page card while this is the latest round. */
+  codebase: Codebase
+  /** One or two sentences on what the round's lessons cover, for the home and hub pages. */
   pitch: string
   lessons: LessonPost[]
   finale: FinalePost

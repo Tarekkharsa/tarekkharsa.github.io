@@ -8,17 +8,15 @@ export const piRound = defineRound({
   number: 2,
   date: '2026-10-09',
   slugPrefix: 'gtc2',
-  answer: {
+  codebase: {
     name: 'Pi',
     repo: 'earendil-works/pi',
     url: 'https://github.com/earendil-works/pi',
     blobBase: 'https://github.com/earendil-works/pi/blob/main/',
     blurb: 'the minimal, extensible agent harness',
   },
-  hintZero:
-    "It's open source, it's small on purpose, and it expects you to bend it to your own workflow.",
   pitch:
-    'A core that lets you replace its own features, import budgets, append-only session trees, an edit tool built for sloppy models, and more. Each post ends with hints.',
+    'A core that lets you replace its own features, import budgets, append-only session trees, an edit tool built for sloppy models, and more.',
   lessons: [
     {
       slug: 'gtc2-01-small-replaceable-core',
@@ -30,11 +28,6 @@ export const piRound = defineRound({
       readMinutes: 2,
       problem: "Core teams keep adding features to the core, and users who disagree with one have to fork.",
       idea: "Build your own features on your public plugin API so users can replace them. A feature that can't be a plugin exposes a gap in the API.",
-      hints: [
-        "It's open source and has more than 100,000 GitHub stars.",
-        'It deliberately ships without sub-agents or a plan mode.',
-        'Its built-in MCP support is a plugin that a third-party plugin can replace.',
-      ],
       sources: [
         'CONTRIBUTING.md',
         'packages/coding-agent/src/extensions/index.ts',
@@ -61,11 +54,6 @@ Don't add speculative hooks: every new hook needs a real caller. Keep the change
       readMinutes: 2,
       problem: "Importing one small function through a barrel file can quietly load a whole package, and nothing fails.",
       idea: "Treat each entry point as a budget: count the files its imports reach, forbid heavy paths, and fail the commit when it grows.",
-      hints: [
-        "It's a TypeScript monorepo of 14 packages.",
-        'CI checks that some of its packages still bundle for the browser.',
-        'One of its packages is a single API for many LLM providers.',
-      ],
       sources: [
         'scripts/check-entry-graphs.mjs',
         'scripts/check-browser-smoke.mjs',
@@ -91,11 +79,6 @@ Keep the script short and dependency-free, and show me the numbers it found.`,
       readMinutes: 2,
       problem: "Agent tests that call real models are slow, cost money, need keys, and can read your real credentials.",
       idea: "Test against a scripted fake model, in an environment with nothing of yours in it, and name regression tests after their issue.",
-      hints: [
-        "Its test suite talks to a model that doesn't exist.",
-        'Its test script starts from an empty environment.',
-        '81 of its regression tests are named after the issue they fix.',
-      ],
       sources: [
         'packages/ai/src/providers/faux.ts',
         'packages/coding-agent/test/suite/README.md',
@@ -122,11 +105,6 @@ Name new regression tests after the issue they fix. Keep the change small.`,
       readMinutes: 3,
       problem: "Agents rewrite the conversation to branch, compact or hide a message, and lose what actually happened: you can't go back, audit it or replay it.",
       idea: "Store each session as an append-only tree of entries, and build the model's context as a projection of the active branch.",
-      hints: [
-        "Its maintainers created a famous Java game framework and a famous Python web framework.",
-        "Its sessions are JSONL files where every line points to its parent.",
-        "Its compaction entries record the first entry they kept.",
-      ],
       sources: [
         "packages/coding-agent/docs/session-format.md",
         "packages/coding-agent/src/core/session-manager.ts",
@@ -153,11 +131,6 @@ Plan migration of existing data separately, and keep the change small.`,
       readMinutes: 2,
       problem: "Supply-chain attacks arrive through lockfile changes nobody reads and install scripts that run on every machine.",
       idea: "Pin exact versions, disable install scripts except a short allowlist with reasons, and block lockfile commits unless they're on purpose.",
-      hints: [
-        'You can install it with one curl command, and the installer pins every dependency.',
-        'Only three of its dependencies are allowed to run install scripts.',
-        'You can run it straight from GitHub with nix run.',
-      ],
       sources: [
         'AGENTS.md',
         'scripts/check-lockfile-commit.mjs',
@@ -185,11 +158,6 @@ Before changing CI, show me any dependency that breaks without its install scrip
       readMinutes: 3,
       problem: "Models call edit tools with curly quotes, trailing spaces, snippets that appear twice and overlapping changes, and a naive find-and-replace silently edits the wrong place or corrupts the file.",
       idea: "Match exactly first, fuzzy-match only on normalized text, reject anything ambiguous with an error the model can act on, and serialize writes to the same file.",
-      hints: [
-        "Its edit tool tries an exact match before a fuzzy one.",
-        "It runs edits to the same file one at a time, but edits to different files in parallel.",
-        "Its prompt templates live in a hidden folder named after the project.",
-      ],
       sources: [
         "packages/coding-agent/src/core/tools/edit-diff.ts",
         "packages/coding-agent/src/core/tools/edit.ts",
@@ -216,11 +184,6 @@ Keep the tool's interface unchanged unless a change removes a whole class of err
       readMinutes: 2,
       problem: "A terminal UI that half-owns scrolling, or redraws the whole screen, flickers, loses scrollback and breaks selection.",
       idea: "Decide who owns the scrollback in each mode, redraw only what changed, and count full redraws in tests.",
-      hints: [
-        'It has two terminal renderers behind one interface.',
-        'It has a test that fails if editing a file redraws the whole screen.',
-        'It runs on Android phones, and its renderer has a special case for that.',
-      ],
       sources: [
         'packages/tui/README.md',
         'packages/tui/src/tui-main-screen.ts',
@@ -247,11 +210,6 @@ Keep the change small and explain the number you assert on.`,
       readMinutes: 2,
       problem: "Everyone writes docs for agents, but almost nobody knows whether they help.",
       idea: "Run the same tasks with and without the docs, and keep what moves the pass rate.",
-      hints: [
-        'It runs its agent with and without its docs to measure what the docs are worth.',
-        'Its website is a two-letter name on .dev.',
-        'Its name is a mathematical constant.',
-      ],
       sources: [
         'packages/evals/README.md',
         'packages/evals/evals/documentation-audit.eval.ts',
@@ -272,16 +230,13 @@ Start with the plan and one task end to end before building the rest.`,
   ],
   finale: {
     slug: 'gtc2-reveal-power-user-tips',
-    title: 'The reveal: it was Pi (plus 20 power-user tips)',
-    teaser: 'The reveal + 20 power-user tips',
-    description:
-      "All eight round-2 #GuessTheCodebase lessons came from Pi. Here's the repo, plus 20 power-user tips for using it every day.",
-    subtitle:
-      "Round 2's eight lessons came from one open-source agent harness. Here it is, and here's how to get the most out of it.",
-    tag: 'Finale',
+    title: 'Pi: 20 power-user tips',
+    teaser: '20 power-user tips',
+    description: '20 power-user tips for Pi, the minimal, extensible coding agent harness, plus a recap of the eight engineering lessons from its source.',
+    subtitle: 'Shortcuts, extensions and workflow tricks for the terminal agent harness.',
+    tag: 'Tips',
     readMinutes: 5,
-    image: { path: '/assets/og/gtc2-reveal.png', alt: 'Guess the codebase, round 2: the reveal. It was Pi.' },
-    shareText:
-      'The #GuessTheCodebase round 2 answer: it was Pi. 8 engineering lessons, plus 20 power-user tips:',
+    image: { path: '/assets/og/gtc2-reveal.png', alt: 'Pi: 20 power-user tips' },
+    shareText: '20 power-user tips for Pi, plus 8 engineering lessons from its source:',
   },
 })

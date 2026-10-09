@@ -26,6 +26,9 @@ for (let page of staticPages()) {
   }
   let file = path.join(outDir, page.file)
   await fs.mkdir(path.dirname(file), { recursive: true })
-  await fs.writeFile(file, await response.text())
+  let body = await response.text()
+  // remix/component appends a streaming marker to every document; static files don't need it.
+  if (file.endsWith('.html')) body = body.replace(/<!-- rmx:flush document -->\s*$/, '\n')
+  await fs.writeFile(file, body)
   console.log(`${page.path} -> ${path.relative(rootDir, file)}`)
 }

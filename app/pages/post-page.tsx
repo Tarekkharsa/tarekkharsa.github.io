@@ -5,6 +5,7 @@ import {
   modifiedDate,
   postPath,
   postUrl,
+  roundOf,
   seriesIndex,
   type GuidePost,
   type SeriesPost,
@@ -15,7 +16,6 @@ import {
   ApplyPrompt,
   Crumbs,
   InShort,
-  GuessCallout,
   lessonCount,
   lessonLabel,
   PostBody,
@@ -23,6 +23,7 @@ import {
   SeriesNav,
   SeriesPager,
   ShareBar,
+  SourceCallout,
 } from '../ui/post-parts.tsx'
 
 type ArticlePost = GuidePost | SeriesPost
@@ -48,7 +49,7 @@ export function PostPage(handle: Handle<{ post: ArticlePost }>) {
               post.kind === 'guide'
                 ? [{ label: 'writing' }]
                 : [
-                    { label: 'guess the codebase', href: postPath(seriesIndex) },
+                    { label: 'lessons', href: postPath(seriesIndex) },
                     { label: lessonLabel(post) },
                   ]
             }
@@ -59,7 +60,7 @@ export function PostPage(handle: Handle<{ post: ArticlePost }>) {
               post={post}
               extra={
                 post.kind === 'lesson'
-                  ? `Round ${post.round} · lesson ${post.lesson} of ${lessonCount}`
+                  ? `${roundOf(post).codebase.name} · lesson ${post.lesson} of ${lessonCount}`
                   : undefined
               }
             />
@@ -69,7 +70,7 @@ export function PostPage(handle: Handle<{ post: ArticlePost }>) {
               before={post.kind === 'lesson' ? <InShort post={post} /> : null}
             >
               {post.kind === 'lesson' ? <ApplyPrompt post={post} /> : null}
-              {post.kind === 'lesson' ? <GuessCallout post={post} /> : null}
+              {post.kind === 'lesson' ? <SourceCallout post={post} /> : null}
             </PostBody>
             <ShareBar post={post} />
             {post.kind !== 'guide' ? <SeriesPager current={post} /> : null}

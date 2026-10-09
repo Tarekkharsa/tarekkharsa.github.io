@@ -1,9 +1,7 @@
 import type { Handle } from 'remix/component'
 
-import { postPath, postUrl, roundPosts, rounds, seriesIndex, type Round } from '../content/posts.ts'
-import { site, tweetIntent } from '../site.ts'
+import { postPath, roundPosts, rounds, seriesIndex, type Round } from '../content/posts.ts'
 import { Document } from '../ui/document.tsx'
-import { XLogo } from '../ui/icons.tsx'
 import { Crumbs, lessonCount, PostBody, PostHeader, ShareBar } from '../ui/post-parts.tsx'
 
 export function SeriesPage() {
@@ -19,15 +17,10 @@ export function SeriesPage() {
         nav="series"
       >
         <main id="content">
-          <Crumbs trail={[{ label: 'guess the codebase' }]} />
+          <Crumbs trail={[{ label: 'lessons' }]} />
           <PostHeader
             post={post}
-            extra={`${rounds.length} rounds · ${lessonCount} lessons each`}
-            heading={
-              <>
-                Guess the codebase<span style="color:var(--accent)">?</span>
-              </>
-            }
+            extra={`${rounds.length} codebases · ${rounds.length * lessonCount} lessons`}
           />
           <PostBody slug={post.slug}>
             {rounds.map((round, index) => (
@@ -44,58 +37,34 @@ export function SeriesPage() {
 function RoundSection(handle: Handle<{ round: Round; latest: boolean }>) {
   return () => {
     let { round, latest } = handle.props
+    let { codebase } = round
     let id = `round-${round.number}`
 
     return (
       <section aria-labelledby={id}>
-        <h2 id={id}>{latest ? `Round ${round.number} (new)` : `Round ${round.number}`}</h2>
+        <h2 id={id}>{latest ? `${codebase.name} (new)` : codebase.name}</h2>
+        <p class="round-intro">
+          <a href={codebase.url}>
+            <code>{codebase.repo}</code>
+          </a>
+          , {codebase.blurb}. {round.pitch}
+        </p>
         <ul class="posts">
           {roundPosts(round).map((entry) => (
             <li>
               <a class="row" href={postPath(entry)}>
                 <span class="t">
                   <span class="tag">
-                    {entry.kind === 'lesson' ? `${entry.lesson} · ${entry.tag}` : 'finale'}
+                    {entry.kind === 'lesson' ? `${entry.lesson} · ${entry.tag}` : 'tips'}
                   </span>
                   {entry.kind === 'lesson' ? entry.title : entry.teaser}
                 </span>
-                <span class="d">
-                  {entry.kind === 'lesson' ? `${entry.readMinutes} min` : 'spoilers'}
-                </span>
-                <span class="s">
-                  {entry.kind === 'lesson'
-                    ? entry.subtitle
-                    : "Only open this once you've made your guess."}
-                </span>
+                <span class="d">{`${entry.readMinutes} min`}</span>
+                <span class="s">{entry.subtitle}</span>
               </a>
             </li>
           ))}
         </ul>
-
-        <div class="callout game">
-          <p class="callout-kicker">{`🕵️ Round ${round.number}, hint zero`}</p>
-          <p>{round.hintZero}</p>
-          <div class="game-actions" style="margin:0.8rem 0 0">
-            <a
-              class="btn btn-primary"
-              href={tweetIntent(
-                round.number === 1
-                  ? `🕵️ Playing #GuessTheCodebase by @${site.twitterHandle}. My first guess: `
-                  : `🕵️ Playing #GuessTheCodebase round ${round.number} by @${site.twitterHandle}. My first guess: `,
-                postUrl(seriesIndex),
-              )}
-              target="_blank"
-              rel="noopener"
-            >
-              <XLogo /> Post a first guess
-            </a>
-            {latest ? (
-              <a class="btn" href={site.social.twitter}>
-                {`Follow @${site.twitterHandle}`}
-              </a>
-            ) : null}
-          </div>
-        </div>
       </section>
     )
   }

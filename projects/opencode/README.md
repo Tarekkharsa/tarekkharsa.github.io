@@ -13,8 +13,8 @@
 | Piece             | Where                                                 | State                             |
 | ----------------- | ----------------------------------------------------- | --------------------------------- |
 | 8 lesson posts    | `content/posts/gtc3-0*.html`                          | Live, in feed                     |
-| Finale + 20 tips  | `content/posts/gtc3-reveal-power-user-tips.html`      | Live but unlisted                 |
-| Round data        | `app/content/rounds/opencode.ts`                      | Hints, pinned sources, finale     |
+| Finale + 20 tips  | `content/posts/gtc3-reveal-power-user-tips.html`      | Live, in feed                     |
+| Round data        | `app/content/rounds/opencode.ts`                      | Pinned sources, finale            |
 | OG images         | `public/assets/og/gtc3-*.png`                         | Rendered (`npm run og -- gtc3`)   |
 | X campaign        | [`tweets.ts`](./tweets.ts) → [`tweet-kit.html`](./tweet-kit.html) | Ready               |
 

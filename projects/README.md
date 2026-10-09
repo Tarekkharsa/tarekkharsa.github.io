@@ -10,9 +10,9 @@ round on a local branch that is never pushed, and merge it on launch day.
 
 | Project              | Round | Status                                        |
 | -------------------- | ----- | --------------------------------------------- |
-| [t3code](./t3code/)  | 1     | Published, finale unlisted until reveal day   |
-| [pi](./pi/)          | 2     | Published, finale unlisted until reveal day   |
-| [opencode](./opencode/) | 3  | Published, finale unlisted until reveal day   |
+| [t3code](./t3code/)  | 1     | Published                                     |
+| [pi](./pi/)          | 2     | Published                                     |
+| [opencode](./opencode/) | 3  | Published                                     |
 
 ## Layout
 
@@ -39,19 +39,21 @@ npm test                   # includes the kit checks
 
 ## Starting a new round
 
+The site names every codebase up front. The guessing game (#GuessTheCodebase) only runs on X:
+tease each lesson there without the name, and link to the site once it's revealed.
+
 1. **Research** in `projects/<name>/research/`: read the repo, and write down every fact you
-   plan to claim, with the file it comes from. Each lesson needs a "where to look" list.
+   plan to claim, with the file it comes from. Each lesson needs a list of source files.
 2. **Pick 8 lessons** across different areas (architecture, performance, testing, PRs,
-   tooling, dev setup, UX, docs). Write 3 hints per lesson, vague first and specific last.
-   Hints accumulate across lessons, so the last ones can be nearly a giveaway.
-3. **Site:** add `app/content/rounds/<name>.ts` with `defineRound({...})` (answer, hint zero,
+   tooling, dev setup, UX, docs), plus power-user tips for the finale.
+3. **Site:** add `app/content/rounds/<name>.ts` with `defineRound({...})` (codebase,
    8 lessons, finale) and put it first in `rounds` in `app/content/posts.ts`. Slugs start
-   with the round's prefix (`gtc3-01-...`). The hub, series nav, hints, pager and feed pick it
-   up from there. Never change an earlier round's slugs: they're already shared.
-4. **Posts:** prose in `content/posts/<slug>.html`, metadata in the round's file. Don't name
-   the repo in lessons (redact package names, env vars, config folders); the answer box does.
-   Keep the finale `indexed: false` until reveal day.
-5. **Images:** `npm run og -- gtc3` renders only the new round's images.
-6. **Campaign:** copy `t3code/tweets.ts` as a starting point, then `npm run kit -- <name>`.
-7. **Reveal day:** in the round's file set `finale.indexed: true` and add a `listing`, then
-   update the "keeps every reveal out of the feed" test in `app/site.test.ts`.
+   with the round's prefix (`gtc4-01-...`). The home page, hub, series nav, source links,
+   pager and feed pick it up from there. Never change an earlier round's slugs: they're
+   already shared.
+4. **Posts:** prose in `content/posts/<slug>.html`, metadata in the round's file.
+5. **Images:** `npm run og -- gtc4` renders only the new round's images.
+6. **Campaign:** copy `opencode/tweets.ts` as a starting point, then `npm run kit -- <name>`.
+   If you tease on X before the site names the repo, keep the round on a local branch that
+   is never pushed (this repo is public) and merge it on reveal day.
+7. **Spread it out:** publish a lesson every day or two instead of all eight at once.
