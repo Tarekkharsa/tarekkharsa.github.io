@@ -46,6 +46,19 @@ npm run kit        # renders projects/<name>/tweet-kit.html from projects/<name>
 npm run og         # re-renders the series social images with headless Chrome (local only)
 ```
 
+## Analytics
+
+Visits and reads go to [GoatCounter](https://tarekkharsa.goatcounter.com) (free, cookie-free,
+no consent banner). Every page loads its async `count.js`. It never counts localhost, so dev
+and preview don't skew the numbers. To stop counting your own visits in a browser, open
+`https://tarekkharsa.github.io/#toggle-goatcounter` once.
+
+- **Visitors / page views:** the normal page list, one row per URL.
+- **Unique reads:** `site.js` sends a `read/<slug>` event once a reader reaches the end of a
+  post's text after spending at least 30% of its read time on the page (10 s minimum). That
+  event's visitor count is the post's unique reads; compare it with the post's visitors for a
+  read rate.
+
 ## Projects
 
 Each codebase I study gets a folder in [`projects/`](projects/README.md): research notes,

@@ -11,6 +11,14 @@ export const site = {
     twitter: 'https://twitter.com/tarekkh1997',
   },
   copyrightYear: 2026,
+  /**
+   * GoatCounter (cookie-free, no consent banner). Dashboard: https://tarekkharsa.goatcounter.com.
+   * count.js skips localhost, so `npm run dev` and `npm run preview` are never counted.
+   */
+  analytics: {
+    endpoint: 'https://tarekkharsa.goatcounter.com/count',
+    script: 'https://gc.zgo.at/count.js',
+  },
   /** 400×400 portrait, shown on the home page only. */
   photo: { path: '/assets/tarek.jpg', alt: 'Tarek Kharsa' },
 } as const

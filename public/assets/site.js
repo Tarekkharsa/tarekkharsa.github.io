@@ -44,6 +44,40 @@
     button.addEventListener("click", () => copy(location.href.split("#")[0], button, label));
   });
 
+  // Count a "read", not just a view: the end of the post was on screen, and the page was open
+  // for at least 30% of its read time (10 s minimum). Sent once per page view as a GoatCounter
+  // event at read/<slug>; GoatCounter dedupes visitors, so that path's visitors are unique reads.
+  const article = document.querySelector("article[data-read-slug]");
+  const body = article && article.querySelector(".prose-body");
+  if (body && "IntersectionObserver" in window) {
+    const minutes = Number(article.dataset.readMinutes) || 1;
+    const minMs = Math.max(10, minutes * 60 * 0.3) * 1000;
+    const start = performance.now();
+    let reachedEnd = false;
+    let sent = false;
+    const trySend = () => {
+      if (sent || !reachedEnd || document.visibilityState !== "visible") return;
+      if (performance.now() - start < minMs) return;
+      const gc = window.goatcounter;
+      if (!gc || typeof gc.count !== "function") return;
+      sent = true;
+      gc.count({ path: `read/${article.dataset.readSlug}`, title: `Read: ${document.title}`, event: true });
+    };
+    const end = document.createElement("div");
+    end.setAttribute("aria-hidden", "true");
+    end.style.height = "1px";
+    body.after(end);
+    new IntersectionObserver((entries, observer) => {
+      if (!entries.some((entry) => entry.isIntersecting)) return;
+      observer.disconnect();
+      reachedEnd = true;
+      trySend();
+      setTimeout(trySend, Math.max(0, minMs - (performance.now() - start)) + 50);
+    }).observe(end);
+    // A reader who finishes in a background tab is counted when they come back to it.
+    document.addEventListener("visibilitychange", trySend);
+  }
+
   const slug = (s) => s.toLowerCase().replace(/[^\w\s-]/g, "").trim().replace(/\s+/g, "-").slice(0, 60);
   document.querySelectorAll(".prose h2, .prose h3").forEach((h) => {
     if (!h.id) h.id = slug(h.textContent);

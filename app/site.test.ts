@@ -71,6 +71,32 @@ describe('Guess the codebase series', () => {
   })
 })
 
+describe('analytics', () => {
+  it('loads GoatCounter once on every page', async () => {
+    for (let page of staticPages()) {
+      if (!page.file.endsWith('.html')) continue
+      let { body } = await get(page.path)
+      let tags = body.match(/<script data-goatcounter="[^"]*"[^>]*>/g) ?? []
+      assert.equal(tags.length, 1, page.path)
+      assert.match(tags[0]!, new RegExp(`data-goatcounter="${site.analytics.endpoint}"`), page.path)
+      assert.match(tags[0]!, /\basync\b/, page.path)
+    }
+  })
+
+  it('marks every article for read tracking, and nothing else', async () => {
+    for (let post of posts) {
+      let { body } = await get(postPath(post))
+      let article = body.match(/<article[^>]*>/)?.[0]
+      if (post.kind === 'series') {
+        assert.equal(article, undefined, post.slug)
+        continue
+      }
+      assert.match(article ?? '', new RegExp(`data-read-slug="${post.slug}"`), post.slug)
+      assert.match(article ?? '', new RegExp(`data-read-minutes="${post.readMinutes}"`), post.slug)
+    }
+  })
+})
+
 describe('updated posts', () => {
   it('show the update date and use it as the modified date', async () => {
     let { body } = await get(postPath(t3CodeServerGuide))

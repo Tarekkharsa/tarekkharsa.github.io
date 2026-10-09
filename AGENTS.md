@@ -12,7 +12,8 @@ docs (`node_modules/remix/INDEX.md`) rather than relying on memory.
   A new route needs an entry there or it will not be published.
 - **No framework JavaScript in the browser.** Pages ship only `public/assets/site.js`
   (progressive enhancement; pages must work without it). Do not add `clientEntry()`,
-  hydration or the asset server without discussing it first.
+  hydration or the asset server without discussing it first. The one third-party script is
+  GoatCounter analytics (`site.analytics`, async, cookie-free); pages must not depend on it.
 - **URLs are public and must not change.** Posts live at `/posts/<slug>.html`.
 - **Spoilers:** the #GuessTheCodebase reveal post (`finale`) is `indexed: false`, so it stays
   out of `feed.xml` and `sitemap.xml`. Keep it that way.

@@ -51,7 +51,8 @@ export function PostPage(handle: Handle<{ post: ArticlePost }>) {
                   ]
             }
           />
-          <article>
+          {/* site.js reads these to count a "read" once the reader reaches the end. */}
+          <article data-read-slug={post.slug} data-read-minutes={post.readMinutes}>
             <PostHeader
               post={post}
               extra={post.kind === 'lesson' ? `Lesson ${post.lesson} of ${lessonCount}` : undefined}

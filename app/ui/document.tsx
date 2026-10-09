@@ -62,6 +62,7 @@ export function Document(handle: Handle<DocumentProps>) {
           <script innerHTML={unsafeHTML(themeScript)} />
           <link rel="stylesheet" href="/assets/site.css" />
           <script src="/assets/site.js" defer />
+          <script data-goatcounter={site.analytics.endpoint} async src={site.analytics.script} />
         </head>
         <body>
           <a class="skip" href="#content">
