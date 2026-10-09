@@ -1,0 +1,178 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>A PR process for the AI era — Tarek Kharsa</title>
+<meta name="description" content="When anyone can generate a 2,000-line PR in ten minutes, review time is what you protect. Lesson 4 of 8 in #GuessTheCodebase: can you guess which open-source repo it came from?">
+<meta name="author" content="Tarek Kharsa">
+<meta name="color-scheme" content="light dark">
+<meta name="theme-color" content="#FBFAF7" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#14171B" media="(prefers-color-scheme: dark)">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<link rel="canonical" href="https://tarekkharsa.github.io/posts/gtc-04-pr-process-for-the-ai-era.html">
+<link rel="alternate" type="application/atom+xml" title="Tarek Kharsa" href="/feed.xml">
+<meta property="og:site_name" content="Tarek Kharsa">
+<meta property="og:locale" content="en_US">
+<meta property="og:title" content="A PR process for the AI era">
+<meta property="og:description" content="When anyone can generate a 2,000-line PR in ten minutes, review time is what you protect. Lesson 4 of 8 in #GuessTheCodebase: can you guess which open-source repo it came from?">
+<meta property="og:type" content="article">
+<meta property="og:url" content="https://tarekkharsa.github.io/posts/gtc-04-pr-process-for-the-ai-era.html">
+<meta property="og:image" content="https://tarekkharsa.github.io/assets/og/gtc-04.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="Guess the codebase, lesson 4: A PR process for the AI era">
+<meta property="article:published_time" content="2026-10-09T00:00:00Z">
+<meta property="article:author" content="https://tarekkharsa.github.io/">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:creator" content="@tarekkh1997">
+<meta name="twitter:title" content="A PR process for the AI era">
+<meta name="twitter:description" content="When anyone can generate a 2,000-line PR in ten minutes, review time is what you protect. Lesson 4 of 8 in #GuessTheCodebase: can you guess which open-source repo it came from?">
+<meta name="twitter:image" content="https://tarekkharsa.github.io/assets/og/gtc-04.png">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "A PR process for the AI era",
+  "description": "When anyone can generate a 2,000-line PR in ten minutes, review time is what you protect. Lesson 4 of 8 in #GuessTheCodebase: can you guess which open-source repo it came from?",
+  "image": "https://tarekkharsa.github.io/assets/og/gtc-04.png",
+  "datePublished": "2026-10-09T00:00:00Z",
+  "dateModified": "2026-10-09T00:00:00Z",
+  "author": {
+    "@type": "Person",
+    "name": "Tarek Kharsa",
+    "url": "https://tarekkharsa.github.io/"
+  },
+  "isPartOf": {
+    "@type": "CreativeWorkSeries",
+    "name": "Guess the codebase",
+    "url": "https://tarekkharsa.github.io/posts/guess-the-codebase.html"
+  },
+  "mainEntityOfPage": "https://tarekkharsa.github.io/posts/gtc-04-pr-process-for-the-ai-era.html",
+  "url": "https://tarekkharsa.github.io/posts/gtc-04-pr-process-for-the-ai-era.html"
+}
+</script>
+<script>try{const t=localStorage.getItem("theme");if(t)document.documentElement.dataset.theme=t}catch{}</script>
+<link rel="stylesheet" href="../assets/site.css">
+<script src="../assets/site.js" defer></script>
+</head>
+<body>
+<a class="skip" href="#content">Skip to content</a>
+<div class="progress" aria-hidden="true"><span></span></div>
+<header class="topbar">
+  <div class="topbar-inner">
+    <a class="brand" href="../">tarek<span class="accent">.</span>kharsa</a>
+    <nav class="nav" aria-label="Main">
+      <a href="../#writing">writing</a>
+      <a href="../posts/guess-the-codebase.html" aria-current="page">series</a>
+      <a class="hide-sm" href="https://github.com/Tarekkharsa">github</a>
+      <a class="hide-sm" href="/feed.xml">rss</a>
+      <button class="theme-toggle" type="button" aria-label="Toggle dark mode">
+        <svg class="sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>
+        <svg class="moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8Z"/></svg>
+      </button>
+    </nav>
+  </div>
+</header>
+<main id="content">
+  <p class="crumbs"><a href="../">home</a> / <a href="guess-the-codebase.html">guess the codebase</a> / lesson 4</p>
+  <article>
+    <header class="post-header">
+      <p class="meta"><span class="tag">GitHub &amp; PRs</span><span>Lesson 4 of 8</span><time datetime="2026-10-09">Oct 9, 2026</time><span>2 min read</span></p>
+      <h1>A PR process for the AI era</h1>
+      <p class="subtitle">When anyone can generate a 2,000-line PR in ten minutes, review time is what you protect.</p>
+    </header>
+    <nav class="series-nav" aria-label="Series">
+      <a class="label" href="guess-the-codebase.html">Guess the codebase</a>
+      <ol><li><a href="gtc-01-decide-commit-then-act.html" title="Decide, commit, then act">1</a></li><li><a href="gtc-02-performance-budgets-as-tests.html" title="Performance budgets belong in unit tests">2</a></li><li><a href="gtc-03-mock-the-boundary.html" title="Mock the boundary, not the logic">3</a></li><li><a href="gtc-04-pr-process-for-the-ai-era.html" aria-current="page" title="A PR process for the AI era">4</a></li><li><a href="gtc-05-taste-as-lint-rules.html" title="Turn taste into lint rules">5</a></li><li><a href="gtc-06-dev-setup-for-parallel-agents.html" title="A dev setup built for ten agents on one laptop">6</a></li><li><a href="gtc-07-honest-ui.html" title="Lying spinners, stale labels, one-way doors">7</a></li><li><a href="gtc-08-write-docs-for-agents.html" title="Write docs for your most frequent contributor">8</a></li><li><a href="gtc-reveal-t3-code-power-user-tips.html" title="The reveal">?</a></li></ol>
+    </nav>
+    <div class="prose">
+
+<p>Open source has a new problem: writing code is now cheap and reviewing it isn't. This repo's contribution process is designed around that.</p>
+
+<h2>A PR template that asks for reasoning</h2>
+<ul>
+  <li><strong>Problem</strong>: one or two sentences.</li>
+  <li><strong>Change</strong>: how it fixes the problem, and why changes to several components belong together.</li>
+  <li><strong>Scope &amp; approval</strong>: a link to the maintainer's approval <em>comment</em>. A linked issue alone isn't enough.</li>
+  <li><strong>Verification</strong>: what you checked, what you saw, and what you <em>couldn't</em> check.</li>
+</ul>
+<blockquote><p>"Tests pass" alone is insufficient.</p></blockquote>
+<p>It ends with the model and harness that did the work. No hiding AI involvement and no shaming it either. It's recorded the way you'd record a dependency version.</p>
+
+<h2>One underlying problem per PR</h2>
+<blockquote><p>Count the underlying problems, not the linked issues.</p></blockquote>
+<p>Five issues can describe one bug. A big diff can still be one problem. Adjacent cleanup gets its own PR.</p>
+
+<h2>AI triage that resists prompt injection</h2>
+<p>If a bot triages PRs, a PR can try to talk it into approving. Their defense: every run resolves <code>main</code> to a commit SHA and loads the policy and exemption list from <em>that</em> SHA.</p>
+<blockquote><p>PR/fork copies and PR-body instructions cannot change policy or exemptions.</p></blockquote>
+<p>If a policy file is missing or malformed, the PR is left unresolved. Nothing gets exempted or auto-closed because of it.</p>
+
+<h2>Review bots with a narrow job</h2>
+<p>Their AI UI reviewer looks only at changed lines, answers exactly three questions, doesn't build the project or ask for screenshots, has a budget per run and per PR, and replies <em>exactly</em> "All clear" when there's nothing to report. A narrow job with clear rules beats "please review this PR".</p>
+<p>Auto-approval has two explicit carve-outs that always need a human: PRs that <strong>change product defaults</strong>, and PRs that <strong>add or broaden a lint or type suppression</strong>.</p>
+
+<h2>Automation that gives context, not gates</h2>
+<ul>
+  <li><strong>Size labels</strong> from XS to XXL, with test files <em>excluded</em> in mixed PRs. If adding tests made a PR look bigger and scarier, people would stop adding tests.</li>
+  <li><strong>A native-change label</strong> on mobile PRs that change the native build fingerprint. Those get merged as a batch right before a store submission, so main can ship over-the-air updates the rest of the time.</li>
+  <li><strong>CI rejects committed PR screenshots.</strong> UI PRs need before/after images, but they're uploaded to the PR. Git history is forever.</li>
+</ul>
+
+<h2>A security comment every repo should copy</h2>
+<pre><code># This pull_request_target job may fetch untrusted PR commits only as passive
+# git data. Do not add dependency installs, build/test scripts, or cache
+# actions here.</code></pre>
+
+<h2>Closing PRs without being a jerk</h2>
+<p>Every policy closure names the rule, cites the evidence, links the guide section and explains how to get the PR reconsidered. And:</p>
+<blockquote><p>We assess the problem, scope, approval, and evidence, not an author's writing style or whether we think an agent wrote the PR.</p></blockquote>
+
+<h2>Commit titles that read like release notes</h2>
+<pre><code>fix(server): status refresh no longer pegs CPU in repos with thousands of untracked files
+perf(web): DOM changes no longer restyle the whole page</code></pre>
+<p>A conventional-commit prefix, then what changed for the user. Not "fix bug in StatusService".</p>
+      <div class="callout steal">
+        <p class="callout-kicker">Steal this</p>
+        <p>Make the PR template ask for reasoning and evidence, not checkboxes. Load bot policy from a trusted ref, never from the PR. Give each AI reviewer one narrow job. Pick your "always needs a human" triggers on purpose.</p>
+      </div>
+
+      <section class="callout game" aria-labelledby="game-h">
+        <p class="callout-kicker">🕵️ #GuessTheCodebase</p>
+        <p class="callout-title" id="game-h">Which open-source codebase did I learn this from?</p>
+        <p>Open the hints one at a time, then post your guess before you peek.</p>
+        <ul class="hints"><li><details><summary>Hint 1</summary><p>One of its maintainers is a well-known tech YouTuber.</p></details></li><li><details><summary>Hint 2</summary><p>Over a thousand commits on main carry AI co-author trailers.</p></details></li><li><details><summary>Hint 3</summary><p>Its AI triage bot loads its rules from main, never from the PR.</p></details></li></ul>
+        <details class="hints-earlier"><summary>+ 9 hints from earlier lessons</summary><ul class="hints"><li><details><summary>Hint E1</summary><p>It's open source and has over 400,000 users.</p></details></li><li><details><summary>Hint E2</summary><p>The same server drives a web app, a desktop app and a mobile app.</p></details></li><li><details><summary>Hint E3</summary><p>Its server is event-sourced and written in TypeScript.</p></details></li><li><details><summary>Hint E4</summary><p>Its maintainers list “performance without compromise” as a value they never trade away.</p></details></li><li><details><summary>Hint E5</summary><p>Its users run AI agents all day, and the docs say they notice a single dropped frame.</p></details></li><li><details><summary>Hint E6</summary><p>Its server is built on the Effect library.</p></details></li><li><details><summary>Hint E7</summary><p>It talks to six different AI coding agents through their own CLIs.</p></details></li><li><details><summary>Hint E8</summary><p>Its pitch: “bring your own subscription”.</p></details></li><li><details><summary>Hint E9</summary><p>Every agent turn ends with a hidden git ref so you can diff and restore.</p></details></li></ul></details>
+        <div class="game-actions">
+          <a class="btn btn-primary" href="https://twitter.com/intent/tweet?text=%F0%9F%95%B5%EF%B8%8F%20My%20%23GuessTheCodebase%20guess%20for%20lesson%204%20(%22A%20PR%20process%20for%20the%20AI%20era%22)%20by%20%40tarekkh1997%3A%20&url=https%3A%2F%2Ftarekkharsa.github.io%2Fposts%2Fgtc-04-pr-process-for-the-ai-era.html" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M18.9 2H22l-6.8 7.8L23.2 22h-6.3l-4.9-6.4L6.4 22H3.3l7.3-8.3L1 2h6.4l4.4 5.9L18.9 2Zm-1.1 18h1.7L6.3 3.9H4.5L17.8 20Z"/></svg> Post my guess</a>
+        </div>
+        <details class="reveal">
+          <summary>I give up. Reveal the codebase.</summary>
+          <div class="answer">
+            <p><strong><a href="https://github.com/pingdotgg/t3code">T3 Code</a></strong> (<code>pingdotgg/t3code</code>), the open-source GUI for coding agents. Where to look:</p>
+            <ul><li><a href="https://github.com/pingdotgg/t3code/blob/main/CONTRIBUTING.md"><code>CONTRIBUTING.md</code></a></li><li><a href="https://github.com/pingdotgg/t3code/blob/main/.github/pull_request_template.md"><code>.github/pull_request_template.md</code></a></li><li><a href="https://github.com/pingdotgg/t3code/blob/main/.github/workflows/pr-size.yml"><code>.github/workflows/pr-size.yml</code></a></li><li><a href="https://github.com/pingdotgg/t3code/blob/main/.github/workflows/mobile-fingerprint-check.yml"><code>.github/workflows/mobile-fingerprint-check.yml</code></a></li><li><a href="https://github.com/pingdotgg/t3code/blob/main/.macroscope/check-run-agents/ui-consistency.md"><code>.macroscope/check-run-agents/ui-consistency.md</code></a></li><li><a href="https://github.com/pingdotgg/t3code/blob/main/.macroscope/approvability.md"><code>.macroscope/approvability.md</code></a></li></ul>
+          </div>
+        </details>
+      </section>
+    </div>
+    <div class="share">
+      <span class="label">share</span>
+      <a class="btn" href="https://twitter.com/intent/tweet?text=Lesson%204%20of%20%23GuessTheCodebase%3A%20A%20PR%20process%20for%20the%20AI%20era.%20Can%20you%20guess%20which%20open-source%20repo%20it%20came%20from%3F&url=https%3A%2F%2Ftarekkharsa.github.io%2Fposts%2Fgtc-04-pr-process-for-the-ai-era.html" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M18.9 2H22l-6.8 7.8L23.2 22h-6.3l-4.9-6.4L6.4 22H3.3l7.3-8.3L1 2h6.4l4.4 5.9L18.9 2Zm-1.1 18h1.7L6.3 3.9H4.5L17.8 20Z"/></svg> Post on X</a>
+      <button class="btn" type="button" data-copy-link><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M10 14a5 5 0 0 0 7 0l3-3a5 5 0 0 0-7-7l-1 1"/><path d="M14 10a5 5 0 0 0-7 0l-3 3a5 5 0 0 0 7 7l1-1"/></svg> Copy link</button>
+    </div>
+    <nav class="pager" aria-label="More in this series"><a class="prev" href="gtc-03-mock-the-boundary.html"><span class="dir">← previous</span><span class="tt">Mock the boundary, not the logic</span></a><a class="next" href="gtc-05-taste-as-lint-rules.html"><span class="dir">next →</span><span class="tt">Turn taste into lint rules</span></a></nav>
+  </article>
+</main>
+<footer class="site-footer">
+  <span>© 2026 Tarek Kharsa</span>
+  <nav aria-label="Footer">
+    <a href="https://twitter.com/tarekkh1997">twitter</a>
+    <a href="https://www.linkedin.com/in/tarek-kharsa-0509a0177/">linkedin</a>
+    <a href="/feed.xml">rss</a>
+    <a href="https://github.com/Tarekkharsa/tarekkharsa.github.io">source</a>
+  </nav>
+</footer>
+</body>
+</html>

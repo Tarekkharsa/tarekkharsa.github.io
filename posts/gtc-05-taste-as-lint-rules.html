@@ -1,0 +1,166 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Turn taste into lint rules — Tarek Kharsa</title>
+<meta name="description" content="Review comments don't scale. A repo with 14 custom lint rules shows what does. Lesson 5 of 8 in #GuessTheCodebase: can you guess which open-source repo it came from?">
+<meta name="author" content="Tarek Kharsa">
+<meta name="color-scheme" content="light dark">
+<meta name="theme-color" content="#FBFAF7" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#14171B" media="(prefers-color-scheme: dark)">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<link rel="canonical" href="https://tarekkharsa.github.io/posts/gtc-05-taste-as-lint-rules.html">
+<link rel="alternate" type="application/atom+xml" title="Tarek Kharsa" href="/feed.xml">
+<meta property="og:site_name" content="Tarek Kharsa">
+<meta property="og:locale" content="en_US">
+<meta property="og:title" content="Turn taste into lint rules">
+<meta property="og:description" content="Review comments don't scale. A repo with 14 custom lint rules shows what does. Lesson 5 of 8 in #GuessTheCodebase: can you guess which open-source repo it came from?">
+<meta property="og:type" content="article">
+<meta property="og:url" content="https://tarekkharsa.github.io/posts/gtc-05-taste-as-lint-rules.html">
+<meta property="og:image" content="https://tarekkharsa.github.io/assets/og/gtc-05.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="Guess the codebase, lesson 5: Turn taste into lint rules">
+<meta property="article:published_time" content="2026-10-09T00:00:00Z">
+<meta property="article:author" content="https://tarekkharsa.github.io/">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:creator" content="@tarekkh1997">
+<meta name="twitter:title" content="Turn taste into lint rules">
+<meta name="twitter:description" content="Review comments don't scale. A repo with 14 custom lint rules shows what does. Lesson 5 of 8 in #GuessTheCodebase: can you guess which open-source repo it came from?">
+<meta name="twitter:image" content="https://tarekkharsa.github.io/assets/og/gtc-05.png">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "Turn taste into lint rules",
+  "description": "Review comments don't scale. A repo with 14 custom lint rules shows what does. Lesson 5 of 8 in #GuessTheCodebase: can you guess which open-source repo it came from?",
+  "image": "https://tarekkharsa.github.io/assets/og/gtc-05.png",
+  "datePublished": "2026-10-09T00:00:00Z",
+  "dateModified": "2026-10-09T00:00:00Z",
+  "author": {
+    "@type": "Person",
+    "name": "Tarek Kharsa",
+    "url": "https://tarekkharsa.github.io/"
+  },
+  "isPartOf": {
+    "@type": "CreativeWorkSeries",
+    "name": "Guess the codebase",
+    "url": "https://tarekkharsa.github.io/posts/guess-the-codebase.html"
+  },
+  "mainEntityOfPage": "https://tarekkharsa.github.io/posts/gtc-05-taste-as-lint-rules.html",
+  "url": "https://tarekkharsa.github.io/posts/gtc-05-taste-as-lint-rules.html"
+}
+</script>
+<script>try{const t=localStorage.getItem("theme");if(t)document.documentElement.dataset.theme=t}catch{}</script>
+<link rel="stylesheet" href="../assets/site.css">
+<script src="../assets/site.js" defer></script>
+</head>
+<body>
+<a class="skip" href="#content">Skip to content</a>
+<div class="progress" aria-hidden="true"><span></span></div>
+<header class="topbar">
+  <div class="topbar-inner">
+    <a class="brand" href="../">tarek<span class="accent">.</span>kharsa</a>
+    <nav class="nav" aria-label="Main">
+      <a href="../#writing">writing</a>
+      <a href="../posts/guess-the-codebase.html" aria-current="page">series</a>
+      <a class="hide-sm" href="https://github.com/Tarekkharsa">github</a>
+      <a class="hide-sm" href="/feed.xml">rss</a>
+      <button class="theme-toggle" type="button" aria-label="Toggle dark mode">
+        <svg class="sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>
+        <svg class="moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8Z"/></svg>
+      </button>
+    </nav>
+  </div>
+</header>
+<main id="content">
+  <p class="crumbs"><a href="../">home</a> / <a href="guess-the-codebase.html">guess the codebase</a> / lesson 5</p>
+  <article>
+    <header class="post-header">
+      <p class="meta"><span class="tag">DX &amp; Tooling</span><span>Lesson 5 of 8</span><time datetime="2026-10-09">Oct 9, 2026</time><span>1 min read</span></p>
+      <h1>Turn taste into lint rules</h1>
+      <p class="subtitle">Review comments don't scale. A repo with 14 custom lint rules shows what does.</p>
+    </header>
+    <nav class="series-nav" aria-label="Series">
+      <a class="label" href="guess-the-codebase.html">Guess the codebase</a>
+      <ol><li><a href="gtc-01-decide-commit-then-act.html" title="Decide, commit, then act">1</a></li><li><a href="gtc-02-performance-budgets-as-tests.html" title="Performance budgets belong in unit tests">2</a></li><li><a href="gtc-03-mock-the-boundary.html" title="Mock the boundary, not the logic">3</a></li><li><a href="gtc-04-pr-process-for-the-ai-era.html" title="A PR process for the AI era">4</a></li><li><a href="gtc-05-taste-as-lint-rules.html" aria-current="page" title="Turn taste into lint rules">5</a></li><li><a href="gtc-06-dev-setup-for-parallel-agents.html" title="A dev setup built for ten agents on one laptop">6</a></li><li><a href="gtc-07-honest-ui.html" title="Lying spinners, stale labels, one-way doors">7</a></li><li><a href="gtc-08-write-docs-for-agents.html" title="Write docs for your most frequent contributor">8</a></li><li><a href="gtc-reveal-t3-code-power-user-tips.html" title="The reveal">?</a></li></ol>
+    </nav>
+    <div class="prose">
+
+<p>When most of your contributors are AI agents, a review comment is the least scalable thing you have. You write it, the agent fixes it, and the next agent makes the same mistake tomorrow.</p>
+<p>This repo puts its taste in a custom lint plugin instead. Fourteen rules, each with its own test file.</p>
+
+<h2>Some of the rules</h2>
+<table>
+  <thead><tr><th>Rule</th><th>The taste behind it</th></tr></thead>
+  <tbody>
+    <tr><td><code>require-suppression-reason</code></td><td>Every <code>eslint-disable</code> or <code>@ts-ignore</code> must say <em>why</em></td></tr>
+    <tr><td><code>no-unscoped-has</code></td><td>No CSS <code>:has()</code> variants that restyle the whole page</td></tr>
+    <tr><td><code>no-native-title-tooltip</code></td><td>Use the styled Tooltip, not <code>title=""</code></td></tr>
+    <tr><td><code>no-test-in-loop</code></td><td>Use <code>it.each</code>, not a <code>for</code> loop around <code>it</code></td></tr>
+    <tr><td><code>no-rpc-permission-bypass</code></td><td>Client mutations go through permission-checked commands</td></tr>
+    <tr><td><code>no-hermes-unsupported-apis</code></td><td>The mobile JS engine can't run every web API</td></tr>
+    <tr><td><code>no-inline-schema-compile</code></td><td>Compile schemas once, not on every call</td></tr>
+    <tr><td><code>no-raw-mcp-registration</code></td><td>Agent tools must declare who may call them</td></tr>
+    <tr><td><code>prefer-catch-tags</code></td><td>Handle typed errors explicitly</td></tr>
+  </tbody>
+</table>
+
+<h2>Good rules know their exceptions</h2>
+<p>The tooltip rule is my favorite example. It bans <code>title</code> as a tooltip on regular elements, but it still allows <code>title</code> on <code>iframe</code>, <code>embed</code>, <code>object</code> and friends, where the attribute is the <em>accessible name</em>, not a tooltip. A blunt rule would have broken accessibility.</p>
+
+<h2>Silencing a tool should cost something</h2>
+<ul>
+  <li>Lint enforces a reason on every suppression: a <code>-- reason</code> suffix or a comment on the line above.</li>
+  <li>Any PR that adds a suppression can't be auto-approved. A human has to look.</li>
+</ul>
+
+<h2>Design systems need enforcement too</h2>
+<p>A rule called <code>shadcn/no-restyle</code> stops you from restyling a shared <code>&lt;Button&gt;</code> with <code>className</code>. You pick a <code>variant</code> or <code>size</code>. If none fits, you add a variant to the component. Layout classes (width, margin, position) go on the parent. That's how a design system stays consistent with hundreds of contributors.</p>
+
+<h2>Dead code fails CI</h2>
+<p><code>knip</code> runs in CI, and an export nobody imports fails the build. No "might need this later" exports, refactors actually delete the old files, and there are no re-export shims.</p>
+      <div class="callout steal">
+        <p class="callout-kicker">Steal this</p>
+        <p>Each time you write the same review comment for the second time, write a lint rule instead, with tests and with the exceptions spelled out. Make suppressions explain themselves and need a human to approve.</p>
+      </div>
+
+      <section class="callout game" aria-labelledby="game-h">
+        <p class="callout-kicker">🕵️ #GuessTheCodebase</p>
+        <p class="callout-title" id="game-h">Which open-source codebase did I learn this from?</p>
+        <p>Open the hints one at a time, then post your guess before you peek.</p>
+        <ul class="hints"><li><details><summary>Hint 1</summary><p>It ships its own oxlint plugin.</p></details></li><li><details><summary>Hint 2</summary><p>Its name is a letter followed by a number.</p></details></li><li><details><summary>Hint 3</summary><p>Its desktop app wraps the web app in Electron.</p></details></li></ul>
+        <details class="hints-earlier"><summary>+ 12 hints from earlier lessons</summary><ul class="hints"><li><details><summary>Hint E1</summary><p>It's open source and has over 400,000 users.</p></details></li><li><details><summary>Hint E2</summary><p>The same server drives a web app, a desktop app and a mobile app.</p></details></li><li><details><summary>Hint E3</summary><p>Its server is event-sourced and written in TypeScript.</p></details></li><li><details><summary>Hint E4</summary><p>Its maintainers list “performance without compromise” as a value they never trade away.</p></details></li><li><details><summary>Hint E5</summary><p>Its users run AI agents all day, and the docs say they notice a single dropped frame.</p></details></li><li><details><summary>Hint E6</summary><p>Its server is built on the Effect library.</p></details></li><li><details><summary>Hint E7</summary><p>It talks to six different AI coding agents through their own CLIs.</p></details></li><li><details><summary>Hint E8</summary><p>Its pitch: “bring your own subscription”.</p></details></li><li><details><summary>Hint E9</summary><p>Every agent turn ends with a hidden git ref so you can diff and restore.</p></details></li><li><details><summary>Hint E10</summary><p>One of its maintainers is a well-known tech YouTuber.</p></details></li><li><details><summary>Hint E11</summary><p>Over a thousand commits on main carry AI co-author trailers.</p></details></li><li><details><summary>Hint E12</summary><p>Its AI triage bot loads its rules from main, never from the PR.</p></details></li></ul></details>
+        <div class="game-actions">
+          <a class="btn btn-primary" href="https://twitter.com/intent/tweet?text=%F0%9F%95%B5%EF%B8%8F%20My%20%23GuessTheCodebase%20guess%20for%20lesson%205%20(%22Turn%20taste%20into%20lint%20rules%22)%20by%20%40tarekkh1997%3A%20&url=https%3A%2F%2Ftarekkharsa.github.io%2Fposts%2Fgtc-05-taste-as-lint-rules.html" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M18.9 2H22l-6.8 7.8L23.2 22h-6.3l-4.9-6.4L6.4 22H3.3l7.3-8.3L1 2h6.4l4.4 5.9L18.9 2Zm-1.1 18h1.7L6.3 3.9H4.5L17.8 20Z"/></svg> Post my guess</a>
+        </div>
+        <details class="reveal">
+          <summary>I give up. Reveal the codebase.</summary>
+          <div class="answer">
+            <p><strong><a href="https://github.com/pingdotgg/t3code">T3 Code</a></strong> (<code>pingdotgg/t3code</code>), the open-source GUI for coding agents. Where to look:</p>
+            <ul><li><a href="https://github.com/pingdotgg/t3code/blob/main/oxlint-plugin-t3code/rules/"><code>oxlint-plugin-t3code/rules/</code></a></li><li><a href="https://github.com/pingdotgg/t3code/blob/main/oxlint-plugin-t3code/rules/no-native-title-tooltip.ts"><code>oxlint-plugin-t3code/rules/no-native-title-tooltip.ts</code></a></li><li><a href="https://github.com/pingdotgg/t3code/blob/main/oxlint-plugin-t3code/rules/require-suppression-reason.ts"><code>oxlint-plugin-t3code/rules/require-suppression-reason.ts</code></a></li><li><a href="https://github.com/pingdotgg/t3code/blob/main/docs/internals/web-ui.md"><code>docs/internals/web-ui.md</code></a></li><li><a href="https://github.com/pingdotgg/t3code/blob/main/knip.jsonc"><code>knip.jsonc</code></a></li></ul>
+          </div>
+        </details>
+      </section>
+    </div>
+    <div class="share">
+      <span class="label">share</span>
+      <a class="btn" href="https://twitter.com/intent/tweet?text=Lesson%205%20of%20%23GuessTheCodebase%3A%20Turn%20taste%20into%20lint%20rules.%20Can%20you%20guess%20which%20open-source%20repo%20it%20came%20from%3F&url=https%3A%2F%2Ftarekkharsa.github.io%2Fposts%2Fgtc-05-taste-as-lint-rules.html" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M18.9 2H22l-6.8 7.8L23.2 22h-6.3l-4.9-6.4L6.4 22H3.3l7.3-8.3L1 2h6.4l4.4 5.9L18.9 2Zm-1.1 18h1.7L6.3 3.9H4.5L17.8 20Z"/></svg> Post on X</a>
+      <button class="btn" type="button" data-copy-link><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M10 14a5 5 0 0 0 7 0l3-3a5 5 0 0 0-7-7l-1 1"/><path d="M14 10a5 5 0 0 0-7 0l-3 3a5 5 0 0 0 7 7l1-1"/></svg> Copy link</button>
+    </div>
+    <nav class="pager" aria-label="More in this series"><a class="prev" href="gtc-04-pr-process-for-the-ai-era.html"><span class="dir">← previous</span><span class="tt">A PR process for the AI era</span></a><a class="next" href="gtc-06-dev-setup-for-parallel-agents.html"><span class="dir">next →</span><span class="tt">A dev setup built for ten agents on one laptop</span></a></nav>
+  </article>
+</main>
+<footer class="site-footer">
+  <span>© 2026 Tarek Kharsa</span>
+  <nav aria-label="Footer">
+    <a href="https://twitter.com/tarekkh1997">twitter</a>
+    <a href="https://www.linkedin.com/in/tarek-kharsa-0509a0177/">linkedin</a>
+    <a href="/feed.xml">rss</a>
+    <a href="https://github.com/Tarekkharsa/tarekkharsa.github.io">source</a>
+  </nav>
+</footer>
+</body>
+</html>

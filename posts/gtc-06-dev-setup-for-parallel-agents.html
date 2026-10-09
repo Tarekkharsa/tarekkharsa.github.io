@@ -1,0 +1,167 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>A dev setup built for ten agents on one laptop — Tarek Kharsa</title>
+<meta name="description" content="Ports, databases, processes and URLs: everything shared becomes a collision once agents run in parallel. Lesson 6 of 8 in #GuessTheCodebase: can you guess which open-source repo it came from?">
+<meta name="author" content="Tarek Kharsa">
+<meta name="color-scheme" content="light dark">
+<meta name="theme-color" content="#FBFAF7" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#14171B" media="(prefers-color-scheme: dark)">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<link rel="canonical" href="https://tarekkharsa.github.io/posts/gtc-06-dev-setup-for-parallel-agents.html">
+<link rel="alternate" type="application/atom+xml" title="Tarek Kharsa" href="/feed.xml">
+<meta property="og:site_name" content="Tarek Kharsa">
+<meta property="og:locale" content="en_US">
+<meta property="og:title" content="A dev setup built for ten agents on one laptop">
+<meta property="og:description" content="Ports, databases, processes and URLs: everything shared becomes a collision once agents run in parallel. Lesson 6 of 8 in #GuessTheCodebase: can you guess which open-source repo it came from?">
+<meta property="og:type" content="article">
+<meta property="og:url" content="https://tarekkharsa.github.io/posts/gtc-06-dev-setup-for-parallel-agents.html">
+<meta property="og:image" content="https://tarekkharsa.github.io/assets/og/gtc-06.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="Guess the codebase, lesson 6: A dev setup built for ten agents on one laptop">
+<meta property="article:published_time" content="2026-10-09T00:00:00Z">
+<meta property="article:author" content="https://tarekkharsa.github.io/">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:creator" content="@tarekkh1997">
+<meta name="twitter:title" content="A dev setup built for ten agents on one laptop">
+<meta name="twitter:description" content="Ports, databases, processes and URLs: everything shared becomes a collision once agents run in parallel. Lesson 6 of 8 in #GuessTheCodebase: can you guess which open-source repo it came from?">
+<meta name="twitter:image" content="https://tarekkharsa.github.io/assets/og/gtc-06.png">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "A dev setup built for ten agents on one laptop",
+  "description": "Ports, databases, processes and URLs: everything shared becomes a collision once agents run in parallel. Lesson 6 of 8 in #GuessTheCodebase: can you guess which open-source repo it came from?",
+  "image": "https://tarekkharsa.github.io/assets/og/gtc-06.png",
+  "datePublished": "2026-10-09T00:00:00Z",
+  "dateModified": "2026-10-09T00:00:00Z",
+  "author": {
+    "@type": "Person",
+    "name": "Tarek Kharsa",
+    "url": "https://tarekkharsa.github.io/"
+  },
+  "isPartOf": {
+    "@type": "CreativeWorkSeries",
+    "name": "Guess the codebase",
+    "url": "https://tarekkharsa.github.io/posts/guess-the-codebase.html"
+  },
+  "mainEntityOfPage": "https://tarekkharsa.github.io/posts/gtc-06-dev-setup-for-parallel-agents.html",
+  "url": "https://tarekkharsa.github.io/posts/gtc-06-dev-setup-for-parallel-agents.html"
+}
+</script>
+<script>try{const t=localStorage.getItem("theme");if(t)document.documentElement.dataset.theme=t}catch{}</script>
+<link rel="stylesheet" href="../assets/site.css">
+<script src="../assets/site.js" defer></script>
+</head>
+<body>
+<a class="skip" href="#content">Skip to content</a>
+<div class="progress" aria-hidden="true"><span></span></div>
+<header class="topbar">
+  <div class="topbar-inner">
+    <a class="brand" href="../">tarek<span class="accent">.</span>kharsa</a>
+    <nav class="nav" aria-label="Main">
+      <a href="../#writing">writing</a>
+      <a href="../posts/guess-the-codebase.html" aria-current="page">series</a>
+      <a class="hide-sm" href="https://github.com/Tarekkharsa">github</a>
+      <a class="hide-sm" href="/feed.xml">rss</a>
+      <button class="theme-toggle" type="button" aria-label="Toggle dark mode">
+        <svg class="sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>
+        <svg class="moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8Z"/></svg>
+      </button>
+    </nav>
+  </div>
+</header>
+<main id="content">
+  <p class="crumbs"><a href="../">home</a> / <a href="guess-the-codebase.html">guess the codebase</a> / lesson 6</p>
+  <article>
+    <header class="post-header">
+      <p class="meta"><span class="tag">Dev setup</span><span>Lesson 6 of 8</span><time datetime="2026-10-09">Oct 9, 2026</time><span>2 min read</span></p>
+      <h1>A dev setup built for ten agents on one laptop</h1>
+      <p class="subtitle">Ports, databases, processes and URLs: everything shared becomes a collision once agents run in parallel.</p>
+    </header>
+    <nav class="series-nav" aria-label="Series">
+      <a class="label" href="guess-the-codebase.html">Guess the codebase</a>
+      <ol><li><a href="gtc-01-decide-commit-then-act.html" title="Decide, commit, then act">1</a></li><li><a href="gtc-02-performance-budgets-as-tests.html" title="Performance budgets belong in unit tests">2</a></li><li><a href="gtc-03-mock-the-boundary.html" title="Mock the boundary, not the logic">3</a></li><li><a href="gtc-04-pr-process-for-the-ai-era.html" title="A PR process for the AI era">4</a></li><li><a href="gtc-05-taste-as-lint-rules.html" title="Turn taste into lint rules">5</a></li><li><a href="gtc-06-dev-setup-for-parallel-agents.html" aria-current="page" title="A dev setup built for ten agents on one laptop">6</a></li><li><a href="gtc-07-honest-ui.html" title="Lying spinners, stale labels, one-way doors">7</a></li><li><a href="gtc-08-write-docs-for-agents.html" title="Write docs for your most frequent contributor">8</a></li><li><a href="gtc-reveal-t3-code-power-user-tips.html" title="The reveal">?</a></li></ol>
+    </nav>
+    <div class="prose">
+
+<p>Run five AI agents in five git worktrees on one machine and everything that's normally shared starts colliding: ports, databases, processes, even the URLs you send to your phone. This repo's dev tooling assumes that's the normal case.</p>
+
+<h2>Ports from a hash of the worktree path</h2>
+<p>The dev runner derives ports from a hash of the worktree path. The same worktree gets the same ports after every restart, and two worktrees almost never collide. Two details I loved:</p>
+<ul>
+  <li>It skips every port on the <a href="https://fetch.spec.whatwg.org/#port-blocking">Fetch spec's blocked list</a>, the ones <code>curl</code> accepts but browsers refuse.</li>
+  <li>It only probes loopback when checking whether a port is free. Probing wildcard addresses made it move away from a free port whenever <code>tailscale serve</code> held the same number on another interface.</li>
+</ul>
+
+<h2>State per worktree</h2>
+<p>Each worktree gets its own gitignored data directory, and that directory deliberately takes priority over any ambient <code>HOME</code>-style environment variable. You can't end up on shared state by accident. A setup script runs when a worktree is created: it links the shared <code>.env</code> and warms the dependency cache.</p>
+
+<h2>Single-origin dev</h2>
+<blockquote><p>Never set <code>VITE_HTTP_URL</code> or <code>VITE_WS_URL</code> for dev.</p></blockquote>
+<p>Vite proxies <code>/api</code> and <code>/ws</code>. Baking <code>localhost</code> into the bundle "silently breaks every remote browser." With the proxy, the same build works on localhost, over the LAN and through Tailscale.</p>
+
+<h2>One command to share</h2>
+<pre><code>vp run dev --share</code></pre>
+<p>This publishes the dev server over the tailnet and prints a pairing URL to open on your phone. When the process exits, the mapping is removed.</p>
+
+<h2>The most underrated line in the agent guide</h2>
+<blockquote><p>Never <code>pkill -f</code> … Your own agent process has this worktree's path in its argv.</p></blockquote>
+<p>If an agent runs your dev server, <code>pkill -f my-worktree</code> can kill the agent itself. Kill only PIDs you captured when you spawned the process.</p>
+
+<h2>Vendored reference repos</h2>
+<p>A gitignored-from-CI <code>.repos/</code> folder holds read-only source of key libraries. Agents read real library code and patterns instead of guessing from training data. The rule: never edit them, never import from them, and re-sync when you bump the dependency.</p>
+
+<h2>CI that doesn't wait in line</h2>
+<ul>
+  <li>Lint, typecheck, build and tests run as parallel jobs, with one aggregate "Check" gate.</li>
+  <li>System packages install in the background while JS dependencies install.</li>
+  <li>Sparse checkout skips the vendored repos.</li>
+  <li>A new push to a PR cancels its superseded runs.</li>
+</ul>
+      <div class="callout steal">
+        <p class="callout-kicker">Steal this</p>
+        <p>Design dev tooling as if a dozen strangers share your laptop, because with agents that's roughly true. Derive ports and state from the worktree, keep one origin, and never kill processes by pattern.</p>
+      </div>
+
+      <section class="callout game" aria-labelledby="game-h">
+        <p class="callout-kicker">🕵️ #GuessTheCodebase</p>
+        <p class="callout-title" id="game-h">Which open-source codebase did I learn this from?</p>
+        <p>Open the hints one at a time, then post your guess before you peek.</p>
+        <ul class="hints"><li><details><summary>Hint 1</summary><p>Most of its contributions come from the app itself, controlled remotely.</p></details></li><li><details><summary>Hint 2</summary><p>It creates a git worktree per task.</p></details></li><li><details><summary>Hint 3</summary><p>You can install it with a three-character npx command.</p></details></li></ul>
+        <details class="hints-earlier"><summary>+ 15 hints from earlier lessons</summary><ul class="hints"><li><details><summary>Hint E1</summary><p>It's open source and has over 400,000 users.</p></details></li><li><details><summary>Hint E2</summary><p>The same server drives a web app, a desktop app and a mobile app.</p></details></li><li><details><summary>Hint E3</summary><p>Its server is event-sourced and written in TypeScript.</p></details></li><li><details><summary>Hint E4</summary><p>Its maintainers list “performance without compromise” as a value they never trade away.</p></details></li><li><details><summary>Hint E5</summary><p>Its users run AI agents all day, and the docs say they notice a single dropped frame.</p></details></li><li><details><summary>Hint E6</summary><p>Its server is built on the Effect library.</p></details></li><li><details><summary>Hint E7</summary><p>It talks to six different AI coding agents through their own CLIs.</p></details></li><li><details><summary>Hint E8</summary><p>Its pitch: “bring your own subscription”.</p></details></li><li><details><summary>Hint E9</summary><p>Every agent turn ends with a hidden git ref so you can diff and restore.</p></details></li><li><details><summary>Hint E10</summary><p>One of its maintainers is a well-known tech YouTuber.</p></details></li><li><details><summary>Hint E11</summary><p>Over a thousand commits on main carry AI co-author trailers.</p></details></li><li><details><summary>Hint E12</summary><p>Its AI triage bot loads its rules from main, never from the PR.</p></details></li><li><details><summary>Hint E13</summary><p>It ships its own oxlint plugin.</p></details></li><li><details><summary>Hint E14</summary><p>Its name is a letter followed by a number.</p></details></li><li><details><summary>Hint E15</summary><p>Its desktop app wraps the web app in Electron.</p></details></li></ul></details>
+        <div class="game-actions">
+          <a class="btn btn-primary" href="https://twitter.com/intent/tweet?text=%F0%9F%95%B5%EF%B8%8F%20My%20%23GuessTheCodebase%20guess%20for%20lesson%206%20(%22A%20dev%20setup%20built%20for%20ten%20agents%20on%20one%20laptop%22)%20by%20%40tarekkh1997%3A%20&url=https%3A%2F%2Ftarekkharsa.github.io%2Fposts%2Fgtc-06-dev-setup-for-parallel-agents.html" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M18.9 2H22l-6.8 7.8L23.2 22h-6.3l-4.9-6.4L6.4 22H3.3l7.3-8.3L1 2h6.4l4.4 5.9L18.9 2Zm-1.1 18h1.7L6.3 3.9H4.5L17.8 20Z"/></svg> Post my guess</a>
+        </div>
+        <details class="reveal">
+          <summary>I give up. Reveal the codebase.</summary>
+          <div class="answer">
+            <p><strong><a href="https://github.com/pingdotgg/t3code">T3 Code</a></strong> (<code>pingdotgg/t3code</code>), the open-source GUI for coding agents. Where to look:</p>
+            <ul><li><a href="https://github.com/pingdotgg/t3code/blob/main/scripts/dev-runner.ts"><code>scripts/dev-runner.ts</code></a></li><li><a href="https://github.com/pingdotgg/t3code/blob/main/scripts/setup-worktree.ts"><code>scripts/setup-worktree.ts</code></a></li><li><a href="https://github.com/pingdotgg/t3code/blob/main/t3.json"><code>t3.json</code></a></li><li><a href="https://github.com/pingdotgg/t3code/blob/main/docs/operations/development.md"><code>docs/operations/development.md</code></a></li><li><a href="https://github.com/pingdotgg/t3code/blob/main/.github/workflows/ci.yml"><code>.github/workflows/ci.yml</code></a></li></ul>
+          </div>
+        </details>
+      </section>
+    </div>
+    <div class="share">
+      <span class="label">share</span>
+      <a class="btn" href="https://twitter.com/intent/tweet?text=Lesson%206%20of%20%23GuessTheCodebase%3A%20A%20dev%20setup%20built%20for%20ten%20agents%20on%20one%20laptop.%20Can%20you%20guess%20which%20open-source%20repo%20it%20came%20from%3F&url=https%3A%2F%2Ftarekkharsa.github.io%2Fposts%2Fgtc-06-dev-setup-for-parallel-agents.html" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M18.9 2H22l-6.8 7.8L23.2 22h-6.3l-4.9-6.4L6.4 22H3.3l7.3-8.3L1 2h6.4l4.4 5.9L18.9 2Zm-1.1 18h1.7L6.3 3.9H4.5L17.8 20Z"/></svg> Post on X</a>
+      <button class="btn" type="button" data-copy-link><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M10 14a5 5 0 0 0 7 0l3-3a5 5 0 0 0-7-7l-1 1"/><path d="M14 10a5 5 0 0 0-7 0l-3 3a5 5 0 0 0 7 7l1-1"/></svg> Copy link</button>
+    </div>
+    <nav class="pager" aria-label="More in this series"><a class="prev" href="gtc-05-taste-as-lint-rules.html"><span class="dir">← previous</span><span class="tt">Turn taste into lint rules</span></a><a class="next" href="gtc-07-honest-ui.html"><span class="dir">next →</span><span class="tt">Lying spinners, stale labels, one-way doors</span></a></nav>
+  </article>
+</main>
+<footer class="site-footer">
+  <span>© 2026 Tarek Kharsa</span>
+  <nav aria-label="Footer">
+    <a href="https://twitter.com/tarekkh1997">twitter</a>
+    <a href="https://www.linkedin.com/in/tarek-kharsa-0509a0177/">linkedin</a>
+    <a href="/feed.xml">rss</a>
+    <a href="https://github.com/Tarekkharsa/tarekkharsa.github.io">source</a>
+  </nav>
+</footer>
+</body>
+</html>

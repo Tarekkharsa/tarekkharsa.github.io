@@ -1,0 +1,174 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Decide, commit, then act — Tarek Kharsa</title>
+<meta name="description" content="The three-step server pattern that keeps AI agents from leaving your app in a weird state. Lesson 1 of 8 in #GuessTheCodebase: can you guess which open-source repo it came from?">
+<meta name="author" content="Tarek Kharsa">
+<meta name="color-scheme" content="light dark">
+<meta name="theme-color" content="#FBFAF7" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#14171B" media="(prefers-color-scheme: dark)">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<link rel="canonical" href="https://tarekkharsa.github.io/posts/gtc-01-decide-commit-then-act.html">
+<link rel="alternate" type="application/atom+xml" title="Tarek Kharsa" href="/feed.xml">
+<meta property="og:site_name" content="Tarek Kharsa">
+<meta property="og:locale" content="en_US">
+<meta property="og:title" content="Decide, commit, then act">
+<meta property="og:description" content="The three-step server pattern that keeps AI agents from leaving your app in a weird state. Lesson 1 of 8 in #GuessTheCodebase: can you guess which open-source repo it came from?">
+<meta property="og:type" content="article">
+<meta property="og:url" content="https://tarekkharsa.github.io/posts/gtc-01-decide-commit-then-act.html">
+<meta property="og:image" content="https://tarekkharsa.github.io/assets/og/gtc-01.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="Guess the codebase, lesson 1: Decide, commit, then act">
+<meta property="article:published_time" content="2026-10-09T00:00:00Z">
+<meta property="article:author" content="https://tarekkharsa.github.io/">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:creator" content="@tarekkh1997">
+<meta name="twitter:title" content="Decide, commit, then act">
+<meta name="twitter:description" content="The three-step server pattern that keeps AI agents from leaving your app in a weird state. Lesson 1 of 8 in #GuessTheCodebase: can you guess which open-source repo it came from?">
+<meta name="twitter:image" content="https://tarekkharsa.github.io/assets/og/gtc-01.png">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "Decide, commit, then act",
+  "description": "The three-step server pattern that keeps AI agents from leaving your app in a weird state. Lesson 1 of 8 in #GuessTheCodebase: can you guess which open-source repo it came from?",
+  "image": "https://tarekkharsa.github.io/assets/og/gtc-01.png",
+  "datePublished": "2026-10-09T00:00:00Z",
+  "dateModified": "2026-10-09T00:00:00Z",
+  "author": {
+    "@type": "Person",
+    "name": "Tarek Kharsa",
+    "url": "https://tarekkharsa.github.io/"
+  },
+  "isPartOf": {
+    "@type": "CreativeWorkSeries",
+    "name": "Guess the codebase",
+    "url": "https://tarekkharsa.github.io/posts/guess-the-codebase.html"
+  },
+  "mainEntityOfPage": "https://tarekkharsa.github.io/posts/gtc-01-decide-commit-then-act.html",
+  "url": "https://tarekkharsa.github.io/posts/gtc-01-decide-commit-then-act.html"
+}
+</script>
+<script>try{const t=localStorage.getItem("theme");if(t)document.documentElement.dataset.theme=t}catch{}</script>
+<link rel="stylesheet" href="../assets/site.css">
+<script src="../assets/site.js" defer></script>
+</head>
+<body>
+<a class="skip" href="#content">Skip to content</a>
+<div class="progress" aria-hidden="true"><span></span></div>
+<header class="topbar">
+  <div class="topbar-inner">
+    <a class="brand" href="../">tarek<span class="accent">.</span>kharsa</a>
+    <nav class="nav" aria-label="Main">
+      <a href="../#writing">writing</a>
+      <a href="../posts/guess-the-codebase.html" aria-current="page">series</a>
+      <a class="hide-sm" href="https://github.com/Tarekkharsa">github</a>
+      <a class="hide-sm" href="/feed.xml">rss</a>
+      <button class="theme-toggle" type="button" aria-label="Toggle dark mode">
+        <svg class="sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>
+        <svg class="moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8Z"/></svg>
+      </button>
+    </nav>
+  </div>
+</header>
+<main id="content">
+  <p class="crumbs"><a href="../">home</a> / <a href="guess-the-codebase.html">guess the codebase</a> / lesson 1</p>
+  <article>
+    <header class="post-header">
+      <p class="meta"><span class="tag">Architecture</span><span>Lesson 1 of 8</span><time datetime="2026-10-09">Oct 9, 2026</time><span>2 min read</span></p>
+      <h1>Decide, commit, then act</h1>
+      <p class="subtitle">The three-step server pattern that keeps AI agents from leaving your app in a weird state.</p>
+    </header>
+    <nav class="series-nav" aria-label="Series">
+      <a class="label" href="guess-the-codebase.html">Guess the codebase</a>
+      <ol><li><a href="gtc-01-decide-commit-then-act.html" aria-current="page" title="Decide, commit, then act">1</a></li><li><a href="gtc-02-performance-budgets-as-tests.html" title="Performance budgets belong in unit tests">2</a></li><li><a href="gtc-03-mock-the-boundary.html" title="Mock the boundary, not the logic">3</a></li><li><a href="gtc-04-pr-process-for-the-ai-era.html" title="A PR process for the AI era">4</a></li><li><a href="gtc-05-taste-as-lint-rules.html" title="Turn taste into lint rules">5</a></li><li><a href="gtc-06-dev-setup-for-parallel-agents.html" title="A dev setup built for ten agents on one laptop">6</a></li><li><a href="gtc-07-honest-ui.html" title="Lying spinners, stale labels, one-way doors">7</a></li><li><a href="gtc-08-write-docs-for-agents.html" title="Write docs for your most frequent contributor">8</a></li><li><a href="gtc-reveal-t3-code-power-user-tips.html" title="The reveal">?</a></li></ol>
+    </nav>
+    <div class="prose">
+
+<p>Picture this: an AI agent is halfway through editing your repo when the app crashes. Or the user's laptop sleeps. Or their phone reconnects from a train tunnel and retries the last request. <strong>What's actually true now?</strong></p>
+<p>Most apps can't answer that cleanly. This codebase can, because every change goes through the same three steps.</p>
+
+<h2>The pattern</h2>
+<pre><code>client request ──▶ command
+                     │
+                     ▼
+  1. DECIDE   pure function: (state, command) → events      no I/O at all
+                     │
+                     ▼
+  2. COMMIT   ONE database transaction writes:
+                events + read models + command receipt + outbox
+                     │   (only after commit)
+                     ▼
+  3. ACT      a worker runs the outbox effects
+              (start the agent, take a git checkpoint, …)
+              and feeds results back in as new commands</code></pre>
+
+<h3>1. Decide without I/O</h3>
+<p>The orchestrator takes the current state and a command and returns events. It never touches the network, the filesystem or a subprocess. You can unit-test it, replay it, and it can't hang on a slow API call while holding a lock.</p>
+
+<h3>2. Commit facts and intent together</h3>
+<p>One transaction writes the events, the read models the UI reads, a <em>command receipt</em>, and the <em>outbox</em>: a record of side effects that still need to run. That buys three things:</p>
+<ul>
+  <li><strong>Read models can't get ahead of the log.</strong> They commit in the same transaction.</li>
+  <li><strong>Retries are idempotent.</strong> A replayed command finds its receipt and returns the same result.</li>
+  <li><strong>Crashes don't lose work.</strong> If the process dies right after commit, the intent to "start the agent" is already saved.</li>
+</ul>
+
+<h3>3. Act after commit</h3>
+<p>A worker picks up outbox effects and does the slow, failure-prone work. Results come back in as new commands, which go through the same decide → commit loop.</p>
+
+<h2>The consequence most apps get wrong</h2>
+<blockquote><p>A command acknowledgement means the <em>intent</em> committed, not that the work finished.</p></blockquote>
+<p>If your UI treats "request accepted" as "done", you ship a lying spinner. Here, "accepted", "agent running" and "follow-up work settled" are separate states. A late checkpoint isn't even allowed to stretch the recorded duration of the agent's turn.</p>
+
+<h2>Two more traps the docs call out</h2>
+<ul>
+  <li><strong>Your schema has a past.</strong> Every stored event must still decode on replay. A schema change affects every old database on its next startup, not just the newest client.</li>
+  <li><strong>Not every effect can replay.</strong> Work tied to a provider process that died is retired during recovery, before new work starts.</li>
+</ul>
+      <div class="callout steal">
+        <p class="callout-kicker">Steal this</p>
+        <p>You don't need an event-sourcing framework. You need a pure <em>decide</em> step, <strong>one</strong> transaction that records facts and intent together, and a worker that does the I/O afterwards. Most "it got into a weird state" bugs come from breaking one of those three.</p>
+      </div>
+
+      <section class="callout game" aria-labelledby="game-h">
+        <p class="callout-kicker">🕵️ #GuessTheCodebase</p>
+        <p class="callout-title" id="game-h">Which open-source codebase did I learn this from?</p>
+        <p>Open the hints one at a time, then post your guess before you peek.</p>
+        <ul class="hints"><li><details><summary>Hint 1</summary><p>It's open source and has over 400,000 users.</p></details></li><li><details><summary>Hint 2</summary><p>The same server drives a web app, a desktop app and a mobile app.</p></details></li><li><details><summary>Hint 3</summary><p>Its server is event-sourced and written in TypeScript.</p></details></li></ul>
+        
+        <div class="game-actions">
+          <a class="btn btn-primary" href="https://twitter.com/intent/tweet?text=%F0%9F%95%B5%EF%B8%8F%20My%20%23GuessTheCodebase%20guess%20for%20lesson%201%20(%22Decide%2C%20commit%2C%20then%20act%22)%20by%20%40tarekkh1997%3A%20&url=https%3A%2F%2Ftarekkharsa.github.io%2Fposts%2Fgtc-01-decide-commit-then-act.html" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M18.9 2H22l-6.8 7.8L23.2 22h-6.3l-4.9-6.4L6.4 22H3.3l7.3-8.3L1 2h6.4l4.4 5.9L18.9 2Zm-1.1 18h1.7L6.3 3.9H4.5L17.8 20Z"/></svg> Post my guess</a>
+        </div>
+        <details class="reveal">
+          <summary>I give up. Reveal the codebase.</summary>
+          <div class="answer">
+            <p><strong><a href="https://github.com/pingdotgg/t3code">T3 Code</a></strong> (<code>pingdotgg/t3code</code>), the open-source GUI for coding agents. Where to look:</p>
+            <ul><li><a href="https://github.com/pingdotgg/t3code/blob/main/docs/internals/overview.md"><code>docs/internals/overview.md</code></a></li><li><a href="https://github.com/pingdotgg/t3code/blob/main/apps/server/src/orchestration-v2/Orchestrator.ts"><code>apps/server/src/orchestration-v2/Orchestrator.ts</code></a></li><li><a href="https://github.com/pingdotgg/t3code/blob/main/apps/server/src/orchestration-v2/EventSink.ts"><code>apps/server/src/orchestration-v2/EventSink.ts</code></a></li><li><a href="https://github.com/pingdotgg/t3code/blob/main/apps/server/src/orchestration-v2/EffectWorker.ts"><code>apps/server/src/orchestration-v2/EffectWorker.ts</code></a></li></ul>
+          </div>
+        </details>
+      </section>
+    </div>
+    <div class="share">
+      <span class="label">share</span>
+      <a class="btn" href="https://twitter.com/intent/tweet?text=Lesson%201%20of%20%23GuessTheCodebase%3A%20Decide%2C%20commit%2C%20then%20act.%20Can%20you%20guess%20which%20open-source%20repo%20it%20came%20from%3F&url=https%3A%2F%2Ftarekkharsa.github.io%2Fposts%2Fgtc-01-decide-commit-then-act.html" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M18.9 2H22l-6.8 7.8L23.2 22h-6.3l-4.9-6.4L6.4 22H3.3l7.3-8.3L1 2h6.4l4.4 5.9L18.9 2Zm-1.1 18h1.7L6.3 3.9H4.5L17.8 20Z"/></svg> Post on X</a>
+      <button class="btn" type="button" data-copy-link><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M10 14a5 5 0 0 0 7 0l3-3a5 5 0 0 0-7-7l-1 1"/><path d="M14 10a5 5 0 0 0-7 0l-3 3a5 5 0 0 0 7 7l1-1"/></svg> Copy link</button>
+    </div>
+    <nav class="pager" aria-label="More in this series"><a class="prev" href="guess-the-codebase.html"><span class="dir">← previous</span><span class="tt">Series intro &amp; rules</span></a><a class="next" href="gtc-02-performance-budgets-as-tests.html"><span class="dir">next →</span><span class="tt">Performance budgets belong in unit tests</span></a></nav>
+  </article>
+</main>
+<footer class="site-footer">
+  <span>© 2026 Tarek Kharsa</span>
+  <nav aria-label="Footer">
+    <a href="https://twitter.com/tarekkh1997">twitter</a>
+    <a href="https://www.linkedin.com/in/tarek-kharsa-0509a0177/">linkedin</a>
+    <a href="/feed.xml">rss</a>
+    <a href="https://github.com/Tarekkharsa/tarekkharsa.github.io">source</a>
+  </nav>
+</footer>
+</body>
+</html>

@@ -1,0 +1,175 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Mock the boundary, not the logic — Tarek Kharsa</title>
+<meta name="description" content="“A test that needs a timeout to pass is wrong.” Testing rules from a repo that bans sleeps. Lesson 3 of 8 in #GuessTheCodebase: can you guess which open-source repo it came from?">
+<meta name="author" content="Tarek Kharsa">
+<meta name="color-scheme" content="light dark">
+<meta name="theme-color" content="#FBFAF7" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#14171B" media="(prefers-color-scheme: dark)">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<link rel="canonical" href="https://tarekkharsa.github.io/posts/gtc-03-mock-the-boundary.html">
+<link rel="alternate" type="application/atom+xml" title="Tarek Kharsa" href="/feed.xml">
+<meta property="og:site_name" content="Tarek Kharsa">
+<meta property="og:locale" content="en_US">
+<meta property="og:title" content="Mock the boundary, not the logic">
+<meta property="og:description" content="“A test that needs a timeout to pass is wrong.” Testing rules from a repo that bans sleeps. Lesson 3 of 8 in #GuessTheCodebase: can you guess which open-source repo it came from?">
+<meta property="og:type" content="article">
+<meta property="og:url" content="https://tarekkharsa.github.io/posts/gtc-03-mock-the-boundary.html">
+<meta property="og:image" content="https://tarekkharsa.github.io/assets/og/gtc-03.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="Guess the codebase, lesson 3: Mock the boundary, not the logic">
+<meta property="article:published_time" content="2026-10-09T00:00:00Z">
+<meta property="article:author" content="https://tarekkharsa.github.io/">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:creator" content="@tarekkh1997">
+<meta name="twitter:title" content="Mock the boundary, not the logic">
+<meta name="twitter:description" content="“A test that needs a timeout to pass is wrong.” Testing rules from a repo that bans sleeps. Lesson 3 of 8 in #GuessTheCodebase: can you guess which open-source repo it came from?">
+<meta name="twitter:image" content="https://tarekkharsa.github.io/assets/og/gtc-03.png">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "Mock the boundary, not the logic",
+  "description": "“A test that needs a timeout to pass is wrong.” Testing rules from a repo that bans sleeps. Lesson 3 of 8 in #GuessTheCodebase: can you guess which open-source repo it came from?",
+  "image": "https://tarekkharsa.github.io/assets/og/gtc-03.png",
+  "datePublished": "2026-10-09T00:00:00Z",
+  "dateModified": "2026-10-09T00:00:00Z",
+  "author": {
+    "@type": "Person",
+    "name": "Tarek Kharsa",
+    "url": "https://tarekkharsa.github.io/"
+  },
+  "isPartOf": {
+    "@type": "CreativeWorkSeries",
+    "name": "Guess the codebase",
+    "url": "https://tarekkharsa.github.io/posts/guess-the-codebase.html"
+  },
+  "mainEntityOfPage": "https://tarekkharsa.github.io/posts/gtc-03-mock-the-boundary.html",
+  "url": "https://tarekkharsa.github.io/posts/gtc-03-mock-the-boundary.html"
+}
+</script>
+<script>try{const t=localStorage.getItem("theme");if(t)document.documentElement.dataset.theme=t}catch{}</script>
+<link rel="stylesheet" href="../assets/site.css">
+<script src="../assets/site.js" defer></script>
+</head>
+<body>
+<a class="skip" href="#content">Skip to content</a>
+<div class="progress" aria-hidden="true"><span></span></div>
+<header class="topbar">
+  <div class="topbar-inner">
+    <a class="brand" href="../">tarek<span class="accent">.</span>kharsa</a>
+    <nav class="nav" aria-label="Main">
+      <a href="../#writing">writing</a>
+      <a href="../posts/guess-the-codebase.html" aria-current="page">series</a>
+      <a class="hide-sm" href="https://github.com/Tarekkharsa">github</a>
+      <a class="hide-sm" href="/feed.xml">rss</a>
+      <button class="theme-toggle" type="button" aria-label="Toggle dark mode">
+        <svg class="sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>
+        <svg class="moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8Z"/></svg>
+      </button>
+    </nav>
+  </div>
+</header>
+<main id="content">
+  <p class="crumbs"><a href="../">home</a> / <a href="guess-the-codebase.html">guess the codebase</a> / lesson 3</p>
+  <article>
+    <header class="post-header">
+      <p class="meta"><span class="tag">Testing</span><span>Lesson 3 of 8</span><time datetime="2026-10-09">Oct 9, 2026</time><span>2 min read</span></p>
+      <h1>Mock the boundary, not the logic</h1>
+      <p class="subtitle">“A test that needs a timeout to pass is wrong.” Testing rules from a repo that bans sleeps.</p>
+    </header>
+    <nav class="series-nav" aria-label="Series">
+      <a class="label" href="guess-the-codebase.html">Guess the codebase</a>
+      <ol><li><a href="gtc-01-decide-commit-then-act.html" title="Decide, commit, then act">1</a></li><li><a href="gtc-02-performance-budgets-as-tests.html" title="Performance budgets belong in unit tests">2</a></li><li><a href="gtc-03-mock-the-boundary.html" aria-current="page" title="Mock the boundary, not the logic">3</a></li><li><a href="gtc-04-pr-process-for-the-ai-era.html" title="A PR process for the AI era">4</a></li><li><a href="gtc-05-taste-as-lint-rules.html" title="Turn taste into lint rules">5</a></li><li><a href="gtc-06-dev-setup-for-parallel-agents.html" title="A dev setup built for ten agents on one laptop">6</a></li><li><a href="gtc-07-honest-ui.html" title="Lying spinners, stale labels, one-way doors">7</a></li><li><a href="gtc-08-write-docs-for-agents.html" title="Write docs for your most frequent contributor">8</a></li><li><a href="gtc-reveal-t3-code-power-user-tips.html" title="The reveal">?</a></li></ol>
+    </nav>
+    <div class="prose">
+
+<p>One sentence in this repo's agent guide sums up the whole testing philosophy:</p>
+<blockquote><p>A test that needs a timeout to pass is wrong.</p></blockquote>
+<p>Here's how they make that achievable.</p>
+
+<h2>The default test shape</h2>
+<pre><code>command dispatch
+  → real orchestrator
+  → real provider adapter
+  → REPLAYED provider transport   ← the only fake
+  → real normalizer
+  → real event store + projections
+  → assertions</code></pre>
+<p>Fakes are allowed at true boundaries only: the external process, the network, the clock, random IDs, a temp filesystem, a temp database.</p>
+<p><strong>Explicitly not allowed:</strong> a mocked orchestrator, adapter, normalizer, event sink, projection reducer or checkpoint policy. A few integration tests that run the real stack beat hundreds of unit tests that mock away the behavior they claim to test.</p>
+
+<h2>Replay real traffic</h2>
+<p>The app integrates with several AI agent CLIs. Tests don't call those CLIs. Instead, raw protocol frames are recorded into <em>replay transcripts</em> and fed through the real adapter. The replay runtime doesn't know what a "turn" or an "approval" is; only the adapter does. So the replay can't quietly hide adapter bugs.</p>
+
+<h2>Determinism comes from production code</h2>
+<p>Production code reads time through the framework's <code>Clock</code> and randomness through its <code>Random</code> service, never <code>Date.now()</code> or <code>Math.random()</code> directly. Tests swap in a <code>TestClock</code> and a seeded <code>Random</code>. No flaky timestamps, and no snapshots that change every run because of a new UUID.</p>
+
+<h2>Drain, don't sleep</h2>
+<p>Background work runs on a <em>drainable worker</em>. Its <code>drain()</code> resolves only when:</p>
+<ul>
+  <li>the queue is empty, <strong>and</strong></li>
+  <li>the item currently being processed has finished.</li>
+</ul>
+<p>An empty queue alone doesn't prove the worker is idle, and that gap is where most "add a 100&nbsp;ms sleep" hacks come from.</p>
+
+<h2>Test a restart the way a restart happens</h2>
+<p>To test "the app restarted mid-task", they don't add a <code>restartForTest()</code> method. They tear down the outermost server layer and rebuild it against the same durable storage. Production code doesn't grow APIs that exist only for tests.</p>
+
+<h2>An empty database is a bad test</h2>
+<p>One script rebuilds a dev database from a <em>read-only, pruned</em> snapshot of the developer's real data. It drops scheduled tasks, pending work and auth sessions, so the dev server never runs real agents. Then it runs migrations on top, which proves new migrations apply to real data and catches two branches claiming the same migration number.</p>
+
+<h2>And what not to test</h2>
+<ul>
+  <li>Don't render components to static markup just to assert props.</li>
+  <li>Don't write tests that only check callback wiring or mirror the implementation.</li>
+  <li>Lint bans declaring tests inside a <code>for</code> loop; use <code>it.each</code>.</li>
+  <li>Locally, run the smallest proof that the change works. CI owns the full suite.</li>
+</ul>
+      <div class="callout steal">
+        <p class="callout-kicker">Steal this</p>
+        <p>"No mocks" is the wrong lesson. The rule is to fake only at true boundaries: process, network, clock, IDs, filesystem. Make time and randomness injectable in <em>production</em> code, and wait on milestones instead of sleeping.</p>
+      </div>
+
+      <section class="callout game" aria-labelledby="game-h">
+        <p class="callout-kicker">🕵️ #GuessTheCodebase</p>
+        <p class="callout-title" id="game-h">Which open-source codebase did I learn this from?</p>
+        <p>Open the hints one at a time, then post your guess before you peek.</p>
+        <ul class="hints"><li><details><summary>Hint 1</summary><p>It talks to six different AI coding agents through their own CLIs.</p></details></li><li><details><summary>Hint 2</summary><p>Its pitch: “bring your own subscription”.</p></details></li><li><details><summary>Hint 3</summary><p>Every agent turn ends with a hidden git ref so you can diff and restore.</p></details></li></ul>
+        <details class="hints-earlier"><summary>+ 6 hints from earlier lessons</summary><ul class="hints"><li><details><summary>Hint E1</summary><p>It's open source and has over 400,000 users.</p></details></li><li><details><summary>Hint E2</summary><p>The same server drives a web app, a desktop app and a mobile app.</p></details></li><li><details><summary>Hint E3</summary><p>Its server is event-sourced and written in TypeScript.</p></details></li><li><details><summary>Hint E4</summary><p>Its maintainers list “performance without compromise” as a value they never trade away.</p></details></li><li><details><summary>Hint E5</summary><p>Its users run AI agents all day, and the docs say they notice a single dropped frame.</p></details></li><li><details><summary>Hint E6</summary><p>Its server is built on the Effect library.</p></details></li></ul></details>
+        <div class="game-actions">
+          <a class="btn btn-primary" href="https://twitter.com/intent/tweet?text=%F0%9F%95%B5%EF%B8%8F%20My%20%23GuessTheCodebase%20guess%20for%20lesson%203%20(%22Mock%20the%20boundary%2C%20not%20the%20logic%22)%20by%20%40tarekkh1997%3A%20&url=https%3A%2F%2Ftarekkharsa.github.io%2Fposts%2Fgtc-03-mock-the-boundary.html" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M18.9 2H22l-6.8 7.8L23.2 22h-6.3l-4.9-6.4L6.4 22H3.3l7.3-8.3L1 2h6.4l4.4 5.9L18.9 2Zm-1.1 18h1.7L6.3 3.9H4.5L17.8 20Z"/></svg> Post my guess</a>
+        </div>
+        <details class="reveal">
+          <summary>I give up. Reveal the codebase.</summary>
+          <div class="answer">
+            <p><strong><a href="https://github.com/pingdotgg/t3code">T3 Code</a></strong> (<code>pingdotgg/t3code</code>), the open-source GUI for coding agents. Where to look:</p>
+            <ul><li><a href="https://github.com/pingdotgg/t3code/blob/main/docs/orchestration-v2/testing-strategy.md"><code>docs/orchestration-v2/testing-strategy.md</code></a></li><li><a href="https://github.com/pingdotgg/t3code/blob/main/packages/shared/src/DrainableWorker.ts"><code>packages/shared/src/DrainableWorker.ts</code></a></li><li><a href="https://github.com/pingdotgg/t3code/blob/main/apps/server/scripts/migrate-dev-db.ts"><code>apps/server/scripts/migrate-dev-db.ts</code></a></li><li><a href="https://github.com/pingdotgg/t3code/blob/main/oxlint-plugin-t3code/rules/no-test-in-loop.ts"><code>oxlint-plugin-t3code/rules/no-test-in-loop.ts</code></a></li></ul>
+          </div>
+        </details>
+      </section>
+    </div>
+    <div class="share">
+      <span class="label">share</span>
+      <a class="btn" href="https://twitter.com/intent/tweet?text=Lesson%203%20of%20%23GuessTheCodebase%3A%20Mock%20the%20boundary%2C%20not%20the%20logic.%20Can%20you%20guess%20which%20open-source%20repo%20it%20came%20from%3F&url=https%3A%2F%2Ftarekkharsa.github.io%2Fposts%2Fgtc-03-mock-the-boundary.html" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M18.9 2H22l-6.8 7.8L23.2 22h-6.3l-4.9-6.4L6.4 22H3.3l7.3-8.3L1 2h6.4l4.4 5.9L18.9 2Zm-1.1 18h1.7L6.3 3.9H4.5L17.8 20Z"/></svg> Post on X</a>
+      <button class="btn" type="button" data-copy-link><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M10 14a5 5 0 0 0 7 0l3-3a5 5 0 0 0-7-7l-1 1"/><path d="M14 10a5 5 0 0 0-7 0l-3 3a5 5 0 0 0 7 7l1-1"/></svg> Copy link</button>
+    </div>
+    <nav class="pager" aria-label="More in this series"><a class="prev" href="gtc-02-performance-budgets-as-tests.html"><span class="dir">← previous</span><span class="tt">Performance budgets belong in unit tests</span></a><a class="next" href="gtc-04-pr-process-for-the-ai-era.html"><span class="dir">next →</span><span class="tt">A PR process for the AI era</span></a></nav>
+  </article>
+</main>
+<footer class="site-footer">
+  <span>© 2026 Tarek Kharsa</span>
+  <nav aria-label="Footer">
+    <a href="https://twitter.com/tarekkh1997">twitter</a>
+    <a href="https://www.linkedin.com/in/tarek-kharsa-0509a0177/">linkedin</a>
+    <a href="/feed.xml">rss</a>
+    <a href="https://github.com/Tarekkharsa/tarekkharsa.github.io">source</a>
+  </nav>
+</footer>
+</body>
+</html>

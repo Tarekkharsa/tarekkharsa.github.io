@@ -1,0 +1,33 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>og: guess the codebase</title>
+<!-- Render: open with ?k=kicker&t=title&s=subtitle, screenshot at 1200x630 (see README). -->
+<style>
+  html, body { margin: 0; width: 1200px; height: 630px; overflow: hidden; }
+  body {
+    background: #14181C; color: #E9E7E2; box-sizing: border-box; padding: 80px 100px 70px;
+    font-family: ui-monospace, "SF Mono", SFMono-Regular, Menlo, Consolas, monospace;
+    display: flex; flex-direction: column; position: relative;
+  }
+  .q { position: absolute; right: 40px; top: -70px; font-size: 560px; font-weight: 700; line-height: 1; color: rgba(240,151,90,0.08); }
+  .k { font-size: 26px; color: #F0975A; margin: 0 0 30px; letter-spacing: 0.02em; }
+  h1 { font-size: 70px; line-height: 1.1; letter-spacing: -0.035em; font-weight: 700; margin: 0 0 26px; max-width: 960px; position: relative; }
+  .s { font-size: 32px; line-height: 1.4; color: #9AA3AC; margin: 0; position: relative; }
+  .foot { margin-top: auto; display: flex; justify-content: space-between; font-size: 26px; color: #9AA3AC; }
+  .foot b { color: #F0975A; font-weight: 700; }
+</style>
+</head>
+<body>
+  <div class="q">?</div>
+  <p class="k" id="k"></p>
+  <h1 id="t"></h1>
+  <p class="s" id="s"></p>
+  <div class="foot"><span>tarekkharsa.github.io</span><b>@tarekkh1997</b></div>
+  <script>
+    const p = new URLSearchParams(location.search);
+    for (const id of ["k", "t", "s"]) document.getElementById(id).textContent = p.get(id) || "";
+  </script>
+</body>
+</html>
