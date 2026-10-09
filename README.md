@@ -19,6 +19,7 @@ buttons, heading anchors), and pages work without it.
 ```
 app/
   content/posts.ts   post metadata: titles, dates, tags, hints, sources, feed entries
+  actions/           route handlers (controller.tsx)
   pages/             home, post, series and 404 pages
   ui/                document <head>, header/footer, post building blocks
   feeds.ts           feed.xml and sitemap.xml
