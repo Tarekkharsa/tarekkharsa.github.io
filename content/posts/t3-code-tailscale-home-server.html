@@ -1,0 +1,81 @@
+<p>My Linux PC runs <a href="https://github.com/pingdotgg/t3code">T3 Code</a> as a background service, all the time. <a href="https://tailscale.com">Tailscale</a> connects it privately to my MacBook and my Android phone. Nothing is open to the public internet.</p>
+<p><strong>You need:</strong></p>
+<ul>
+  <li>A Linux PC (I used Ubuntu)</li>
+  <li>Node.js</li>
+  <li>Tailscale on the PC <em>and</em> on every device you want to connect from</li>
+</ul>
+
+<h2>Step 1: Install T3 Code as a service</h2>
+<pre><code>npm i -g t3
+t3 service install
+loginctl enable-linger $USER</code></pre>
+<p>This installs T3 Code, runs it as a background service, and starts it at boot, even if nobody logs in. Check it:</p>
+<pre><code>t3 service status</code></pre>
+<p>You should see <code>Status: installed</code>.</p>
+
+<hr>
+
+<h2>Step 2: Turn on Tailscale Serve</h2>
+<p>First, let your own user manage Tailscale Serve:</p>
+<pre><code>sudo tailscale set --operator=$USER</code></pre>
+<p>Then add a small settings file (a systemd drop-in) to the T3 service:</p>
+<pre><code>mkdir -p ~/.config/systemd/user/t3code.service.d
+
+cat &gt; ~/.config/systemd/user/t3code.service.d/tailscale.conf &lt;&lt;EOF
+[Service]
+Environment=T3CODE_TAILSCALE_SERVE=1
+Environment=PATH=$HOME/.local/bin:$(dirname $(which node)):/usr/local/bin:/usr/bin:/bin:/snap/bin
+EOF
+
+systemctl --user daemon-reload
+systemctl --user restart t3code</code></pre>
+<p>This file survives T3 updates. The <code>PATH</code> line matters because the service can't otherwise see where Node CLIs (like Codex) are installed. If you switch Node versions with <code>nvm</code>, run it again.</p>
+<p>Check it:</p>
+<pre><code>tailscale serve status</code></pre>
+<p>You should see a private address like <code>https://my-pc.tailXXXXX.ts.net</code>. The first HTTPS certificate can take a few seconds, so if it doesn't load right away, wait and try again.</p>
+
+<hr>
+
+<h2>Step 3: Pair your laptop and phone</h2>
+<p>On the PC:</p>
+<pre><code>t3 pair --tailscale</code></pre>
+<p>In the T3 Code app, go to <strong>Add Environment → Remote link</strong>, then paste the link or scan the QR code.</p>
+<blockquote><p>The code expires after 5 minutes. Need more time? Use <code>t3 pair --tailscale --ttl 1h</code>.</p></blockquote>
+
+<h3>Can't connect?</h3>
+<p>If you see something like this, your device can't reach the PC:</p>
+<pre><code>Failed to fetch remote environment endpoint ... (HttpClientError: Transport error ...)</code></pre>
+<p>Check these, in order:</p>
+<ol>
+  <li>Tailscale is <em>Connected</em> on the device.</li>
+  <li><strong>Mac:</strong> Tailscale menu → Settings → turn on <strong>Use Tailscale DNS</strong>.</li>
+  <li><strong>Android:</strong> Settings → Private DNS → <strong>Off</strong>. "Automatic" didn't work for me.</li>
+  <li>The pairing code hasn't expired.</li>
+</ol>
+
+<hr>
+
+<h2>Step 4: Install your agent CLIs</h2>
+<p>T3 Code runs agents through their command-line tools, so install them on the PC. For Codex:</p>
+<pre><code>npm i -g @openai/codex
+codex login status</code></pre>
+<p>The <code>PATH</code> line from Step 2 lets the service find them.</p>
+
+<hr>
+
+<h2>Step 5: Keep it reachable</h2>
+<p>Stop the PC from sleeping:</p>
+<pre><code>sudo systemctl mask sleep.target suspend.target hibernate.target hybrid-sleep.target</code></pre>
+<p>Tailscale logins expire after about 6 months. In the <a href="https://login.tailscale.com/admin/machines">Tailscale admin console</a>, click <strong>⋯</strong> next to your PC and choose <strong>Disable key expiry</strong>.</p>
+
+<hr>
+
+<h2>Updating T3 Code</h2>
+<p><strong>Golden rule:</strong> keep the PC, the <code>t3</code> command and all your apps on the <strong>same channel</strong>, and run updates on the PC itself:</p>
+<pre><code>t3 update --channel nightly --yes</code></pre>
+<p><em>(Use <code>stable</code>, <code>preview</code> or <code>nightly</code>, whichever your other devices use.)</em></p>
+
+<hr>
+
+<p>That's it: T3 Code on my PC, from anywhere. 🚀</p>

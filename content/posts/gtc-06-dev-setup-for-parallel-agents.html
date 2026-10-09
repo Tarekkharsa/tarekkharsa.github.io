@@ -1,0 +1,39 @@
+<p>Run five AI agents in five git worktrees on one machine and everything that's normally shared starts colliding: ports, databases, processes, even the URLs you send to your phone. This repo's dev tooling assumes that's the normal case.</p>
+
+<h2>Ports from a hash of the worktree path</h2>
+<p>The dev runner derives ports from a hash of the worktree path. The same worktree gets the same ports after every restart, and two worktrees almost never collide. Two details I loved:</p>
+<ul>
+  <li>It skips every port on the <a href="https://fetch.spec.whatwg.org/#port-blocking">Fetch spec's blocked list</a>, the ones <code>curl</code> accepts but browsers refuse.</li>
+  <li>It only probes loopback when checking whether a port is free. Probing wildcard addresses made it move away from a free port whenever <code>tailscale serve</code> held the same number on another interface.</li>
+</ul>
+
+<h2>State per worktree</h2>
+<p>Each worktree gets its own gitignored data directory, and that directory deliberately takes priority over any ambient <code>HOME</code>-style environment variable. You can't end up on shared state by accident. A setup script runs when a worktree is created: it links the shared <code>.env</code> and warms the dependency cache.</p>
+
+<h2>Single-origin dev</h2>
+<blockquote><p>Never set <code>VITE_HTTP_URL</code> or <code>VITE_WS_URL</code> for dev.</p></blockquote>
+<p>Vite proxies <code>/api</code> and <code>/ws</code>. Baking <code>localhost</code> into the bundle "silently breaks every remote browser." With the proxy, the same build works on localhost, over the LAN and through Tailscale.</p>
+
+<h2>One command to share</h2>
+<pre><code>vp run dev --share</code></pre>
+<p>This publishes the dev server over the tailnet and prints a pairing URL to open on your phone. When the process exits, the mapping is removed.</p>
+
+<h2>The most underrated line in the agent guide</h2>
+<blockquote><p>Never <code>pkill -f</code> … Your own agent process has this worktree's path in its argv.</p></blockquote>
+<p>If an agent runs your dev server, <code>pkill -f my-worktree</code> can kill the agent itself. Kill only PIDs you captured when you spawned the process.</p>
+
+<h2>Vendored reference repos</h2>
+<p>A gitignored-from-CI <code>.repos/</code> folder holds read-only source of key libraries. Agents read real library code and patterns instead of guessing from training data. The rule: never edit them, never import from them, and re-sync when you bump the dependency.</p>
+
+<h2>CI that doesn't wait in line</h2>
+<ul>
+  <li>Lint, typecheck, build and tests run as parallel jobs, with one aggregate "Check" gate.</li>
+  <li>System packages install in the background while JS dependencies install.</li>
+  <li>Sparse checkout skips the vendored repos.</li>
+  <li>A new push to a PR cancels its superseded runs.</li>
+</ul>
+
+<div class="callout steal">
+  <p class="callout-kicker">Steal this</p>
+  <p>Design dev tooling as if a dozen strangers share your laptop, because with agents that's roughly true. Derive ports and state from the worktree, keep one origin, and never kill processes by pattern.</p>
+</div>

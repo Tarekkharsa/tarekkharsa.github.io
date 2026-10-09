@@ -1,0 +1,22 @@
+{
+  "name": "tarekkharsa.github.io",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": ">=24.3.0"
+  },
+  "scripts": {
+    "dev": "NODE_ENV=development node --watch --import remix/node-tsx server.ts",
+    "build": "NODE_ENV=production node --import remix/node-tsx scripts/build.ts",
+    "preview": "node --import remix/node-tsx scripts/preview.ts",
+    "test": "NODE_ENV=test remix test",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "remix": "3.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "^24.3.0",
+    "typescript": "^5.9.3"
+  }
+}

@@ -1,0 +1,43 @@
+<p>One line from this repo's guide stuck with me:</p>
+<blockquote><p>Our users drive agents all day and notice a dropped frame, a lying spinner, and a stale label.</p></blockquote>
+<p>These are the rules that follow from it.</p>
+
+<h2>"Reconnecting…" is a promise</h2>
+<p>Connection health and data freshness are tracked <em>separately</em>. A socket opening doesn't prove the server is usable; the client waits for the initial server config before it calls itself ready. If a data subscription fails on a healthy socket, the UI must not say "reconnecting", because no reconnect is coming.</p>
+
+<h2>Cached isn't live</h2>
+<p>Cached data stays readable offline, but it must never</p>
+<ul>
+  <li>imply a live connection, or</li>
+  <li>overwrite newer live data during a reconnect.</li>
+</ul>
+<p>Showing stale data is fine. Showing stale data as if it were live is the bug.</p>
+
+<h2>No one-way doors</h2>
+<blockquote><p>If you added a way in, add the way out and the way to see it. Snooze needs unsnooze. Close needs reopen. A one-way door is a bug.</p></blockquote>
+<p>In practice: settle/un-settle, snooze/wake, a five-second Undo after sidebar actions, and a shortcut that reopens the last closed tab.</p>
+
+<h2>Hit every surface</h2>
+<blockquote><p>The most common defect in this repo is a change that works on the path you tested and is missing everywhere else.</p></blockquote>
+<p>Their checklist: entry points (chat, settings, command palette, keybinding), clients (web, desktop, mobile), each backend integration, AI agents reaching it through tools, reverse states, connection modes (local, remote, tunnel), and docs.</p>
+
+<h2>The server owns derived state</h2>
+<p>If three devices show the same item, none of them should work out its status from its own clock. Status such as "this thread is finished and can be tucked away" is evaluated on the server and stored. Clients just render it, so every device agrees.</p>
+
+<h2>Components built from slots</h2>
+<p>Their banner component exports small slots (<code>Root</code>, <code>Row</code>, <code>Icon</code>, <code>Content</code>, <code>Actions</code>, <code>Dismiss</code>), and each slot owns its styling. A new banner is a few lines with no classes of its own:</p>
+<pre><code>&lt;Banner.Root variant="info"&gt;
+  &lt;Banner.Row&gt;
+    &lt;Banner.Icon /&gt;
+    &lt;Banner.Content&gt;Agent is waiting for approval&lt;/Banner.Content&gt;
+    &lt;Banner.Actions&gt;…&lt;/Banner.Actions&gt;
+  &lt;/Banner.Row&gt;
+&lt;/Banner.Root&gt;</code></pre>
+
+<h2>No GPU-burning shimmer</h2>
+<p>No continuously repainting animations. Your 120&nbsp;Hz MacBook user will notice the fan before they notice the shimmer.</p>
+
+<div class="callout steal">
+  <p class="callout-kicker">Steal this</p>
+  <p>Every label is a promise. Keep "connected" and "fresh" as separate states, never let cache pose as live data, give every action a reverse, and let the server decide derived status so devices agree.</p>
+</div>
