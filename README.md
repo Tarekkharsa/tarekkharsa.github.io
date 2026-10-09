@@ -27,6 +27,8 @@ app/
   static-pages.ts    every URL the build writes to dist/
 content/posts/       the prose of each post, as HTML
 public/              files copied unchanged (CSS, JS, icons, social images)
+projects/            per-codebase research, drafts and X campaigns (never deployed)
+scripts/             build, preview, tweet kits, OG image rendering
 ```
 
 ## Commands
@@ -40,7 +42,16 @@ npm test           # renders every page, checks internal links, feed and sitemap
 npm run typecheck
 npm run build      # writes dist/
 npm run preview    # serves dist/ like GitHub Pages, on http://localhost:44101
+npm run kit        # renders projects/<name>/tweet-kit.html from projects/<name>/tweets.ts
+npm run og         # re-renders the series social images with headless Chrome (local only)
 ```
+
+## Projects
+
+Each codebase I study gets a folder in [`projects/`](projects/README.md): research notes,
+archived drafts, and the X campaign as typed data with a generated, copy-ready tweet kit.
+None of it is deployed, but the repository is public. The projects README has the
+checklist for starting a new round of Guess the codebase.
 
 ## Adding a post
 
@@ -48,7 +59,7 @@ npm run preview    # serves dist/ like GitHub Pages, on http://localhost:44101
 2. Register it in `app/content/posts.ts`. Headers, share buttons, the home page list,
    the feed and the sitemap are generated from that entry. Guess-the-codebase lessons
    use `lesson({...})`, which also builds the hints box, the pager and the series nav.
-3. Add its social image to `public/assets/og/`.
+3. Add its social image to `public/assets/og/` (series images: `npm run og`).
 
 ## Social preview images
 

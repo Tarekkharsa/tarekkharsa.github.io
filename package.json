@@ -10,7 +10,9 @@
     "build": "NODE_ENV=production node --import remix/node-tsx scripts/build.ts",
     "preview": "node --import remix/node-tsx scripts/preview.ts",
     "test": "NODE_ENV=test remix test",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "kit": "node --import remix/node-tsx scripts/tweet-kit.ts",
+    "og": "node --import remix/node-tsx scripts/render-og.ts"
   },
   "dependencies": {
     "remix": "3.0.0"

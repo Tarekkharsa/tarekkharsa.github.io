@@ -1,0 +1,1009 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Engineering Lessons from T3 Code — Tweets, Threads & Blog Posts</title>
+<style>
+  :root {
+    --bg: #0b0c0f; --panel: #14161b; --panel2: #1b1e25; --text: #e7e9ee; --muted: #9aa1ad;
+    --accent: #7c9cff; --ok: #4ade80; --warn: #f87171; --border: #262a33; --chip: #222631;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; font: 15px/1.6 -apple-system, BlinkMacSystemFont, "Inter", "Segoe UI", sans-serif; background: var(--bg); color: var(--text); }
+  header { padding: 48px 24px 24px; max-width: 1100px; margin: 0 auto; }
+  h1 { font-size: 34px; margin: 0 0 8px; letter-spacing: -0.02em; }
+  h2 { font-size: 24px; margin: 48px 0 12px; letter-spacing: -0.01em; border-top: 1px solid var(--border); padding-top: 32px; }
+  h3 { font-size: 17px; margin: 0 0 6px; }
+  .muted { color: var(--muted); }
+  main { max-width: 1100px; margin: 0 auto; padding: 0 24px 96px; }
+  nav.toc { display: flex; flex-wrap: wrap; gap: 8px; margin: 16px 0 0; }
+  nav.toc a { background: var(--chip); color: var(--text); padding: 6px 12px; border-radius: 999px; text-decoration: none; font-size: 13px; border: 1px solid var(--border); }
+  nav.toc a:hover { border-color: var(--accent); }
+  .stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 12px; margin: 24px 0; }
+  .stat { background: var(--panel); border: 1px solid var(--border); border-radius: 12px; padding: 14px 16px; }
+  .stat b { display: block; font-size: 22px; }
+  .filters { display: flex; flex-wrap: wrap; gap: 8px; margin: 12px 0 20px; position: sticky; top: 0; background: var(--bg); padding: 10px 0; z-index: 2; }
+  .filters button { background: var(--chip); color: var(--text); border: 1px solid var(--border); border-radius: 999px; padding: 6px 12px; cursor: pointer; font-size: 13px; }
+  .filters button.active { background: var(--accent); color: #0b0c0f; border-color: var(--accent); }
+  .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(330px, 1fr)); gap: 14px; }
+  .card { background: var(--panel); border: 1px solid var(--border); border-radius: 14px; padding: 16px; display: flex; flex-direction: column; gap: 10px; }
+  .card .cat { font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--accent); }
+  .tweet { background: var(--panel2); border-radius: 10px; padding: 12px; white-space: pre-wrap; font-size: 14.5px; }
+  .meta { display: flex; justify-content: space-between; align-items: center; gap: 8px; font-size: 12px; }
+  .count.ok { color: var(--ok); } .count.over { color: var(--warn); font-weight: 700; }
+  .evidence { font-size: 12px; color: var(--muted); }
+  .evidence code, code { background: var(--chip); padding: 1px 6px; border-radius: 5px; font-size: 12px; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; }
+  button.copy { background: transparent; color: var(--accent); border: 1px solid var(--accent); border-radius: 8px; padding: 4px 10px; cursor: pointer; font-size: 12px; }
+  button.copy.done { color: var(--ok); border-color: var(--ok); }
+  .thread { background: var(--panel); border: 1px solid var(--border); border-radius: 14px; padding: 18px; margin-bottom: 18px; }
+  .thread ol { list-style: none; padding: 0; margin: 12px 0 0; display: flex; flex-direction: column; gap: 10px; }
+  .thread li { position: relative; }
+  .thread li .tweet { padding-right: 70px; }
+  .thread li .meta { position: absolute; right: 10px; top: 8px; flex-direction: column; align-items: flex-end; gap: 4px; }
+  .blog { background: var(--panel); border: 1px solid var(--border); border-radius: 14px; padding: 22px 26px; margin-bottom: 18px; }
+  .blog h3 { font-size: 21px; }
+  .blog h4 { margin: 18px 0 4px; font-size: 15px; color: var(--accent); }
+  .blog p, .blog li { color: #d3d7df; }
+  pre { background: #0f1115; border: 1px solid var(--border); border-radius: 10px; padding: 12px 14px; overflow-x: auto; font-size: 12.5px; line-height: 1.5; }
+  table { width: 100%; border-collapse: collapse; font-size: 14px; }
+  th, td { text-align: left; padding: 8px 10px; border-bottom: 1px solid var(--border); vertical-align: top; }
+  th { color: var(--muted); font-weight: 600; }
+  .note { background: #1a1f2e; border: 1px solid #2b3550; border-radius: 12px; padding: 12px 16px; font-size: 14px; }
+</style>
+</head>
+<body>
+<header>
+  <div class="muted">Source: <code>github.com/pingdotgg/t3code</code> · 5,075 commits on main · read on this checkout</div>
+  <h1>Engineering lessons from T3 Code</h1>
+  <p class="muted">Lessons taken from the code, docs, lint rules, CI and PR process of an open-source app with 400k+ users: web, desktop (Electron) and mobile (React Native) clients for six coding-agent providers. Each lesson has a ready-to-post tweet (with a live character count), the files it comes from, and an angle you can expand into a blog post. Threads and full blog drafts are further down.</p>
+  <nav class="toc">
+    <a href="#tweets">Single tweets</a>
+    <a href="#threads">Threads</a>
+    <a href="#blogs">Blog post drafts</a>
+    <a href="#plan">Posting plan</a>
+    <a href="#sources">Source map</a>
+  </nav>
+  <div class="stats">
+    <div class="stat"><b>5,075</b><span class="muted">commits on main</span></div>
+    <div class="stat"><b>3 surfaces</b><span class="muted">web · desktop · mobile</span></div>
+    <div class="stat"><b>6 providers</b><span class="muted">behind one adapter boundary</span></div>
+    <div class="stat"><b>14</b><span class="muted">custom lint rules encoding taste</span></div>
+    <div class="stat"><b>18</b><span class="muted">GitHub workflows</span></div>
+    <div class="stat"><b>~1,000+</b><span class="muted">commits co-authored by AI agents</span></div>
+  </div>
+  <div class="note">Tip: credit the source when posting, e.g. “from reading the T3 Code repo (github.com/pingdotgg/t3code)”. Check handles before tagging anyone.</div>
+</header>
+
+<main>
+<h2 id="tweets">1 · Single tweets, one per lesson</h2>
+<div class="filters" id="filters"></div>
+<div class="grid" id="grid"></div>
+
+<h2 id="threads">2 · Threads</h2>
+<p class="muted">Post the first tweet, then reply with the rest. Each part has its own copy button and count.</p>
+<div id="threads-root"></div>
+
+<h2 id="blogs">3 · Blog post drafts</h2>
+<p class="muted">Each draft has a title, hook, structure, code from the repo, and a takeaway. Expand them in your own voice.</p>
+
+<article class="blog" id="blog-1">
+  <div class="cat muted">Architecture · ~1,800 words</div>
+  <h3>The pure orchestrator: how T3 Code keeps agent work correct across crashes, retries and three clients</h3>
+  <p><b>Hook:</b> When an AI agent is editing your repo and the app crashes halfway through, what's true? T3 Code answers that with one rule: <em>decide without I/O, commit everything at once, do the work afterwards.</em></p>
+  <h4>1. The problem</h4>
+  <p>T3 Code wraps provider CLIs (Codex, Claude Code, Cursor, Grok, OpenCode, Antigravity) in a WebSocket server. Turns start subprocesses, write files, capture git checkpoints and talk to GitHub, and any of those can fail, hang or outlive the client that started them. Clients reconnect from other devices. Commands get retried.</p>
+  <h4>2. The shape</h4>
+<pre>client RPC ──▶ command
+              │
+              ▼
+   Orchestrator (pure: state + command → events, no I/O)
+              │
+              ▼
+   EventSink — ONE transaction:
+     events + projections (read models) + command receipt + outbox effects
+              │  (after commit)
+              ▼
+   EffectWorker runs the effects (start turn, checkpoint…)
+              │
+              └──▶ results come back in as new commands</pre>
+  <p>Files: <code>apps/server/src/orchestration-v2/Orchestrator.ts</code>, <code>EventSink.ts</code>, <code>EffectWorker.ts</code>.</p>
+  <h4>3. Why each piece matters</h4>
+  <ul>
+    <li><b>No I/O in decisions.</b> The orchestrator is a pure function of state, so you can test it, replay it, and know it won't hang on a network call.</li>
+    <li><b>One transaction.</b> Read models can't get ahead of the event log, and the command receipt makes retries idempotent.</li>
+    <li><b>Outbox.</b> The intent to do side-effect work is stored before any of it runs. If the process dies after commit, the intent is still there for recovery.</li>
+    <li><b>An ack means intent was recorded.</b> The docs say it outright: a command acknowledgement means the intent committed, not that the provider finished. The UI has to reflect that, or the spinner lies.</li>
+  </ul>
+  <h4>4. The traps the docs call out</h4>
+  <ul>
+    <li>Persisted events must stay decodable on replay. Changing a schema hits old environments at startup as well as live RPC traffic.</li>
+    <li>A provider turn ending and its follow-up work (checkpoint, diff) settling are separate milestones. A late checkpoint must not make the turn's recorded duration longer.</li>
+    <li>Effects tied to a lost provider process can't just replay. Recovery retires them before it accepts new work.</li>
+  </ul>
+  <h4>5. Takeaway</h4>
+  <p>You don't need a big event-sourcing framework. You need: a pure decide function, one transaction that records facts and intent together, and a worker that does the effects after commit. Most "it got into a weird state" bugs come from breaking one of those three.</p>
+</article>
+
+<article class="blog" id="blog-2">
+  <div class="cat muted">Performance · ~1,500 words</div>
+  <h3>Performance budgets as unit tests: what T3 Code does so 400k users don't feel a regression</h3>
+  <p><b>Hook:</b> Most teams find performance regressions when users complain. T3 Code puts the budget in a test file, so a regression fails <code>vp test</code> before it ships.</p>
+  <h4>1. Budgets in tests</h4>
+  <p><code>ThreadTransportPerformance.test.ts</code> has a <code>describe("thread transport payload budget")</code> block that asserts the bounded snapshot is at most 2% of the full one, and that command event payloads are at most 10% of their size before omission. The docs give concrete targets: cold opens load about 75 recent timeline rows and around 1 MiB, and resume catch-up replays at most 128 events or 1 MiB before falling back to a snapshot.</p>
+<pre>expect(projectedBoundedRpcJsonBytes / fullRpcJsonBytes).toBeLessThanOrEqual(0.02);
+expect(projectedRpcJsonBytes / preOmissionRpcJsonBytes).toBeLessThanOrEqual(0.1);</pre>
+  <h4>2. Benchmark the path users actually run</h4>
+  <p>The perf doc includes a warning worth repeating: the older benchmark fixtures seeded v1 events, and running them against a v2 client "can produce reassuring timings while missing the active transport path." A benchmark that measures the wrong path is worse than having none.</p>
+  <h4>3. Patterns from the perf commit log</h4>
+  <table>
+    <tr><th>Pattern</th><th>Commit</th></tr>
+    <tr><td>Check a cheap fingerprint before the expensive read</td><td>PR watches spend ~90% fewer GitHub points (#16270)</td></tr>
+    <tr><td>Batch per sweep, not per item</td><td>Background branch lookups share one GitHub query per sweep (#16760)</td></tr>
+    <tr><td>Hoist repeated work</td><td>Scan PATH once per command, not on every spawn (#12600)</td></tr>
+    <tr><td>Don't persist per streamed chunk</td><td>ACP tool updates no longer persist a snapshot per chunk (#16682)</td></tr>
+    <tr><td>Render only what's visible</td><td>Virtualize command palette results (#15266)</td></tr>
+    <tr><td>Stop work nobody can see</td><td>Pause elapsed-time timers on hidden thread screens (#15397)</td></tr>
+    <tr><td>Memoize at the right granularity</td><td>Diff panel no longer re-renders every file header per patch (#16033)</td></tr>
+    <tr><td>One selector can restyle the whole page</td><td>Remove a broad <code>:has()</code> (#15265), then lint for it (#15274)</td></tr>
+  </table>
+  <h4>4. Keep heavy data off the wire</h4>
+  <p>Raw command output, tool result bodies and inline file-change bodies are left out at the wire boundary. Persisted events keep everything, and diff endpoints serve file content when someone asks for it. The client gets the status and counts it needs to render, not megabytes of logs.</p>
+  <h4>5. The quieter wins</h4>
+  <ul>
+    <li>Sequence cursors seek an index instead of scanning history.</li>
+    <li>Startup picks recovery candidates from projection state and doesn't load completed history.</li>
+    <li>Polling that finds nothing changed keeps the same array identity, so React subscribers don't re-render.</li>
+    <li>Live queries are leased to the visible viewport plus a small overscan.</li>
+    <li>Reconnects use jittered exponential backoff capped at 5 minutes, so a server restart doesn't bring every client back in the same second.</li>
+  </ul>
+  <h4>6. Takeaway</h4>
+  <p>Write the budget down as a number, put that number in a test, and run it against the path users actually use.</p>
+</article>
+
+<article class="blog" id="blog-3">
+  <div class="cat muted">Testing · ~1,400 words</div>
+  <h3>Mock the boundary, not the logic: T3 Code's testing rules</h3>
+  <p><b>Hook:</b> "A test that needs a timeout to pass is wrong." That line from AGENTS.md sums up the whole testing approach.</p>
+  <h4>1. The test shape</h4>
+<pre>command dispatch → real Orchestrator → real ProviderAdapter
+  → replayed provider transport (recorded frames)
+  → real normalizer → real event sink → real projections → assertions</pre>
+  <p>Fakes are allowed only at true boundaries: the provider transport (replayed from transcripts), the clock (<code>TestClock</code>), randomness (a deterministic <code>Random</code>), a temp filesystem, and a temp database. Not allowed: a mocked orchestrator, adapter, normalizer, event sink, projection reducer or checkpoint policy. (<code>docs/orchestration-v2/testing-strategy.md</code>)</p>
+  <h4>2. Determinism comes from design</h4>
+  <p>Production code reads time through Effect's <code>Clock</code>/<code>DateTime</code> and randomness through <code>effect/Random</code>, never <code>Date.now</code> or <code>Math.random</code> directly. That's what lets a test control time instead of waiting on it.</p>
+  <h4>3. Drain instead of sleep</h4>
+  <p><code>packages/shared/src/DrainableWorker.ts</code> exposes <code>drain()</code>, which resolves only when the queue is empty <em>and</em> the item in progress has finished. An empty queue alone doesn't prove the worker is idle. Tests wait on <code>drain()</code> or on a specific persisted event, never on a sleep.</p>
+  <h4>4. Test restarts without test-only hooks</h4>
+  <p>To test an app restart, tear down the outermost layer and rebuild it against the same durable storage. Don't add a <code>restartForTest()</code> method to production code.</p>
+  <h4>5. Enforce the rules with lint</h4>
+  <ul>
+    <li><code>no-test-in-loop</code>: use <code>it.each</code>, not a <code>for</code> loop around <code>it</code>.</li>
+    <li><code>no-manual-effect-runtime-in-tests</code>: tests don't build their own runtime.</li>
+    <li>Even the CI scripts have tests (<code>.github/scripts/*.test.cjs</code>, <code>stage-preview-bundle.test.py</code>).</li>
+  </ul>
+  <h4>6. Test against real data</h4>
+  <p><code>vp run migrate-dev-db</code> rebuilds a dev database from a read-only, pruned snapshot of the developer's real one. It drops scheduled tasks, pending work and auth sessions. Running migrations on that copy also proves a new migration applies on top of the migrations already applied in real data, and it catches two branches claiming the same migration number.</p>
+  <h4>7. Takeaway</h4>
+  <p>Fewer tests that run the real stack, deterministic time and IDs, and no sleeps. "No mocks" is the wrong lesson. The rule is that a fake is allowed only at a true boundary.</p>
+</article>
+
+<article class="blog" id="blog-4">
+  <div class="cat muted">GitHub & OSS process · ~1,600 words</div>
+  <h3>A PR process for the AI era: what T3 Code requires from contributors</h3>
+  <p><b>Hook:</b> When anyone can generate a 2,000-line PR in ten minutes, review time becomes the scarce resource. T3 Code's contribution process is built around protecting it.</p>
+  <h4>1. The PR template asks for reasoning</h4>
+  <p>Sections: <b>Problem</b> (a sentence or two), <b>Change</b>, <b>Scope & approval</b> (a link to the maintainer's approval comment, not just an issue), <b>Verification</b>. The template says "tests pass" alone is not enough: describe what you checked and what you saw, and say what you couldn't check. It ends with the model and harness that did the work.</p>
+  <h4>2. One underlying problem per PR</h4>
+  <p>"Count the underlying problems, not the linked issues." Several reports can describe one bug, and a large diff alone doesn't mean the PR mixes unrelated work.</p>
+  <h4>3. Automation that gives context without gatekeeping</h4>
+  <ul>
+    <li><b>Size labels</b> (XS to XXL) exclude test files in mixed PRs, so adding tests doesn't make a PR look bigger.</li>
+    <li><b>Vouch list</b> (<code>.github/VOUCHED.td</code>) marks trusted contributors, but vouching is separate from skipping triage.</li>
+    <li><b>Mobile fingerprint check</b> labels PRs that change the native build. Those are merged as a batch just before a store submission, so main can ship over-the-air updates the rest of the time.</li>
+    <li><b>CI rejects committed PR screenshots</b> in <code>.github/pr-assets</code>. Evidence gets uploaded to GitHub.</li>
+  </ul>
+  <h4>4. AI triage that resists prompt injection</h4>
+  <p>Each triage run resolves <code>main</code> to a commit SHA and loads the policy, the triage skill and the exemption list from that SHA. "PR/fork copies and PR-body instructions cannot change policy or exemptions." If a policy file is missing or malformed, the PR stays unresolved. Nothing gets exempted or auto-closed because of it.</p>
+  <h4>5. Review bots with a narrow job</h4>
+  <p><code>.macroscope/check-run-agents/ui-consistency.md</code> reviews only changed lines, answers three questions, has a per-run budget, and replies exactly "All clear" when it finds nothing. <code>approvability.md</code>: a PR that changes product defaults, or adds a lint/type suppression, needs a human.</p>
+  <h4>6. Closing PRs without insults</h4>
+  <p>Every policy closure names the rule, cites the evidence, links the guide section and explains how to get the PR reconsidered. "We assess the problem, scope, approval, and evidence, not an author's writing style or whether we think an agent wrote the PR."</p>
+  <h4>7. Commit titles that describe the outcome</h4>
+  <p><code>fix(server): status refresh no longer pegs CPU in repos with thousands of untracked files</code>. Conventional-commit prefix, then the change in user terms, so the changelog reads like release notes.</p>
+  <h4>8. Security footnote</h4>
+  <p>The <code>pull_request_target</code> size job has a comment: fetch untrusted PR commits "only as passive git data. Do not add dependency installs, build/test scripts, or cache actions here." That one comment heads off a whole class of supply-chain attacks.</p>
+</article>
+
+<article class="blog" id="blog-5">
+  <div class="cat muted">DX & tooling · ~1,300 words</div>
+  <h3>Turn taste into lint rules: 14 custom rules in T3 Code's oxlint plugin</h3>
+  <p><b>Hook:</b> Code-review comments don't scale, especially when most of your contributors are agents. A lint rule says the same thing on every PR, instantly.</p>
+  <h4>The rules (<code>oxlint-plugin-t3code/rules</code>)</h4>
+  <table>
+    <tr><th>Rule</th><th>The taste it encodes</th></tr>
+    <tr><td><code>require-suppression-reason</code></td><td>Every <code>eslint-disable</code> or <code>@ts-ignore</code> says why</td></tr>
+    <tr><td><code>no-unscoped-has</code></td><td>No <code>:has()</code> Tailwind variants that restyle the whole page</td></tr>
+    <tr><td><code>no-native-title-tooltip</code></td><td>Use the styled Tooltip; <code>title</code> stays allowed on iframe/embed, where it's the accessible name</td></tr>
+    <tr><td><code>no-test-in-loop</code></td><td><code>it.each</code> over <code>for</code> loops</td></tr>
+    <tr><td><code>no-rpc-permission-bypass</code></td><td>Client mutations go through permission-checked commands</td></tr>
+    <tr><td><code>no-hermes-unsupported-apis</code></td><td>Mobile JS engine can't run every web API</td></tr>
+    <tr><td><code>no-inline-schema-compile</code></td><td>Compile schemas once, not per call</td></tr>
+    <tr><td><code>prefer-catch-tags</code></td><td>Typed, explicit error handling</td></tr>
+    <tr><td><code>no-raw-mcp-registration</code></td><td>MCP tools must declare who may call them</td></tr>
+    <tr><td><code>require-centered-scroll-gutter</code></td><td>Scroll areas lay out the same everywhere</td></tr>
+  </table>
+  <h4>The pattern: fix the instance, then remove the bug class</h4>
+  <p>#15265 changed one line, a <code>:has()</code> selector that made any DOM change restyle the whole page. The next PR, #15274, added a lint rule so that selector can't come back. Fix it, then make it impossible.</p>
+  <h4>Also</h4>
+  <ul>
+    <li><code>shadcn/no-restyle</code>: UI primitives own their look. If no variant fits, add one to the primitive.</li>
+    <li><code>knip</code> in CI: an unused export fails the build, so dead code can't pile up.</li>
+    <li>Macroscope: a PR that adds a suppression can't be auto-approved.</li>
+  </ul>
+</article>
+
+<article class="blog" id="blog-6">
+  <div class="cat muted">Dev setup · ~1,200 words</div>
+  <h3>A dev setup built for ten parallel agents on one machine</h3>
+  <p><b>Hook:</b> When five worktrees and five agents run dev servers at once, everything that's normally shared becomes a collision: ports, databases, processes, URLs.</p>
+  <ul>
+    <li><b>Ports from a hash of the worktree path</b> (<code>scripts/dev-runner.ts</code>). The same worktree gets the same ports across restarts, and the runner skips the ports browsers refuse to connect to (the Fetch spec's bad-ports list).</li>
+    <li><b>Probe only loopback</b> when checking whether a port is free. Probing wildcard addresses made the runner move off a free port whenever <code>tailscale serve</code> held that number on another interface.</li>
+    <li><b>State per worktree</b>: each worktree's <code>.t3</code> takes priority over an ambient <code>T3CODE_HOME</code>, so you can't end up on shared state by accident.</li>
+    <li><b>Single-origin dev</b>: Vite proxies <code>/api</code> and <code>/ws</code>. Never set <code>VITE_WS_URL</code> for dev, because it bakes localhost into the bundle and breaks every remote browser.</li>
+    <li><b><code>vp run dev --share</code></b> publishes over the tailnet and prints a pairing URL.</li>
+    <li><b><code>t3.json</code></b> runs worktree setup automatically: it links the shared <code>.env</code> and warms the dependency cache.</li>
+    <li><b>"Never kill by pattern"</b>: your own agent process has the worktree path in its argv. Kill only PIDs you captured when you spawned them.</li>
+    <li><b>Vendored reference repos</b> (<code>.repos/effect-smol</code>): read-only library source so agents copy real patterns instead of making them up.</li>
+  </ul>
+  <p><b>Takeaway:</b> design dev tooling as if a dozen strangers share your laptop, because with agents that's roughly true.</p>
+</article>
+
+<article class="blog" id="blog-7">
+  <div class="cat muted">UI/UX · ~1,200 words</div>
+  <h3>Lying spinners, stale labels, one-way doors: UX rules from T3 Code</h3>
+  <ul>
+    <li><b>"Users notice a dropped frame, a lying spinner, and a stale label."</b> No continuously repainting animations, because they peg the GPU on high-refresh displays.</li>
+    <li><b>Connection health and data freshness are separate.</b> A socket opening doesn't prove the environment is usable. A failed shell subscription on a healthy connection must not show "Reconnecting", because that promises a retry that will never happen.</li>
+    <li><b>Cached data is readable offline</b> but must not look live or overwrite newer data on reconnect.</li>
+    <li><b>Reverse states:</b> "Snooze needs unsnooze. Close needs reopen. A one-way door is a bug."</li>
+    <li><b>Check every surface:</b> if a behavior is reachable from chat, it's usually also reachable from Settings, the command palette and a keybinding, on web, desktop and mobile. Fixing one entry point doesn't fix the feature.</li>
+    <li><b>Slot composition:</b> <code>ComposerBanner</code> exports small slots (Root, Row, Icon, Content, Actions). A banner built from them is a few lines with no styling of its own.</li>
+    <li><b>The server owns derived state:</b> clients show the persisted settlement result and don't work it out from their own clocks, so every device agrees.</li>
+  </ul>
+</article>
+
+<article class="blog" id="blog-8">
+  <div class="cat muted">AI-native engineering · ~1,400 words</div>
+  <h3>AGENTS.md as an onboarding doc: how T3 Code writes for its main contributor, an AI agent</h3>
+  <p><b>Hook:</b> "Most T3 Code contributions will come from T3 Code itself, often controlled remotely." The repo is the agent's workplace, and the docs are written that way.</p>
+  <ul>
+    <li><b>A glossary</b> so humans and agents mean the same thing by environment, project, thread and turn.</li>
+    <li><b>"The three ways to hurt yourself"</b>: killing by pattern, writing to the live install, baking in origins. Short, concrete and memorable.</li>
+    <li><b>"Hit every surface"</b>: a checklist covering entry points, clients, providers, MCP reach, contracts, reverse states, connection modes and docs.</li>
+    <li><b>Verification limits:</b> the smallest proof that works. No repo-wide checks, because CI owns those.</li>
+    <li><b>Documentation rules:</b> internal docs record decisions and traps that are hard to find in the code. No feature catalogs. When a decision changes, rewrite the text instead of appending to it.</li>
+    <li><b>Theo's note:</b> "Fight for the smallest model that makes the correct behavior unsurprising." Channel both "measure twice, cut once" and "YAGNI".</li>
+    <li><b>Transparency:</b> PR bodies end with the model and harness that did the work, and 1,000+ commits carry AI co-author trailers.</li>
+  </ul>
+</article>
+
+<h2 id="plan">4 · Suggested posting plan (2 weeks)</h2>
+<table>
+  <tr><th>Day</th><th>Post</th><th>Format</th></tr>
+  <tr><td>Mon</td><td>Pure orchestrator (A1)</td><td>Tweet + architecture thread</td></tr>
+  <tr><td>Tue</td><td>Blog 1: The pure orchestrator</td><td>Blog + link tweet</td></tr>
+  <tr><td>Wed</td><td>One-line <code>:has()</code> fix → lint rule (P3)</td><td>Tweet (good for engagement)</td></tr>
+  <tr><td>Thu</td><td>Performance thread</td><td>Thread</td></tr>
+  <tr><td>Fri</td><td>Blog 2: Performance budgets as tests</td><td>Blog + link tweet</td></tr>
+  <tr><td>Mon</td><td>"A test that needs a timeout is wrong" (T3)</td><td>Tweet + testing thread</td></tr>
+  <tr><td>Tue</td><td>Blog 3: Mock the boundary</td><td>Blog</td></tr>
+  <tr><td>Wed</td><td>AI triage loads policy from main (G6)</td><td>Tweet + PR thread</td></tr>
+  <tr><td>Thu</td><td>Blog 4: PR process for the AI era</td><td>Blog</td></tr>
+  <tr><td>Fri</td><td>Dev setup for parallel agents (D1–D4)</td><td>Thread + Blog 6</td></tr>
+</table>
+
+<h2 id="sources">5 · Source map (to verify or quote)</h2>
+<table>
+  <tr><th>Topic</th><th>Files</th></tr>
+  <tr><td>Architecture</td><td><code>docs/internals/overview.md</code>, <code>apps/server/src/orchestration-v2/{Orchestrator,EventSink,EffectWorker}.ts</code></td></tr>
+  <tr><td>Services & errors</td><td><code>docs/internals/effect-services.md</code></td></tr>
+  <tr><td>Performance</td><td><code>docs/internals/performance-regressions.md</code>, <code>ThreadTransportPerformance.test.ts</code>, <code>package.json</code> → <code>test:perf:v2-wire</code></td></tr>
+  <tr><td>Testing</td><td><code>docs/orchestration-v2/testing-strategy.md</code>, <code>packages/shared/src/DrainableWorker.ts</code>, <code>apps/server/scripts/migrate-dev-db.ts</code></td></tr>
+  <tr><td>Connection / UX honesty</td><td><code>docs/internals/connection-runtime.md</code></td></tr>
+  <tr><td>Security</td><td><code>docs/internals/environment-auth.md</code>, <code>packages/contracts/src/clientRpcPermissions.ts</code></td></tr>
+  <tr><td>Providers</td><td><code>docs/internals/providers.md</code>, <code>packages/provider-*</code></td></tr>
+  <tr><td>UI system</td><td><code>docs/internals/web-ui.md</code>, <code>.macroscope/check-run-agents/ui-consistency.md</code></td></tr>
+  <tr><td>Lint</td><td><code>oxlint-plugin-t3code/rules/*</code>, <code>knip.jsonc</code></td></tr>
+  <tr><td>PR process</td><td><code>CONTRIBUTING.md</code>, <code>.github/pull_request_template.md</code>, <code>.github/workflows/{pr-size,pr-vouch,mobile-fingerprint-check,ci}.yml</code>, <code>.macroscope/approvability.md</code></td></tr>
+  <tr><td>Dev setup</td><td><code>scripts/dev-runner.ts</code>, <code>scripts/setup-worktree.ts</code>, <code>t3.json</code>, <code>docs/operations/development.md</code></td></tr>
+  <tr><td>Agent docs</td><td><code>AGENTS.md</code>, <code>docs/internals/glossary.md</code></td></tr>
+</table>
+</main>
+
+<script>
+const T = [
+  // ───────── Architecture
+  { id:"A1", cat:"Architecture", title:"Pure orchestrator + outbox",
+    ev:"apps/server/src/orchestration-v2/Orchestrator.ts · EventSink.ts · EffectWorker.ts",
+    t:`The cleanest server pattern I've read lately (T3 Code):
+
+1. The orchestrator decides events. Zero I/O.
+2. One DB transaction commits events + read models + command receipt + outbox.
+3. A worker runs side effects after commit.
+
+Retries are idempotent. Read models can't get ahead of the log.` },
+  { id:"A2", cat:"Architecture", title:"An ack means intent, not completion",
+    ev:"docs/internals/overview.md → Durable intent and side effects",
+    t:`An API ack should mean "your intent is saved", not "the work is done".
+
+T3 Code's docs say it outright: acknowledging a command means intent committed, not that the agent, checkpoint or follow-up work finished.
+
+Mix those two up and you ship a lying spinner.` },
+  { id:"A3", cat:"Architecture", title:"Complexity lives at the adapter boundary",
+    ev:"docs/internals/providers.md · packages/provider-core/src/server/ProviderAdapter.ts",
+    t:`T3 Code runs 6 different coding agents (Codex, Claude, Cursor, Grok, OpenCode, Antigravity).
+
+The orchestration layer doesn't know which one is running a thread.
+
+Each adapter normalizes its provider's protocol into the same events.
+
+Complexity goes at the edges. The core stays boring.` },
+  { id:"A4", cat:"Architecture", title:"Thin transports, fat services",
+    ev:"docs/internals/effect-services.md",
+    t:`Rule from T3 Code: an RPC handler does 3 things.
+
+1. Decode input
+2. Call ONE service method
+3. Map errors
+
+That's it. Why? The same capability is reached from WebSocket, MCP tools (agents), scheduled tasks and the CLI.
+
+Logic in a handler is missing everywhere else.` },
+  { id:"A5", cat:"Architecture", title:"Negotiate capabilities, not versions",
+    ev:"docs/internals/overview.md → Pull request linking compatibility",
+    t:`Web, desktop, mobile and servers all upgrade on their own schedule.
+
+So T3 Code never checks "client version >= X". The server advertises capability flags, and clients pick the protocol they can use.
+
+Old fields keep shipping for old clients. No coordinated releases needed.` },
+  { id:"A6", cat:"Architecture", title:"Your schema has a past",
+    ev:"docs/internals/overview.md",
+    t:`Event-sourcing trap: every stored event must still decode on replay, forever.
+
+Changing a schema doesn't just affect the newest client. It affects every old database on its next startup.
+
+Compatibility includes the data you already stored, not just what the newest client sends.` },
+  { id:"A7", cat:"Architecture", title:"One connection owner shared by web + mobile",
+    ev:"docs/internals/connection-runtime.md · packages/client-runtime",
+    t:`Web and React Native share one connection runtime in T3 Code.
+
+Platforms only supply storage, credentials, network signals and lifecycle events. Retry policy lives in one place.
+
+Result: no competing reconnect loops, and web and mobile don't drift apart.` },
+  { id:"A8", cat:"Architecture", title:"Native code in a child process",
+    ev:"docs/internals/overview.md (Electron section)",
+    t:`Electron rule from T3 Code:
+
+Native modules never load in the main process on the startup path.
+
+New native capabilities go in a forked child process with a deadline, not an import in main.
+
+A crash or hang in a native addon must never take the app down.` },
+  { id:"A9", cat:"Architecture", title:"The server owns derived state",
+    ev:"ThreadSettlementService.ts · overview.md",
+    t:`If 3 devices are looking at the same data, none of them should compute its status from its own clock.
+
+T3 Code evaluates thread "settlement" on the server and persists the result. Clients just render it.
+
+Derived state belongs to whoever owns the truth.` },
+  { id:"A10", cat:"Architecture", title:"Immutable releases + leases",
+    ev:"apps/server/src/provider/AntigravityInstallation.ts",
+    t:`How to update a binary while agents are still running it:
+
+- Releases are immutable
+- An atomic pointer picks the version for NEW processes
+- Running processes hold a lease on their version
+
+Updates respect leases. Never swap an executable out from under a running process.` },
+
+  // ───────── Performance
+  { id:"P1", cat:"Performance", title:"Payload budgets in unit tests",
+    ev:"apps/server/src/orchestration-v2/ThreadTransportPerformance.test.ts",
+    t:`Most teams find perf regressions when users complain.
+
+T3 Code writes the budget into a test:
+
+expect(boundedBytes / fullBytes).toBeLessThanOrEqual(0.02)
+
+Cold-opening a thread: ~75 recent rows, ~1 MiB. Exceed the budget and the test fails before you ship.` },
+  { id:"P2", cat:"Performance", title:"Benchmark the path users run",
+    ev:"docs/internals/performance-regressions.md",
+    t:`Perf lesson from T3 Code's docs:
+
+Their old benchmark fixtures seeded v1 data. Against the v2 client they "can produce reassuring timings while missing the active transport path."
+
+A benchmark that measures the wrong path is worse than having none. It tells you you're fine.` },
+  { id:"P3", cat:"Performance", title:"Fix it, then make it impossible",
+    ev:"PR #15265 (1-line fix) → PR #15274 (no-unscoped-has lint rule)",
+    t:`My favorite pair of PRs in T3 Code:
+
+#15265: a 1-line change. A broad CSS :has() selector made every DOM change restyle the whole page.
+
+#15274: a lint rule so nobody can write that selector again.
+
+Fix the bug. Then make the bug class impossible.` },
+  { id:"P4", cat:"Performance", title:"Cheap fingerprint before an expensive read",
+    ev:"PR #16270 · PullRequestWatchReactor.ts",
+    t:`T3 Code cut GitHub API spend on PR watches by ~90%.
+
+Instead of fetching every watched PR in full on every pass, it checks a 1-point fingerprint first and does the full read only when that changes.
+
+Same pattern as ETags. Ask "did anything change?" before "what changed?"` },
+  { id:"P5", cat:"Performance", title:"Keep heavy data off the wire",
+    ev:"docs/internals/performance-regressions.md",
+    t:`T3 Code never sends raw command output, tool results or inline file diffs over the websocket, even small ones.
+
+Persisted events stay complete. The client gets status and counts, and fetches bodies on demand.
+
+Store everything, send what the screen needs.` },
+  { id:"P6", cat:"Performance", title:"Stop work nobody can see",
+    ev:"PR #15397 · #15266 · performance-regressions.md",
+    t:`Three "stop doing invisible work" wins from T3 Code:
+
+- Pause elapsed-time timers on hidden mobile screens
+- Virtualize command palette results
+- Lease live git/PR queries to the visible viewport plus a small overscan
+
+The fastest work is the work you skip.` },
+  { id:"P7", cat:"Performance", title:"Jittered backoff with a cap",
+    ev:"docs/internals/connection-runtime.md · supervisor.ts",
+    t:`Reconnect logic, explained in one paragraph from T3 Code:
+
+Without jitter, every client of a restarted server reconnects in the same second.
+With a short cap, a client that can never connect retries all day.
+
+So: jittered exponential backoff, capped at 5 min, reset only after a stable connection.` },
+  { id:"P8", cat:"Performance", title:"Batch per sweep, hoist per command",
+    ev:"PRs #16760 · #12600 · #16682",
+    t:`Three perf fixes from T3 Code's git log that are really the same lesson:
+
+- Branch lookups share ONE GitHub query per sweep
+- Scan PATH once per command, not on every spawn
+- Stop persisting a snapshot for every streamed chunk
+
+Look for "per item" work that could be "per batch".` },
+  { id:"P9", cat:"Performance", title:"Keep identity on unchanged polls",
+    ev:"docs/internals/performance-regressions.md",
+    t:`Small React perf trick from T3 Code:
+
+When a polling read comes back unchanged, keep the old array identity.
+
+New array, same data = every subscriber re-renders for nothing. Returning the same reference keeps polling cheap for the UI.` },
+  { id:"P10", cat:"Performance", title:"Seek, don't scan",
+    ev:"performance-regressions.md → Event store and startup",
+    t:`Startup perf rules from T3 Code:
+
+- Sequence cursors seek an index, never scan history
+- Recovery picks candidates from current state, never loads completed threads "just to check"
+- Rebuilds replay in bounded pages, never collect the whole log
+
+Startup time shouldn't grow with how long you've used the app.` },
+  { id:"P11", cat:"Performance", title:"No continuously repainting animations",
+    ev:"AGENTS.md → Taste",
+    t:`A UI rule more apps should have (from T3 Code):
+
+No continuously repainting animations. They peg the GPU on high-refresh displays.
+
+Your 120Hz MacBook user notices the fan before they notice your fancy shimmer.` },
+
+  // ───────── UI/UX
+  { id:"U1", cat:"UI / UX", title:"Primitives own their look",
+    ev:"AGENTS.md → Taste · docs/internals/web-ui.md · shadcn/no-restyle",
+    t:`Design system rule in T3 Code, enforced by lint:
+
+You don't restyle a <Button> with className. You pick a variant or size.
+
+No variant fits? Add one to the component. Layout classes go on the parent.
+
+That's how a design system stays consistent with hundreds of contributors.` },
+  { id:"U2", cat:"UI / UX", title:"Slot composition",
+    ev:"apps/web/src/components/chat/ComposerBanner.tsx",
+    t:`The best React component pattern in T3 Code: slots.
+
+ComposerBanner exports Root, Row, Icon, Content, Actions, Dismiss. Each slot owns its styles.
+
+A new banner is a few lines with zero classes of its own.
+
+Make the shared component, not each call site, carry the styling.` },
+  { id:"U3", cat:"UI / UX", title:"Honest status labels",
+    ev:"docs/internals/connection-runtime.md",
+    t:`"Reconnecting…" is a promise.
+
+T3 Code keeps connection health and data freshness separate. A failed subscription on a healthy socket must NOT say "reconnecting", because no reconnect is coming.
+
+Users drive agents all day. They notice a lying spinner and a stale label.` },
+  { id:"U4", cat:"UI / UX", title:"No one-way doors",
+    ev:"AGENTS.md → Hit every surface",
+    t:`UX rule from T3 Code I'm stealing:
+
+"If you added a way in, add the way out and the way to see it.
+Snooze needs unsnooze. Close needs reopen.
+A one-way door is a bug."` },
+  { id:"U5", cat:"UI / UX", title:"Hit every surface",
+    ev:"AGENTS.md → Hit every surface",
+    t:`"The most common defect in this repo is a change that works on the path you tested and is missing everywhere else."
+
+T3 Code's checklist: entry points (chat, settings, palette, keybinding), clients (web/desktop/mobile), providers, agents via MCP, reverse states, connection modes, docs.` },
+  { id:"U6", cat:"UI / UX", title:"Ban the native tooltip",
+    ev:"oxlint-plugin-t3code/rules/no-native-title-tooltip.ts",
+    t:`T3 Code has a lint rule banning the HTML title="" attribute as a tooltip. Use the styled Tooltip component instead.
+
+The nice detail: it still allows title on iframe/embed/object, where title is the accessible name, not a tooltip.
+
+Good lint rules know their exceptions.` },
+  { id:"U7", cat:"UI / UX", title:"Cached isn't live",
+    ev:"docs/internals/connection-runtime.md",
+    t:`Offline-first rule from T3 Code:
+
+Cached data stays readable offline, but it must never:
+- imply a live connection
+- overwrite newer live data on reconnect
+
+Showing stale data is fine. Showing stale data as if it were live is the bug.` },
+
+  // ───────── Testing
+  { id:"T1", cat:"Testing", title:"Mock the boundary, not the logic",
+    ev:"docs/orchestration-v2/testing-strategy.md",
+    t:`T3 Code's testing rule:
+
+Fakes are allowed only at true boundaries: process, network, clock, IDs, filesystem.
+
+Never mock the orchestrator, adapter, normalizer, event sink or projections.
+
+A few integration tests running the real stack beat 500 mocked unit tests.` },
+  { id:"T2", cat:"Testing", title:"No sleeps in tests",
+    ev:"AGENTS.md → Verifying · packages/shared/src/DrainableWorker.ts",
+    t:`"A test that needs a timeout to pass is wrong."
+
+T3 Code's DrainableWorker exposes drain(), which resolves only when the queue is empty AND the current item has finished.
+
+An empty queue alone doesn't prove the worker is idle. Wait on the milestone, not on a sleep.` },
+  { id:"T3", cat:"Testing", title:"Determinism by design",
+    ev:"docs/orchestration-v2/testing-strategy.md",
+    t:`Want deterministic tests? Fix it in production code.
+
+T3 Code reads time via Effect's Clock and randomness via effect/Random. Never Date.now or Math.random directly.
+
+Tests swap in TestClock and a seeded Random. No flaky timestamps, no snapshot UUID churn.` },
+  { id:"T4", cat:"Testing", title:"Replay real provider traffic",
+    ev:"docs/orchestration-v2/testing-strategy.md",
+    t:`How T3 Code tests integrations with 6 AI agent CLIs without calling them:
+
+Record the raw provider frames into replay transcripts. Replay them through the REAL adapter and normalizer.
+
+The replay runtime doesn't know what a "turn" is. Only the adapter does.` },
+  { id:"T5", cat:"Testing", title:"No test-only restart hooks",
+    ev:"docs/orchestration-v2/testing-strategy.md",
+    t:`How do you test "the app restarted mid-task"?
+
+Not with a restartForTest() method.
+
+T3 Code tears down the outermost server layer and rebuilds it against the same durable storage, the same way a real restart works.
+
+Production code shouldn't grow APIs that exist only for tests.` },
+  { id:"T6", cat:"Testing", title:"Test against real data",
+    ev:"apps/server/scripts/migrate-dev-db.ts",
+    t:`"An empty database is a bad test."
+
+T3 Code's migrate-dev-db copies a pruned, read-only snapshot of your real DB into the worktree, drops live work and auth, then runs migrations.
+
+Bonus: it proves new migrations apply on real data and catches two branches claiming the same migration ID.` },
+  { id:"T7", cat:"Testing", title:"Don't test the implementation",
+    ev:"AGENTS.md → Verifying",
+    t:`From T3 Code's guidelines:
+
+Don't render components to static markup just to assert props, and don't write tests that only check callback wiring or mirror the implementation.
+
+Test meaningful logic or observable behavior. Everything else breaks on refactor and catches nothing.` },
+  { id:"T8", cat:"Testing", title:"Smallest proof, CI owns the rest",
+    ev:"AGENTS.md → Verifying",
+    t:`Verification rule in T3 Code:
+
+Locally, run the smallest proof the change works: the tests you touched plus targeted typecheck/lint.
+
+Don't run the whole suite. CI owns that.
+
+Fast feedback locally, full coverage in CI. Each does its own job.` },
+
+  // ───────── DX & Tooling
+  { id:"D1", cat:"DX & Tooling", title:"Taste as lint rules",
+    ev:"oxlint-plugin-t3code/rules (14 rules)",
+    t:`T3 Code has 14 custom lint rules. A few:
+
+- require-suppression-reason
+- no-unscoped-has (CSS perf)
+- no-rpc-permission-bypass
+- no-hermes-unsupported-apis (mobile)
+- no-test-in-loop
+
+Review comments don't scale. Lint rules do, especially when agents write the code.` },
+  { id:"D2", cat:"DX & Tooling", title:"Every suppression says why",
+    ev:"oxlint-plugin-t3code/rules/require-suppression-reason.ts · .macroscope/approvability.md",
+    t:`Two rules about lint suppressions in T3 Code:
+
+1. Every eslint-disable / @ts-ignore must say why (a "-- reason" suffix or a comment above). Lint enforces it.
+2. Any PR that adds a suppression can't be auto-approved. A human has to look.
+
+Silencing a tool should cost something.` },
+  { id:"D3", cat:"DX & Tooling", title:"Ports from a hash of the worktree path",
+    ev:"scripts/dev-runner.ts",
+    t:`Dev setup detail I love in T3 Code:
+
+Dev server ports come from a hash of the worktree path, so they're stable across restarts and don't collide across worktrees.
+
+It also skips ports browsers block per the Fetch spec, the kind curl accepts but Chrome refuses.` },
+  { id:"D4", cat:"DX & Tooling", title:"Single-origin dev",
+    ev:"AGENTS.md → The three ways to hurt yourself",
+    t:`Never bake your API URL into a dev bundle.
+
+T3 Code: dev is single-origin and Vite proxies /api and /ws. Setting VITE_WS_URL would bake localhost in and "silently break every remote browser."
+
+Same build works on localhost, over the LAN and through Tailscale.` },
+  { id:"D5", cat:"DX & Tooling", title:"Worktree-isolated state",
+    ev:"docs/operations/development.md · scripts/setup-worktree.ts · t3.json",
+    t:`Running 5 agents in 5 git worktrees? T3 Code's setup:
+
+- Each worktree gets its own .t3 state, which beats any ambient env var
+- A setup script runs on worktree create (links .env, warms caches)
+- Stable per-worktree ports
+
+Shared state is the enemy of parallel work.` },
+  { id:"D6", cat:"DX & Tooling", title:"Never kill by pattern",
+    ev:"AGENTS.md → The three ways to hurt yourself",
+    t:`The most underrated line in T3 Code's AGENTS.md:
+
+"Never pkill -f … Your own agent process has this worktree's path in its argv."
+
+When an agent runs your dev server, pkill -f <worktree> can kill the agent itself. Only kill PIDs you captured at spawn.` },
+  { id:"D7", cat:"DX & Tooling", title:"Vendor reference repos for agents",
+    ev:".repos/effect-smol · .repos/alchemy-effect",
+    t:`Neat trick in T3 Code: a .repos/ folder with read-only vendored source of key libraries (like Effect).
+
+Agents read real library code and patterns instead of guessing from training data.
+
+Rule: never edit them, never import from them. Re-sync when you bump the dependency.` },
+  { id:"D8", cat:"DX & Tooling", title:"Dead code fails CI",
+    ev:"knip.jsonc · ci.yml → Check unused code",
+    t:`T3 Code runs knip in CI. An export nobody imports fails the build.
+
+It sounds harsh, but it means:
+- no "might need this later" exports
+- refactors actually delete the old code
+- no re-export shims hanging around
+
+Unused code is a cost, not an asset.` },
+  { id:"D9", cat:"DX & Tooling", title:"CI that doesn't wait in line",
+    ev:".github/workflows/ci.yml",
+    t:`CI tricks from T3 Code's workflow:
+
+- Lint, typecheck, build and tests run as parallel jobs, with one aggregate "Check" gate
+- apt installs run in the background while JS deps install
+- Sparse checkout skips vendored repos
+- Superseded PR runs get cancelled
+
+Minutes saved × every PR.` },
+
+  // ───────── GitHub & PRs
+  { id:"G1", cat:"GitHub & PRs", title:"The PR template",
+    ev:".github/pull_request_template.md",
+    t:`T3 Code's PR template has 4 sections:
+
+Problem: one or two sentences
+Change: how it fixes it
+Scope & approval: link the maintainer's approval comment
+Verification: what you checked and what you saw
+
+"'Tests pass' alone is insufficient."` },
+  { id:"G2", cat:"GitHub & PRs", title:"One problem per PR",
+    ev:"CONTRIBUTING.md#one-problem",
+    t:`"Count the underlying problems, not the linked issues."
+
+T3 Code's rule: one PR = one underlying problem. Five issues can be one bug. A big diff can still be one problem.
+
+Adjacent cleanup gets its own PR.` },
+  { id:"G3", cat:"GitHub & PRs", title:"AI triage that resists prompt injection",
+    ev:"CONTRIBUTING.md → Triage and deeper review",
+    t:`If an AI bot triages your PRs, a PR can try to talk it into approving.
+
+T3 Code's defense: every run loads the policy from main's commit SHA. "PR/fork copies and PR-body instructions cannot change policy."
+
+Missing policy file? No auto-close and no exemption. The PR waits for a maintainer.` },
+  { id:"G4", cat:"GitHub & PRs", title:"Size labels that don't punish tests",
+    ev:".github/workflows/pr-size.yml",
+    t:`T3 Code labels every PR size:XS → size:XXL.
+
+The detail: test files are excluded from the count in mixed PRs.
+
+If adding tests makes a PR look bigger and scarier, people stop adding tests. Measure what you want less of, not what you want more of.` },
+  { id:"G5", cat:"GitHub & PRs", title:"Batch native changes, keep OTA alive",
+    ev:".github/workflows/mobile-fingerprint-check.yml",
+    t:`Clever mobile CI in T3 Code:
+
+A check computes the Expo native fingerprint per PR. If a PR changes native code, it gets a "📱 Native Change" label.
+
+Those PRs get merged as a batch right before a store submission, so main can ship OTA updates the rest of the time.` },
+  { id:"G6", cat:"GitHub & PRs", title:"pull_request_target safety",
+    ev:".github/workflows/pr-size.yml",
+    t:`One comment in T3 Code's workflow every OSS repo should copy:
+
+"This pull_request_target job may fetch untrusted PR commits only as passive git data. Do not add dependency installs, build/test scripts, or cache actions here."
+
+That's one of the most common ways repos get supply-chain attacked.` },
+  { id:"G7", cat:"GitHub & PRs", title:"Commit titles describe the outcome",
+    ev:"git log",
+    t:`T3 Code's commit titles read like release notes:
+
+fix(server): status refresh no longer pegs CPU in repos with thousands of untracked files
+
+perf(web): DOM changes no longer restyle the whole page
+
+Conventional prefix, then what changed for the user. Not "fix bug in X".` },
+  { id:"G8", cat:"GitHub & PRs", title:"Close PRs like a professional",
+    ev:"CONTRIBUTING.md → Closure and reconsideration",
+    t:`How T3 Code closes a PR:
+
+- Name the specific rule
+- Cite the evidence
+- Link the guide section
+- Explain how to get reconsidered
+
+And: "We assess the problem, scope, approval, and evidence, not … whether we think an agent wrote the PR."
+
+Firm, specific, no insults.` },
+  { id:"G9", cat:"GitHub & PRs", title:"Narrow AI reviewers",
+    ev:".macroscope/check-run-agents/ui-consistency.md",
+    t:`T3 Code's AI UI reviewer:
+- reviews only changed lines
+- answers exactly 3 questions
+- doesn't build the project or ask for screenshots
+- has a budget per run and per PR
+- says exactly "All clear" when there's nothing
+
+A narrow job with clear rules beats "review this PR".` },
+  { id:"G10", cat:"GitHub & PRs", title:"Defaults need a human",
+    ev:".macroscope/approvability.md",
+    t:`T3 Code's auto-approval policy has 2 explicit carve-outs that always need a human:
+
+1. Any PR that changes product defaults
+2. Any PR that adds or broadens a lint/type suppression
+
+Small diffs, big blast radius. Pick your human-review triggers on purpose.` },
+  { id:"G11", cat:"GitHub & PRs", title:"PR evidence goes to GitHub, not git",
+    ev:".github/workflows/ci.yml → Reject repository-owned PR assets",
+    t:`T3 Code's CI fails if anyone commits files under .github/pr-assets.
+
+UI PRs need before/after screenshots (and video for motion), but they're uploaded to the PR, not committed.
+
+Screenshots in git history are forever. Screenshots in a PR are context.` },
+
+  // ───────── Security
+  { id:"S1", cat:"Security", title:"Authentication isn't authorization",
+    ev:"docs/internals/overview.md · clientRpcPermissions.ts",
+    t:`"Authentication of a socket does not authorize every method on it." (T3 Code)
+
+Each protected RPC declares its scope, and the scope is checked at execution against the destination environment.
+
+The client uses permissions only to hide buttons. The server stays authoritative.` },
+  { id:"S2", cat:"Security", title:"Scopes narrow, never widen",
+    ev:"docs/internals/environment-auth.md",
+    t:`Auth rule from T3 Code:
+
+Exchanging a pairing credential can narrow its scopes but never widen them. Creating a new pairing link requires access:write AND every scope you're delegating.
+
+You can't hand out more power than you have.` },
+  { id:"S3", cat:"Security", title:"Errors that don't leak",
+    ev:"docs/internals/effect-services.md → Errors",
+    t:`Error design rule from T3 Code:
+
+Error attributes and log fields stay bounded: no raw payloads, command output, signed URLs, credentials or query strings.
+
+Log the category, length, count, or a URL's host. The exact value lives only in the wrapped cause.` },
+  { id:"S4", cat:"Security", title:"Health checks with no side effects",
+    ev:"docs/internals/providers.md",
+    t:`"Setup must not happen as a health-check side effect."
+
+Opening an agent session can start MCP servers, run hooks or launch a login browser. So T3 Code's background status probes only initialize and never authenticate.
+
+A status check should never change anything.` },
+  { id:"S5", cat:"Security", title:"Read models never hold secrets",
+    ev:"docs/internals/environment-auth.md",
+    t:`Subtle auth bug class, avoided in T3 Code:
+
+The "connections" list never contains recoverable pairing secrets. Only the creation response returns the raw credential.
+
+Otherwise read access to a list becomes a way to steal someone else's access.` },
+
+  // ───────── AI-native & Docs
+  { id:"AI1", cat:"AI-native & Docs", title:"The product builds itself",
+    ev:"AGENTS.md",
+    t:`"Most T3 Code contributions will come from T3 Code itself, often controlled remotely."
+
+So AGENTS.md is written like onboarding for a new hire: a glossary, "the three ways to hurt yourself", a "hit every surface" checklist and verification limits.
+
+Write your docs for your most frequent contributor.` },
+  { id:"AI2", cat:"AI-native & Docs", title:"Docs for decisions, not features",
+    ev:"AGENTS.md → Documentation",
+    t:`T3 Code's doc rules:
+
+- Internal docs record decisions, constraints and hard-to-find traps
+- No feature catalogs, no narrated control flow
+- When a decision changes, rewrite the text, don't append
+
+Ask: "what would a maintainer get wrong without this paragraph?"` },
+  { id:"AI3", cat:"AI-native & Docs", title:"Smallest model, unsurprising behavior",
+    ev:"AGENTS.md → A note from Theo",
+    t:`From Theo's note in T3 Code's AGENTS.md:
+
+"Understand the real constraint, then fight for the smallest model that makes the correct behavior unsurprising."
+
+"Do not preserve complexity just because it already exists."` },
+  { id:"AI4", cat:"AI-native & Docs", title:"Name the model in the PR",
+    ev:".github/pull_request_template.md · git log",
+    t:`T3 Code asks every agent-written PR to end with the model and harness that did the work.
+
+1,000+ commits on main carry AI co-author trailers.
+
+No hiding it and no shaming it. Treat it as provenance, the same as recording which version of a dependency you used.` },
+  { id:"AI5", cat:"AI-native & Docs", title:"A shared glossary",
+    ev:"docs/internals/glossary.md",
+    t:`Underrated engineering doc: a glossary.
+
+T3 Code defines environment, project, thread, turn, command, event, projection, outbox and more. Each term means exactly one thing.
+
+When humans and agents use the same words for the same things, half the bugs never get written.` },
+];
+
+const cats = ["All", ...new Set(T.map(x => x.cat))];
+const grid = document.getElementById("grid");
+const filters = document.getElementById("filters");
+
+// X counts any URL as 23 chars; approximate that.
+function xLen(s) { return [...s.replace(/https?:\/\/\S+/g, "x".repeat(23))].length; }
+function countEl(s) {
+  const n = xLen(s);
+  return `<span class="count ${n > 280 ? "over" : "ok"}">${n}/280</span>`;
+}
+function esc(s) { return s.replace(/[&<>]/g, c => ({ "&":"&amp;", "<":"&lt;", ">":"&gt;" }[c])); }
+function copyBtn(text) { return `<button class="copy" data-text="${encodeURIComponent(text)}">Copy</button>`; }
+
+function render(cat) {
+  grid.innerHTML = T.filter(x => cat === "All" || x.cat === cat).map(x => `
+    <div class="card">
+      <div class="cat">${x.cat} · ${x.id}</div>
+      <h3>${esc(x.title)}</h3>
+      <div class="tweet">${esc(x.t)}</div>
+      <div class="meta">${countEl(x.t)}${copyBtn(x.t)}</div>
+      <div class="evidence">Source: <code>${esc(x.ev)}</code></div>
+    </div>`).join("");
+}
+filters.innerHTML = cats.map((c, i) => `<button class="${i === 0 ? "active" : ""}" data-cat="${c}">${c} ${c === "All" ? `(${T.length})` : `(${T.filter(x => x.cat === c).length})`}</button>`).join("");
+filters.addEventListener("click", e => {
+  const b = e.target.closest("button"); if (!b) return;
+  filters.querySelectorAll("button").forEach(x => x.classList.remove("active"));
+  b.classList.add("active"); render(b.dataset.cat);
+});
+render("All");
+
+const THREADS = [
+  { title: "🧵 Architecture: how T3 Code stays correct when AI agents crash mid-task", parts: [
+`I read through T3 Code's server (open-source GUI for Codex, Claude Code, Cursor and more, 400k+ users).
+
+The architecture fits on a napkin, and it's the right napkin. 🧵`,
+`1/ Clients send typed WebSocket requests. The server turns them into commands.
+
+The Orchestrator decides which events happen. It does ZERO I/O. Pure function of state + command.`,
+`2/ An EventSink commits, in ONE transaction:
+- the events
+- the read models (projections)
+- a command receipt
+- "outbox" effects (start agent turn, take checkpoint…)
+
+Read models can't get ahead of the log. Retries are idempotent.`,
+`3/ After commit, an effect worker runs the side effects and feeds the results back in as new commands.
+
+If the process dies mid-way, the intent is already persisted. Recovery picks it up.`,
+`4/ The consequence most apps get wrong:
+
+A command ack means "intent committed", not "work finished". The UI has to show those as separate states, or you get a lying spinner.`,
+`5/ Six providers, one core. Each provider adapter normalizes its protocol into the same events, and orchestration never branches on provider.
+
+Complexity goes at the edges.`,
+`6/ Every turn ends with a checkpoint stored as a hidden git ref. You get diffs and restore without adding commits to your branch.`,
+`7/ The takeaway: you don't need a framework. You need
+- a pure decide step
+- one transaction for facts + intent
+- a worker that does the I/O after commit
+
+github.com/pingdotgg/t3code`]},
+  { title: "🧵 Performance: 9 patterns from T3 Code's git log", parts: [
+`T3 Code's AGENTS.md lists "performance without compromise" as non-negotiable.
+
+So I read their perf commits. 9 patterns worth stealing 🧵`,
+`1/ Payload budgets are unit tests.
+
+expect(boundedBytes / fullBytes).toBeLessThanOrEqual(0.02)
+
+Opening a thread loads ~75 recent rows, ~1 MiB. Go over and the test fails.`,
+`2/ Benchmark the path users run. Their old fixtures seeded v1 data and gave "reassuring timings while missing the active transport path".
+
+A benchmark that measures the wrong path tells you you're fine.`,
+`3/ Fix it, then make it impossible.
+#15265: a 1-line fix, a CSS :has() selector that restyled the whole page on every DOM change
+#15274: a lint rule banning that selector`,
+`4/ Cheap fingerprint first. PR watches spend ~90% fewer GitHub points by checking a 1-point fingerprint and reading in full only when it changes.`,
+`5/ Per batch, not per item:
+- one GitHub query per sweep
+- scan PATH once per command
+- no snapshot per streamed chunk`,
+`6/ Keep heavy data off the wire. Raw command output and tool result bodies never go over the socket. Persist everything, send what the screen needs.`,
+`7/ Skip invisible work: pause timers on hidden screens, virtualize long lists, lease live queries to the viewport plus overscan.`,
+`8/ Reconnects: jittered exponential backoff capped at 5 min. No jitter means a thundering herd. No cap means retrying all day.`,
+`9/ No continuously repainting animations. They peg the GPU on 120Hz displays, and your users notice the fan.`]},
+  { title: "🧵 Testing: mock the boundary, not the logic", parts: [
+`"A test that needs a timeout to pass is wrong."
+
+T3 Code's testing rules, in one thread 🧵`,
+`1/ Fakes are allowed only at true boundaries: provider process, network, clock, random IDs, filesystem, DB.
+
+Not allowed: a mocked orchestrator, adapter, normalizer, event sink or projection.`,
+`2/ To test integrations with AI agent CLIs, they record real provider frames into replay transcripts, then replay them through the REAL adapter.`,
+`3/ Determinism comes from production code. Time is read via Effect's Clock and randomness via effect/Random. Tests swap in TestClock and a seeded Random.`,
+`4/ No sleeps. DrainableWorker.drain() resolves when the queue is empty AND the current item has finished. An empty queue alone doesn't mean idle.`,
+`5/ Restart tests rebuild the outer server layer on the same durable storage. No restartForTest() methods in prod code.`,
+`6/ Real data: migrate-dev-db copies a pruned, read-only snapshot of the real DB and runs migrations on top. "An empty database is a bad test."`,
+`7/ And no tests that only assert props or callback wiring. Test behavior, not implementation.`]},
+  { title: "🧵 The PR process for the AI era", parts: [
+`When anyone can generate a 2,000-line PR in 10 minutes, review time is the scarce resource.
+
+Here's how T3 Code protects it 🧵`,
+`1/ Template: Problem / Change / Scope & approval / Verification.
+"Tests pass" alone is not evidence. Say what you checked, what you saw and what you couldn't check.`,
+`2/ One underlying problem per PR. "Count the underlying problems, not the linked issues."`,
+`3/ Features need explicit maintainer approval first, and you link the approval comment itself. A linked issue isn't enough.`,
+`4/ The AI triage loads its policy from main's commit SHA, never from the PR. PR-body instructions can't change the rules. That's prompt-injection defense.`,
+`5/ Size labels exclude tests in mixed PRs. Never make adding tests look scarier.`,
+`6/ Auto-approval is never allowed for PRs that change product defaults or add lint suppressions.`,
+`7/ Closures cite the rule, the evidence and the path to reconsideration. And they judge the work, not whether an agent wrote it.`]},
+  { title: "🧵 Dev setup for running many agents in parallel", parts: [
+`With 5 agents in 5 worktrees on one laptop, everything shared becomes a collision.
+
+T3 Code's dev setup handles it. 🧵`,
+`1/ Ports come from a hash of the worktree path. Stable across restarts, no collisions, and the ports browsers block per the Fetch spec are skipped.`,
+`2/ Each worktree gets its own .t3 state, which outranks an ambient T3CODE_HOME. You can't land on shared state by accident.`,
+`3/ Single-origin dev: Vite proxies /api and /ws. Never bake a WS URL in. The same build works on localhost, LAN and Tailscale.`,
+`4/ "vp run dev --share" publishes over the tailnet and prints a pairing URL for your phone.`,
+`5/ "Never pkill -f": your own agent's argv contains the worktree path. Kill only PIDs you captured at spawn.`,
+`6/ Vendored, read-only library source in .repos/ so agents copy real patterns instead of guessing.`]},
+];
+
+document.getElementById("threads-root").innerHTML = THREADS.map(th => `
+  <div class="thread">
+    <h3>${esc(th.title)}</h3>
+    <div class="meta" style="justify-content:flex-start;gap:12px"><span class="muted">${th.parts.length} tweets</span>${copyBtn(th.parts.join("\n\n---\n\n")).replace("Copy", "Copy whole thread")}</div>
+    <ol>${th.parts.map(p => `<li><div class="tweet">${esc(p)}</div><div class="meta">${countEl(p)}${copyBtn(p)}</div></li>`).join("")}</ol>
+  </div>`).join("");
+
+document.addEventListener("click", async e => {
+  const b = e.target.closest("button.copy"); if (!b) return;
+  const text = decodeURIComponent(b.dataset.text);
+  try { await navigator.clipboard.writeText(text); } catch {
+    const ta = document.createElement("textarea"); ta.value = text; document.body.appendChild(ta); ta.select(); document.execCommand("copy"); ta.remove();
+  }
+  const old = b.textContent; b.textContent = "Copied ✓"; b.classList.add("done");
+  setTimeout(() => { b.textContent = old; b.classList.remove("done"); }, 1200);
+});
+</script>
+</body>
+</html>
