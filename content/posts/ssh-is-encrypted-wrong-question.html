@@ -1,0 +1,82 @@
+<p>Theo, who created T3 Code, posted this today:</p>
+<blockquote><p>Someone tried to tell me t3 code is bad and their terminal phone app was better because "ssh is encrypted"</p><p>— <a href="https://x.com/theo">Theo (@theo)</a>, Oct 9, 2026</p></blockquote>
+<p>It's a great prompt, because the argument sounds reasonable. SSH <em>is</em> encrypted, and it's one of the most battle-tested protocols we have. So is WhatsApp. I still wouldn't give WhatsApp a root shell on my laptop.</p>
+<p>"It's encrypted" answers a question nobody asked. Here's why, and the four questions I now ask about any "it's encrypted, so it's secure" claim.</p>
+
+<h2>The two setups</h2>
+<ul>
+  <li><strong>Phone terminal:</strong> an SSH app on the phone (Termius, Blink and friends), an SSH key stored on it, and coding agents running in <code>tmux</code> on the server.</li>
+  <li><strong>T3 Code:</strong> a T3 Code server on the same machine, the T3 Code app on the phone, connected over Tailscale, T3 Connect, or SSH.</li>
+</ul>
+<p>Both are legitimate. I've used both.</p>
+
+<h2>First, the strongest version of their point</h2>
+<p>SSH deserves its reputation: decades of scrutiny, strong defaults, key-based login, and it's already on every server. If your rule is "the only thing I expose is <code>sshd</code>", that's a defensible rule. Fewer moving parts is a real security property, and I'd never argue otherwise.</p>
+
+<h2>Encryption answers one question out of four</h2>
+<p>Securing remote access comes down to roughly four questions:</p>
+<table>
+  <thead><tr><th>Question</th><th>What answers it</th></tr></thead>
+  <tbody>
+    <tr><td>Can someone on the network read or tamper with my traffic?</td><td>Encryption</td></tr>
+    <tr><td>Who is allowed to connect?</td><td>Authentication</td></tr>
+    <tr><td>What can they do once they're in?</td><td>Authorization</td></tr>
+    <tr><td>How do I take access back?</td><td>Revocation</td></tr>
+  </tbody>
+</table>
+<p>"SSH is encrypted" only answers the first row. It's like picking a car because the seatbelts work: true, important, and also true of every other car in the lot. Which brings us to row one.</p>
+
+<h2>Row one is a tie</h2>
+<p>T3 Code's recommended ways to connect are all encrypted:</p>
+<table>
+  <thead><tr><th>Route</th><th>Encrypted?</th></tr></thead>
+  <tbody>
+    <tr><td>Tailscale</td><td>Yes: WireGuard end to end, plus HTTPS through Tailscale Serve. This is <a href="t3-code-tailscale-home-server.html">my home-server setup</a>.</td></tr>
+    <tr><td>T3 Connect</td><td>Yes: HTTPS through a managed Cloudflare tunnel. T3's relay brokers the pairing but never receives your session token.</td></tr>
+    <tr><td>SSH</td><td>It literally is SSH: the desktop app can connect to a machine over SSH, start the server there and forward the port for you.</td></tr>
+    <tr><td>Plain LAN pairing (<code>t3 serve --host &lt;ip&gt;</code>)</td><td><strong>No: plain HTTP.</strong></td></tr>
+  </tbody>
+</table>
+<p>That last row is the fair part of the criticism. Direct LAN pairing is plain HTTP, and T3 Code's own docs say so. On your home network that's a small risk. On café or hotel Wi-Fi, don't use it; use Tailscale. If the argument had been "don't pair over plain HTTP on public Wi-Fi," I'd have agreed completely.</p>
+
+<h2>The threat that actually happens: a lost phone</h2>
+<p>Breaking modern encryption is hard and rare. Losing a phone, having it stolen unlocked, or installing a sketchy app is common. So run the realistic scenario: <strong>someone else has your phone.</strong></p>
+
+<h3>With the phone terminal</h3>
+<p>An SSH key on that phone usually means a <strong>full shell as your user</strong>: every file, every credential in <code>~/.config</code>, your <code>git push</code> access, <code>rm -rf</code>. The good news: when the thief runs <code>rm -rf ~</code>, it will be end-to-end encrypted. 🔐 SSH can restrict a key (<code>command=</code>, <code>restrict</code>, <code>from=</code> in <code>authorized_keys</code>), but almost nobody does, because it's manual and easy to get wrong. So in practice the key is all-or-nothing.</p>
+<p>Taking it back means deleting that key from <code>authorized_keys</code> on every machine it can reach. And if your app syncs keys to its cloud vault for convenience, that's one more place the key lives.</p>
+
+<h3>With T3 Code</h3>
+<p>Each device pairs separately and gets its own session:</p>
+<ul>
+  <li><strong>Scoped.</strong> Pairing can narrow permissions but never widen them. A device can be read-only (<code>--scope orchestration:read</code>): it sees threads but can't start or steer agents. Ordinary pairing never grants permission to create new pairings or manage access.</li>
+  <li><strong>Revocable per device.</strong> <em>Settings → Connections</em> lists every session. Revoke the lost phone; nothing else is touched.</li>
+  <li><strong>Bound to the device, over T3 Connect.</strong> Those sessions are tied to a key held by the device (DPoP), so a copied token alone isn't enough.</li>
+  <li><strong>Agents are fenced too.</strong> In <em>Supervised</em> mode, the agent asks before running commands or changing files, and the approval shows up on your phone.</li>
+</ul>
+<p>To be fair, a T3 Code device with full permissions is powerful too: it can start an agent in <em>Full access</em> mode, which can run any command. The difference is that you can <em>choose less</em>, per device, and revoke it cleanly. With SSH you could too, but it's work, so in practice almost nobody does.</p>
+<p>That's <strong>least privilege</strong>, the genuinely hard part of security, and it's where the two setups actually differ.</p>
+
+<h2>Usability is a separate argument</h2>
+<p>Running Claude Code in <code>tmux</code> over SSH works. <code>tmux</code> keeps sessions alive across disconnects, and a terminal is the most honest UI there is. Some people love it, and that's fine.</p>
+<p>T3 Code's case is about the experience: approvals as buttons, diffs you can actually read on a phone, a notification when an agent needs you, many threads across many machines, history that survives restarts, and switching between Codex, Claude and others mid-conversation. Those are real reasons, but they're <em>product</em> reasons, not security reasons. Keep the two arguments apart; mixing them is how "SSH is encrypted" ends up sounding like a reason to pick a whole product.</p>
+<p>They're not mutually exclusive either: T3 Code has a terminal panel, and it can connect over SSH.</p>
+
+<h2>The lesson: encryption is a property of the pipe</h2>
+<p>Security is a property of the whole system. "It's encrypted" is the "it compiles" of security: necessary, nice to hear, and wildly insufficient. Next time someone says "X is secure because it's encrypted," ask:</p>
+<ol>
+  <li><strong>Who can connect?</strong> (authentication)</li>
+  <li><strong>What can they do once they're in?</strong> (authorization)</li>
+  <li><strong>How do I take it back?</strong> (revocation)</li>
+  <li><strong>What happens when a device is lost?</strong> (the threat that actually happens)</li>
+</ol>
+<p>Encryption tells you the pipe doesn't leak. It tells you nothing about what comes out the other end. A sealed envelope is great; it doesn't matter much if you mailed it to the burglar.</p>
+
+<h2>What I actually run</h2>
+<p>T3 Code on my home PC, reachable only over Tailscale, with plain-HTTP LAN pairing off. My phone is paired with the permissions it needs, and I'd revoke it in one click if I lost it. SSH is still there for the days I want a raw shell.</p>
+<p>Use the tool that fits. Just know which question each one answers.</p>
+
+<div class="callout">
+  <p class="callout-kicker">Sources</p>
+  <p>Every T3 Code claim above comes from its docs: <a href="https://github.com/pingdotgg/t3code/blob/main/docs/user/remote-access.md">remote access</a> (routes, SSH, revoking sessions, scopes), <a href="https://github.com/pingdotgg/t3code/blob/main/docs/internals/remote.md">remote internals</a> (plain HTTP LAN), <a href="https://github.com/pingdotgg/t3code/blob/main/docs/internals/environment-auth.md">environment auth</a> (scopes narrow, never widen; DPoP), <a href="https://github.com/pingdotgg/t3code/blob/main/docs/internals/t3-connect.md">T3 Connect</a> (the relay never receives session tokens), and <a href="https://github.com/pingdotgg/t3code/blob/main/docs/user/permission-modes.md">permission modes</a>.</p>
+</div>

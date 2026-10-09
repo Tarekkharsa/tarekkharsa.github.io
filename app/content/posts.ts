@@ -307,6 +307,37 @@ export const seriesIndex: SeriesIndexPost = {
   },
 }
 
+export const sshEncryptedEssay: GuidePost = {
+  kind: 'guide',
+  slug: 'ssh-is-encrypted-wrong-question',
+  title: '"But SSH is encrypted": the wrong security question',
+  heading: '"But SSH is encrypted" is the wrong security question',
+  description:
+    'A phone terminal over SSH vs. T3 Code: encryption is a tie, so the real differences are who can connect, what they can do, and how you take access back when a phone is lost.',
+  subtitle: 'Encryption is a property of the pipe. Security is a property of the system.',
+  date: '2026-10-09',
+  tag: 'Security',
+  readMinutes: 5,
+  image: {
+    path: '/assets/og/ssh-is-encrypted-wrong-question.png',
+    alt: '"But SSH is encrypted": the wrong security question, by Tarek Kharsa',
+  },
+  shareText:
+    '"SSH is encrypted" answers 1 of the 4 questions that matter for remote access. The other 3 are where the real differences are:',
+  indexed: true,
+  feed: {
+    title: '"But SSH is encrypted": the wrong security question',
+    summary:
+      'Encryption is a tie between a phone SSH terminal and T3 Code. Authentication, authorization and revocation are where they differ.',
+  },
+  listing: {
+    tag: 'security',
+    title: '"But SSH is encrypted" is the wrong security question',
+    summary:
+      'A phone terminal over SSH vs. T3 Code: encryption is a tie, so the real differences are who can connect, what they can do, and how you take it back.',
+  },
+}
+
 export const t3CodeServerGuide: GuidePost = {
   kind: 'guide',
   slug: 't3-code-tailscale-home-server',
@@ -344,7 +375,7 @@ export const t3CodeServerGuide: GuidePost = {
 export const seriesPosts: SeriesPost[] = [...lessons, finale]
 
 /** All posts, newest first. Posts sharing a date keep series order. */
-export const posts: Post[] = [seriesIndex, ...seriesPosts, t3CodeServerGuide]
+export const posts: Post[] = [sshEncryptedEssay, seriesIndex, ...seriesPosts, t3CodeServerGuide]
 
 export function findPost(slug: string): Post | undefined {
   return posts.find((post) => post.slug === slug)
