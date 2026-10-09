@@ -1,6 +1,6 @@
 import { createController } from 'remix/router'
 
-import { findPost } from '../content/posts.ts'
+import { findPost, postPath } from '../content/posts.ts'
 import { atomFeed, sitemap } from '../feeds.ts'
 import { HomePage } from '../pages/home-page.tsx'
 import { NotFoundPage } from '../pages/not-found-page.tsx'
@@ -20,6 +20,11 @@ export default createController(routes, {
       if (post == null) return context.render(<NotFoundPage />, { status: 404 })
       if (post.kind === 'series') return context.render(<SeriesPage />)
       return context.render(<PostPage post={post} />)
+    },
+    legacyPost(context) {
+      let post = findPost(context.params.slug)
+      if (post == null) return context.render(<NotFoundPage />, { status: 404 })
+      return Response.redirect(new URL(postPath(post), context.url), 301)
     },
     feed() {
       return new Response(atomFeed(), { headers: xmlHeaders('application/atom+xml') })

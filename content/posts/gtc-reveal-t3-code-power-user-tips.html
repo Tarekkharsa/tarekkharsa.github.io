@@ -8,14 +8,14 @@
 
 <h2>The eight lessons, unmasked</h2>
 <ol class="recap">
-  <li><a href="gtc-01-decide-commit-then-act.html">Decide, commit, then act</a>: the pure orchestrator with a transactional outbox.</li>
-  <li><a href="gtc-02-performance-budgets-as-tests.html">Performance budgets as unit tests</a>: payload ratios asserted in <code>vp test</code>.</li>
-  <li><a href="gtc-03-mock-the-boundary.html">Mock the boundary, not the logic</a>: replayed provider transcripts and drainable workers.</li>
-  <li><a href="gtc-04-pr-process-for-the-ai-era.html">A PR process for the AI era</a>: evidence-first templates and injection-proof triage.</li>
-  <li><a href="gtc-05-taste-as-lint-rules.html">Taste as lint rules</a>: 14 custom oxlint rules.</li>
-  <li><a href="gtc-06-dev-setup-for-parallel-agents.html">A dev setup for parallel agents</a>: hashed ports, per-worktree state, single origin.</li>
-  <li><a href="gtc-07-honest-ui.html">Lying spinners and one-way doors</a>: honest status in a multi-device app.</li>
-  <li><a href="gtc-08-write-docs-for-agents.html">Docs for your most frequent contributor</a>: an AGENTS.md that onboards.</li>
+  <li><a href="/posts/gtc-01-decide-commit-then-act">Decide, commit, then act</a>: the pure orchestrator with a transactional outbox.</li>
+  <li><a href="/posts/gtc-02-performance-budgets-as-tests">Performance budgets as unit tests</a>: payload ratios asserted in <code>vp test</code>.</li>
+  <li><a href="/posts/gtc-03-mock-the-boundary">Mock the boundary, not the logic</a>: replayed provider transcripts and drainable workers.</li>
+  <li><a href="/posts/gtc-04-pr-process-for-the-ai-era">A PR process for the AI era</a>: evidence-first templates and injection-proof triage.</li>
+  <li><a href="/posts/gtc-05-taste-as-lint-rules">Taste as lint rules</a>: 14 custom oxlint rules.</li>
+  <li><a href="/posts/gtc-06-dev-setup-for-parallel-agents">A dev setup for parallel agents</a>: hashed ports, per-worktree state, single origin.</li>
+  <li><a href="/posts/gtc-07-honest-ui">Lying spinners and one-way doors</a>: honest status in a multi-device app.</li>
+  <li><a href="/posts/gtc-08-write-docs-for-agents">Docs for your most frequent contributor</a>: an AGENTS.md that onboards.</li>
 </ol>
 
 <p>Studying the repo taught me how it's built. Using it every day taught me the tricks below. <code>mod</code> means <kbd>Cmd</kbd> on macOS and <kbd>Ctrl</kbd> everywhere else.</p>
@@ -64,7 +64,7 @@
 
 <h3>Machines, agents and automation</h3>
 <ol class="tips" start="25">
-  <li><strong>One machine, many routes.</strong> Add LAN, Tailscale, SSH and T3 Connect routes to the same machine. The app uses the first one that answers and moves back to a faster route when it works again. (My <a href="t3-code-tailscale-home-server.html">home-server setup</a> uses this.)</li>
+  <li><strong>One machine, many routes.</strong> Add LAN, Tailscale, SSH and T3 Connect routes to the same machine. The app uses the first one that answers and moves back to a faster route when it works again. (My <a href="/posts/t3-code-tailscale-home-server">home-server setup</a> uses this.)</li>
   <li><strong>Load-balance across machines.</strong> <em>Settings → Connections → Load balancing</em> picks a machine for each new thread. Mark machines <em>Prefer</em>, <em>Less often</em> or <em>Manual only</em>.</li>
   <li><strong>Let outside agents drive T3.</strong> Copy the MCP URL from <em>Settings → Connections</em>, then:
 <pre><code>claude mcp add --transport http t3 https://&lt;environment-address&gt;/mcp
@@ -82,4 +82,4 @@ claude mcp login t3</code></pre>
 <p>Bonus for mobile developers: the <strong>Device</strong> panel streams a live iOS Simulator or Android Emulator next to the thread, and agents can drive it through <code>device_*</code> tools. <em>Float device over chat</em> keeps it visible while you review diffs.</p>
 
 <h2>What's next</h2>
-<p>The next round of #GuessTheCodebase is another repo. Follow <a href="https://twitter.com/tarekkh1997">@tarekkh1997</a> to play, or subscribe via <a href="../feed.xml">RSS</a>.</p>
+<p>The next round of #GuessTheCodebase is another repo. Follow <a href="https://twitter.com/tarekkh1997">@tarekkh1997</a> to play, or subscribe via <a href="/feed.xml">RSS</a>.</p>

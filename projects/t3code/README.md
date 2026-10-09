@@ -3,7 +3,7 @@
 - **Answer:** [T3 Code](https://github.com/pingdotgg/t3code) (`pingdotgg/t3code`), the
   open-source GUI for coding agents.
 - **Studied at:** `main`, early October 2026 (about 5,000 commits).
-- **Series hub:** https://tarekkharsa.github.io/posts/guess-the-codebase.html
+- **Series hub:** https://tarekkharsa.github.io/posts/guess-the-codebase
 
 ## Status
 

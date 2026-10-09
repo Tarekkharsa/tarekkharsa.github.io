@@ -10,6 +10,12 @@ function xml(value: string): string {
     .replace(/"/g, '&quot;')
 }
 
+/**
+ * Feed entry IDs must never change, or readers show every post again as new. They stay on
+ * the URLs posts had before clean URLs.
+ */
+const entryId = (slug: string) => absoluteUrl(`/posts/${slug}.html`)
+
 const indexedPosts = () => posts.filter((post) => post.indexed)
 
 export function atomFeed(): string {
@@ -20,7 +26,7 @@ export function atomFeed(): string {
     return `  <entry>
     <title>${xml(feed.title)}</title>
     <link href="${xml(url)}"/>
-    <id>${xml(url)}</id>
+    <id>${xml(entryId(post.slug))}</id>
     <published>${isoTimestamp(post.date)}</published>
     <updated>${isoTimestamp(modifiedDate(post))}</updated>
     <summary>${xml(feed.summary)}</summary>

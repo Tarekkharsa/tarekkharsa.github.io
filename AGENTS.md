@@ -14,7 +14,10 @@ docs (`node_modules/remix/INDEX.md`) rather than relying on memory.
   (progressive enhancement; pages must work without it). Do not add `clientEntry()`,
   hydration or the asset server without discussing it first. The one third-party script is
   GoatCounter analytics (`site.analytics`, async, cookie-free); pages must not depend on it.
-- **URLs are public and must not change.** Posts live at `/posts/<slug>.html`.
+- **URLs are public and must not change.** Posts live at `/posts/<slug>` (written to
+  `dist/posts/<slug>.html`, which Pages serves at both `/posts/<slug>` and the old
+  `/posts/<slug>.html`). Link to the clean URL. Feed entry IDs stay on the old `.html`
+  URLs on purpose: changing them makes readers show every post again.
 - **Spoilers:** the #GuessTheCodebase reveal post (`finale`) is `indexed: false`, so it stays
   out of `feed.xml` and `sitemap.xml`. Keep it that way.
 

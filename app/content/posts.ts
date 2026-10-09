@@ -307,33 +307,6 @@ export const seriesIndex: SeriesIndexPost = {
   },
 }
 
-export const sshEncryptedEssay: GuidePost = {
-  kind: 'guide',
-  slug: 'ssh-is-encrypted-wrong-question',
-  title: '"But SSH is encrypted"',
-  description:
-    'Sure. So is everything else. A short, interactive look at what actually matters when your phone gets stolen: SSH key vs. T3 Code.',
-  subtitle: 'Sure. So is WhatsApp.',
-  date: '2026-10-09',
-  tag: 'Security',
-  readMinutes: 2,
-  image: {
-    path: '/assets/og/ssh-is-encrypted-wrong-question.png',
-    alt: '"But SSH is encrypted." Sure. So is WhatsApp. By Tarek Kharsa',
-  },
-  shareText: '"But SSH is encrypted." Sure. So is every pipe. What matters is what a stolen phone can do:',
-  indexed: true,
-  feed: {
-    title: '"But SSH is encrypted"',
-    summary: 'Sure. So is every pipe. What a stolen phone can do with an SSH key vs. T3 Code.',
-  },
-  listing: {
-    tag: 'security',
-    title: '"But SSH is encrypted"',
-    summary: 'Sure. So is WhatsApp. A 2-minute, interactive look at what a stolen phone can actually do.',
-  },
-}
-
 export const t3CodeServerGuide: GuidePost = {
   kind: 'guide',
   slug: 't3-code-tailscale-home-server',
@@ -371,14 +344,14 @@ export const t3CodeServerGuide: GuidePost = {
 export const seriesPosts: SeriesPost[] = [...lessons, finale]
 
 /** All posts, newest first. Posts sharing a date keep series order. */
-export const posts: Post[] = [sshEncryptedEssay, seriesIndex, ...seriesPosts, t3CodeServerGuide]
+export const posts: Post[] = [seriesIndex, ...seriesPosts, t3CodeServerGuide]
 
 export function findPost(slug: string): Post | undefined {
   return posts.find((post) => post.slug === slug)
 }
 
 export function postPath(post: Pick<Post, 'slug'>): string {
-  return `/posts/${post.slug}.html`
+  return `/posts/${post.slug}`
 }
 
 export function postUrl(post: Pick<Post, 'slug'>): string {

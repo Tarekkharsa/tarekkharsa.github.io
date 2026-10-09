@@ -110,11 +110,43 @@ describe('updated posts', () => {
   })
 })
 
+describe('clean post URLs', () => {
+  it('uses /posts/<slug> everywhere, written to posts/<slug>.html', async () => {
+    let post = lessons[0]!
+    let page = staticPages().find((entry) => entry.path === postPath(post))
+    assert.equal(page?.file, `posts/${post.slug}.html`)
+    let { body } = await get(postPath(post))
+    assert.match(body, new RegExp(`<link rel="canonical" href="${site.origin}/posts/${post.slug}"`))
+    assert.doesNotMatch(body, /href="[^"]*\/posts\/[^"]*\.html"/)
+  })
+
+  it('moves the old .html URL in the address bar to the clean one', async () => {
+    let { body } = await get(postPath(lessons[0]!))
+    assert.match(body, /history\.replaceState/)
+    assert.doesNotMatch((await get('/')).body, /history\.replaceState/)
+  })
+
+  it('redirects old .html URLs in dev', async () => {
+    let { response } = await get(`/posts/${lessons[0]!.slug}.html`)
+    assert.equal(response.status, 301)
+    assert.equal(response.headers.get('Location'), `${site.origin}${postPath(lessons[0]!)}`)
+  })
+
+  it('keeps feed entry IDs on the original URLs so readers see no duplicates', async () => {
+    let { body } = await get('/feed.xml')
+    assert.match(body, new RegExp(`<link href="${site.origin}/posts/${lessons[0]!.slug}"/>`))
+    assert.match(body, new RegExp(`<id>${site.origin}/posts/${lessons[0]!.slug}\\.html</id>`))
+  })
+})
+
 describe('404', () => {
   it('renders the not-found page for unknown posts', async () => {
-    let { response, body } = await get('/posts/does-not-exist.html')
-    assert.equal(response.status, 404)
-    assert.match(body, /404: not found/)
+    for (let path of ['/posts/does-not-exist', '/posts/does-not-exist.html']) {
+      let { response, body } = await get(path)
+      assert.equal(response.status, 404, path)
+      assert.match(body, /404: not found/)
+    }
+    let { body } = await get('/posts/does-not-exist')
     assert.match(body, /<meta name="robots" content="noindex"/)
   })
 })

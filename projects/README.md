@@ -1,7 +1,7 @@
 # Projects
 
 Working material for the codebases I study: research notes, drafts and the X campaign
-for each round of [Guess the codebase](https://tarekkharsa.github.io/posts/guess-the-codebase.html).
+for each round of [Guess the codebase](https://tarekkharsa.github.io/posts/guess-the-codebase).
 
 **Nothing here is deployed.** The site build only publishes `public/` and the routes in
 `app/`. But the repository is public, so anything in this folder can be read on GitHub.

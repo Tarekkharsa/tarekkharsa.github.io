@@ -13,7 +13,7 @@ export interface OpenGraph {
 }
 
 export interface DocumentProps {
-  /** Site-relative canonical path, e.g. /posts/foo.html. */
+  /** Site-relative canonical path, e.g. /posts/foo. */
   path?: string
   /** Full <title> text. */
   title: string
@@ -60,6 +60,9 @@ export function Document(handle: Handle<DocumentProps>) {
           {og && url ? <OpenGraphTags og={og} url={url} description={description} /> : null}
           {jsonLd ? <JsonLd value={jsonLd} /> : null}
           <script innerHTML={unsafeHTML(themeScript)} />
+          {path?.startsWith('/posts/') ? (
+            <script innerHTML={unsafeHTML(cleanUrlScript(path))} />
+          ) : null}
           <link rel="stylesheet" href="/assets/site.css" />
           <script src="/assets/site.js" defer />
           <script data-goatcounter={site.analytics.endpoint} async src={site.analytics.script} />
@@ -120,6 +123,16 @@ function JsonLd(handle: Handle<{ value: object }>) {
     let json = JSON.stringify(handle.props.value, null, 2).replace(/</g, '\\u003c')
     return <script type="application/ld+json" innerHTML={unsafeHTML(json)} />
   }
+}
+
+/**
+ * GitHub Pages can't redirect, and it serves a post at both /posts/<slug> and the old
+ * /posts/<slug>.html. This swaps the old URL in the address bar for the canonical one,
+ * without a reload, so copied and shared links are clean.
+ */
+function cleanUrlScript(path: string): string {
+  let target = JSON.stringify(path)
+  return `if(location.pathname===${target}+".html")history.replaceState(history.state,"",${target}+location.search+location.hash)`
 }
 
 export function isoTimestamp(date: string): string {
