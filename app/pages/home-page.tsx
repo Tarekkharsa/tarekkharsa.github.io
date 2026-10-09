@@ -9,7 +9,7 @@ const personJsonLd = {
   name: site.name,
   url: absoluteUrl('/'),
   jobTitle: site.jobTitle,
-  sameAs: [site.social.github, site.social.linkedin, site.social.twitter],
+  sameAs: [site.social.github, site.social.twitter],
 }
 
 export function HomePage() {
@@ -53,13 +53,7 @@ export function HomePage() {
               <a href={site.social.github}>github</a>
             </li>
             <li>
-              <a href={site.social.linkedin}>linkedin</a>
-            </li>
-            <li>
               <a href={site.social.twitter}>twitter</a>
-            </li>
-            <li>
-              <a href={`mailto:${site.email}`}>email</a>
             </li>
           </ul>
         </section>

@@ -5,11 +5,9 @@ export const site = {
     'Full-stack software engineer working on AI infrastructure: coding agents, multi-agent orchestration, and the tooling that makes them reliable.',
   jobTitle: 'Software Engineer',
   twitterHandle: 'tarekkh1997',
-  email: 'tarekkh1997@gmail.com',
   sourceUrl: 'https://github.com/Tarekkharsa/tarekkharsa.github.io',
   social: {
     github: 'https://github.com/Tarekkharsa',
-    linkedin: 'https://www.linkedin.com/in/tarek-kharsa-0509a0177/',
     twitter: 'https://twitter.com/tarekkh1997',
   },
   copyrightYear: 2026,

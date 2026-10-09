@@ -47,8 +47,8 @@ export function SiteFooter() {
     <footer class="site-footer">
       <span>{`© ${site.copyrightYear} ${site.name}`}</span>
       <nav aria-label="Footer">
+        <a href={site.social.github}>github</a>
         <a href={site.social.twitter}>twitter</a>
-        <a href={site.social.linkedin}>linkedin</a>
         <a href={routes.feed.href()}>rss</a>
         <a href={site.sourceUrl}>source</a>
       </nav>
