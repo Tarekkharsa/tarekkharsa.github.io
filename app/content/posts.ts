@@ -77,13 +77,42 @@ export const t3CodeServerGuide: GuidePost = {
   },
 }
 
+export const effectGraphqlGuide: GuidePost = {
+  kind: 'guide',
+  slug: 'gql-tada-to-effect-graphql',
+  title: 'Moving from gql.tada to effect/graphql',
+  heading: 'Why We Moved Our GraphQL Client from gql.tada to effect/graphql',
+  description:
+    'Why a TanStack Start app on Effect 4 replaced gql.tada and a hand-written client with effect/graphql: decoded results, typed errors, middleware, a test transport and batching, moved in four steps.',
+  subtitle: 'Why we switched, what we got, and how we moved without breaking the app.',
+  date: '2026-10-14',
+  tag: 'Effect',
+  readMinutes: 7,
+  image: {
+    path: '/assets/og/gql-tada-to-effect-graphql.png',
+    alt: 'Moving from gql.tada to effect/graphql, by Tarek Kharsa',
+  },
+  shareText: 'Why we moved our GraphQL client from gql.tada to effect/graphql, and how:',
+  indexed: true,
+  feed: {
+    title: 'Moving from gql.tada to effect/graphql',
+    summary:
+      'Decoded results, typed errors, middleware, a test transport and batching: why we moved off gql.tada, and how we did it in four steps.',
+  },
+  listing: {
+    tag: 'effect',
+    title: 'Moving from gql.tada to effect/graphql',
+    summary: 'Why we replaced gql.tada and a hand-written client with effect/graphql, and how we moved in four steps.',
+  },
+}
+
 /** A round's pages in reading order: its lessons, then the finale. */
 export function roundPosts(round: Round): SeriesPost[] {
   return [...round.lessons, round.finale]
 }
 
 /** All posts, newest first. Posts sharing a date keep series order. */
-export const posts: Post[] = [seriesIndex, ...rounds.flatMap(roundPosts), t3CodeServerGuide]
+export const posts: Post[] = [effectGraphqlGuide, seriesIndex, ...rounds.flatMap(roundPosts), t3CodeServerGuide]
 
 export function roundOf(post: SeriesPost): Round {
   let round = rounds.find((candidate) => candidate.number === post.round)
