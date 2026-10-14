@@ -130,7 +130,7 @@ yield* Effect.forEach(isbns, (isbn) =&gt; getBook({ isbn }), { concurrency: "unb
   <li><strong>Replace the mock</strong>A scripted <code>GraphQLProtocol</code> keyed by operation name, plus fixes for the 10 fixtures it caught.</li>
   <li><strong>Move to the generator, one area at a time</strong><code>ResultOf&lt;typeof Doc&gt;</code> became <code>Doc.Result</code>, fragments became plain types, and all 46 <code>readFragment()</code> calls went away. Then we removed gql.tada.</li>
 </ol>
-<p>Steps 1 to 3 are merged. Step 4 is in review as I write this.</p>
+<p>All four steps are merged, and gql.tada is gone.</p>
 <p>We also added a <code>graphqlgen --check</code> step to our checks. It fails when someone edits a query but forgets to run the generator.</p>
 
 <h2>What it cost</h2>
