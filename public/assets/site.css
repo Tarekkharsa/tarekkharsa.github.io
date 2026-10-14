@@ -312,6 +312,31 @@ pre code { background: none; padding: 0; font-size: inherit; color: inherit; bor
 .code:hover .copy-code, .copy-code:focus-visible { opacity: 1; }
 @media (hover: none) { .copy-code { opacity: 1; } }
 
+/* highlighted code blocks (tokens are added at build time by app/content/highlight.ts) */
+.code-block { margin: 0 0 1.4rem; border-radius: 12px; overflow: hidden; background: var(--term); border: 1px solid rgba(255, 255, 255, 0.06); }
+.code-block figcaption {
+  display: flex; align-items: center; gap: 0.75rem; padding: 0.55rem 1rem;
+  font: 0.72rem var(--mono); color: #8B96A1; background: rgba(255, 255, 255, 0.035); border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+}
+.code-block .dots { width: 8px; height: 8px; border-radius: 50%; background: #E5534B; box-shadow: 13px 0 #E5B566, 26px 0 #57AB5A; margin-right: 28px; flex: none; }
+.code-block .code, .code-block pre { margin: 0; border-radius: 0; }
+.code-block pre { padding: 1rem 1.2rem 1.1rem; font-size: 0.82rem; }
+.tok-kw { color: #F2A06B; }
+.tok-str { color: #A8D49A; }
+.tok-com { color: #6E7781; font-style: italic; }
+.tok-num { color: #E5B566; }
+.tok-type { color: #7CC4F0; }
+.tok-fn { color: #D4A8F0; }
+.tok-var { color: #F07A8A; }
+.tok-punc { color: #8B96A1; }
+
+/* key numbers */
+.stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.7rem; margin: 0 0 1.4rem; }
+.stats > div { border: 1px solid var(--line); border-radius: 12px; background: var(--card); padding: 0.85rem 1rem; }
+.stats .n { display: block; font: 700 1.5rem var(--mono); letter-spacing: -0.03em; color: var(--accent); line-height: 1.2; }
+.stats .l { display: block; font-size: 0.86rem; color: var(--muted); margin-top: 0.2rem; line-height: 1.4; }
+@media (max-width: 560px) { .stats { grid-template-columns: 1fr 1fr; } }
+
 blockquote {
   margin: 0 0 1.25rem; padding: 0.8rem 1.1rem; border-left: 3px solid var(--accent); background: var(--accent-soft);
   border-radius: 0 10px 10px 0; font-size: 1.02rem;

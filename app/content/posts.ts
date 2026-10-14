@@ -1,6 +1,7 @@
 import * as fs from 'node:fs'
 
 import { absoluteUrl, site } from '../site.ts'
+import { highlightCodeBlocks } from './highlight.ts'
 import { opencodeRound } from './rounds/opencode.ts'
 import { piRound } from './rounds/pi.ts'
 import { t3codeRound } from './rounds/t3code.ts'
@@ -87,7 +88,7 @@ export const effectGraphqlGuide: GuidePost = {
   subtitle: 'Why we switched, what we got, and how we moved without breaking the app.',
   date: '2026-10-14',
   tag: 'Effect',
-  readMinutes: 7,
+  readMinutes: 8,
   image: {
     path: '/assets/og/gql-tada-to-effect-graphql.png',
     alt: 'Moving from gql.tada to effect/graphql, by Tarek Kharsa',
@@ -164,7 +165,9 @@ const bodyCache = new Map<string, string>()
 export function readPostBody(slug: string): string {
   let cached = bodyCache.get(slug)
   if (cached != null && process.env.NODE_ENV === 'production') return cached
-  let body = fs.readFileSync(new URL(`../../content/posts/${slug}.html`, import.meta.url), 'utf8')
+  let body = highlightCodeBlocks(
+    fs.readFileSync(new URL(`../../content/posts/${slug}.html`, import.meta.url), 'utf8'),
+  )
   bodyCache.set(slug, body)
   return body
 }

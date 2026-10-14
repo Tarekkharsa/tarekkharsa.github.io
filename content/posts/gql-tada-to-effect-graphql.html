@@ -1,13 +1,42 @@
-<p>At work I build a <a href="https://tanstack.com/start">TanStack Start</a> app whose server runs on <a href="https://effect.website">Effect</a> 4 and reads almost all of its content from a headless CMS over GraphQL. For a long time that GraphQL layer was <a href="https://gql-tada.0no.co">gql.tada</a> for typed documents, plus an Effect client we wrote by hand. This month we replaced both with <code>effect/graphql</code>, the GraphQL module that shipped in Effect 4.0.4, and its generator. The new client and the test transport are merged. The last step, moving every document to the generator, is in review as I write this.</p>
-<p>This post covers why we moved, what we got, and how we did it in small steps without breaking the app along the way.</p>
+<p>At work I build a <a href="https://tanstack.com/start">TanStack Start</a> app. Its server runs on <a href="https://effect.website">Effect</a> 4, and almost all of its content comes from a headless CMS over GraphQL.</p>
+<p>For a long time our GraphQL layer was <a href="https://gql-tada.0no.co">gql.tada</a> for typed queries, plus a client we wrote ourselves. This month we replaced both with <code>effect/graphql</code>, the GraphQL module that shipped in Effect 4.0.4.</p>
+<p>Here is why we moved, what we got, what it cost, and how we did it without breaking the app.</p>
 
-<blockquote><p><strong>In short:</strong> gql.tada gave us types but no runtime check. <code>effect/graphql</code> decodes every response with a generated Schema, gives typed errors, middleware, a swappable transport for tests, and request batching. We moved in four steps, and the app worked after each one.</p></blockquote>
+<blockquote><p><strong>In short:</strong> gql.tada gave us types, but nothing checked the data at runtime. <code>effect/graphql</code> checks every response, gives us one clear error type, and makes testing easy. We moved in four small steps, and the app kept working after each one.</p></blockquote>
+
+<h2>The numbers</h2>
+<div class="stats">
+  <div><span class="n">38,501</span><span class="l">lines deleted (12,340 added)</span></div>
+  <div><span class="n">31,424</span><span class="l">of them were one generated type file</span></div>
+  <div><span class="n">10</span><span class="l">broken test fixtures found on day one</span></div>
+  <div><span class="n">0</span><span class="l">call sites changed when we swapped the client</span></div>
+  <div><span class="n">46</span><span class="l"><code>readFragment()</code> calls removed</span></div>
+  <div><span class="n">39</span><span class="l">queries and fragments moved</span></div>
+</div>
 
 <hr>
 
-<h2>Where we started</h2>
-<p>gql.tada is great at one thing: you write a query in a template string, and TypeScript infers the result type from your schema. No codegen step, and good editor support.</p>
-<pre><code>import { graphql, type ResultOf } from "gql.tada"
+<h2>Before and after</h2>
+<div class="compare-grid">
+  <div>
+    <p class="k">gql.tada</p>
+    <p>Queries live in template strings inside TypeScript.</p>
+    <p>Types come from the schema, but the response is <em>cast</em> to them.</p>
+    <p>Our own client for errors, retries, mocks and metrics.</p>
+  </div>
+  <div>
+    <p class="k">effect/graphql</p>
+    <p>Queries live in <code>.graphql</code> files, and a generator writes the code.</p>
+    <p>Every response is <em>decoded</em> with a Schema, so bad data fails right away.</p>
+    <p>Errors, middleware, a test transport and batching are built in.</p>
+  </div>
+</div>
+
+<h2>Why we moved</h2>
+
+<h3>1. The types were a promise, not a check</h3>
+<p>With gql.tada you write a query, and TypeScript works out its type. It feels great:</p>
+<pre data-title="before.ts"><code class="language-ts">import { graphql, type ResultOf } from "gql.tada"
 
 const BookByIsbn = graphql(`
   query BookByIsbn($isbn: Isbn!) {
@@ -16,29 +45,37 @@ const BookByIsbn = graphql(`
 `)
 
 type Book = ResultOf&lt;typeof BookByIsbn&gt;</code></pre>
-<p>Around it we had our own Effect client: one <code>query(document, variables)</code> function that sent the request, mapped HTTP and GraphQL errors to our error types, handled partial results, cached, and recorded metrics. About 40 documents and 200 call sites went through it.</p>
+<p>But at runtime, our client got JSON back and simply told TypeScript "trust me, this is a <code>Book</code>". When the CMS changed a field, nothing failed where the data came in. We found out later, as an <code>undefined</code> somewhere on a page.</p>
 
-<h2>Why we moved</h2>
-<ol>
-  <li><strong>The types were a promise, not a check.</strong> At runtime the client received JSON and cast it to <code>ResultOf&lt;typeof Doc&gt;</code>. When the CMS changed a field, nothing failed at the boundary. We found out later, as an <code>undefined</code> somewhere in a page.</li>
-  <li><strong>A 31,424-line type cache in git.</strong> To keep the editor and <code>tsc</code> fast, gql.tada writes a cache of every document's types. Ours was over 31,000 lines, and if it went missing, <code>tsc</code> failed with <code>TS2589</code> (type instantiation is excessively deep).</li>
-  <li><strong>TypeScript 7.</strong> gql.tada and its language-service plugin need the classic compiler API. The native TypeScript 7 issue was <a href="https://github.com/0no-co/gql.tada/issues/519">closed as not planned</a>, so we were running two TypeScript versions side by side.</li>
-  <li><strong>We owned too much client code.</strong> Errors, retries, partial results, test mocks: all hand-written, and all things a library could own.</li>
-</ol>
+<h3>2. A 31,424-line file in git</h3>
+<p>To keep the editor fast, gql.tada writes a cache with the types of every query. Ours had grown to 31,424 lines. If it went missing, the type check failed with <code>TS2589</code>: "Type instantiation is excessively deep".</p>
 
-<h2>What <code>effect/graphql</code> gives us</h2>
+<h3>3. TypeScript 7</h3>
+<p>gql.tada needs the old TypeScript compiler API. Its <a href="https://github.com/0no-co/gql.tada/issues/519">TypeScript 7 issue</a> was closed as not planned, so we had to keep two TypeScript versions installed side by side.</p>
 
-<h3>1. Operations are values, and results are decoded</h3>
-<p>You keep queries in <code>.graphql</code> files. The generator, <code>@effect/graphql-generator</code>, turns each one into a TypeScript file with a Schema for every selection and an operation value:</p>
-<pre><code>// graphql.config.ts
-import { defineConfig } from "@effect/graphql-generator/Config"
+<h3>4. Too much code of our own</h3>
+<p>Error mapping, retries, partial results and the test mock were all ours. Those are exactly the things a library should own.</p>
+
+<h2>What we got</h2>
+
+<h3>Responses are checked, not trusted</h3>
+<p>You write each query in a <code>.graphql</code> file and point the generator at your schema:</p>
+<pre data-title="graphql.config.ts"><code class="language-ts">import { defineConfig } from "@effect/graphql-generator/Config"
 
 export default defineConfig({
   schema: "./schema.graphql",
   documents: ["documents/**/*.graphql"],
   scalars: { Isbn: "./scalars.ts#Isbn" }
 })</code></pre>
-<pre><code>import * as Context from "effect/Context"
+<pre data-title="documents/BookByIsbn.graphql"><code class="language-graphql">query BookByIsbn($isbn: Isbn!) {
+  book(isbn: $isbn) {
+    id
+    title
+    publishedAt
+  }
+}</code></pre>
+<p>The generator turns each file into a Schema plus an operation you can call:</p>
+<pre data-title="library.ts"><code class="language-ts">import * as Context from "effect/Context"
 import { GraphQLClient, GraphQLGroup } from "effect/graphql"
 import { BookByIsbn } from "./documents/BookByIsbn.graphql.ts"
 
@@ -46,72 +83,76 @@ class Library extends Context.Service&lt;Library&gt;()("Library", {
   make: GraphQLClient.make(GraphQLGroup.make(BookByIsbn))
 }) {}
 
-const book = Library.use((library) =&gt; library.BookByIsbn({ isbn }))
-// Effect&lt;BookByIsbn.Result, GraphQLClientError, Library&gt;</code></pre>
-<p>The result is <em>decoded</em> with the generated Schema, not cast. If the CMS sends something the query didn't promise, you get a <code>DecodeError</code> at the boundary, with a path, instead of a broken page later. Custom scalars like <code>Isbn</code> decode to your own branded types.</p>
+// Effect&lt;BookByIsbn.Result, GraphQLClientError, Library&gt;
+const book = Library.use((library) =&gt; library.BookByIsbn({ isbn }))</code></pre>
+<p>Now the response is <em>decoded</em>. If the CMS sends something the query didn't ask for, you get a <code>DecodeError</code> with the exact path, at the moment the data arrives. Custom scalars like <code>Isbn</code> become your own branded types.</p>
 
-<h3>2. One error type with the details you need</h3>
-<p>Every failure is a <code>GraphQLClientError</code> with a tagged reason, so mapping it to your own errors is one <code>switch</code>:</p>
-<pre><code>switch (error.reason._tag) {
+<h3>One error type</h3>
+<p>Every failure is a <code>GraphQLClientError</code> with a reason, so turning it into your own errors is one <code>switch</code>:</p>
+<pre data-title="errors.ts"><code class="language-ts">switch (error.reason._tag) {
   case "ResponseError":  // the server answered with GraphQL errors
-  case "TransportError": // the request failed: network, timeout or HTTP status
-  case "DecodeError":    // the answer didn't match the query's Schema
+  case "TransportError": // network, timeout or an HTTP status
+  case "DecodeError":    // the answer didn't match the query
 }</code></pre>
-<p>Errors carry the HTTP <code>status</code> and <code>headers</code>, and a response error knows its <code>retryAfter</code> and whether it <code>isRetryable</code>. With <code>{ partial: true }</code> a call returns <code>{ data, errors }</code>, so one failing field doesn't take down a whole page.</p>
+<p>Errors carry the HTTP <code>status</code> and <code>headers</code>. A response error also tells you its <code>retryAfter</code> and whether it <code>isRetryable</code>. And with <code>{ partial: true }</code> you get <code>{ data, errors }</code>, so one broken field doesn't take down a whole page.</p>
 
-<h3>3. Middleware, in one place</h3>
-<p>Spans, metrics and logs live in one GraphQL middleware attached to every operation, instead of being spread through the client. It sees the operation name and the outcome, which is what our dashboards group by.</p>
+<h3>Tracing and metrics in one place</h3>
+<p>Spans, metrics and logs now live in one small middleware that runs for every query. It's 36 lines, and it sees the operation name and the result.</p>
 
-<h3>4. A transport you can swap</h3>
-<p>The client talks to a <code>GraphQLProtocol</code> service. In production that is <code>GraphQLProtocol.layerHttp({ url })</code> on top of Effect's <code>HttpClient</code>, so our existing retry and timeout policy still applies. In tests it is a few lines:</p>
-<pre><code>const scripted = (fixtures: Record&lt;string, unknown&gt;) =&gt;
+<h3>Tests that behave like production</h3>
+<p>The client sends requests through a <code>GraphQLProtocol</code>. In production that's <code>GraphQLProtocol.layerHttp({ url })</code>, on top of Effect's <code>HttpClient</code>, so our existing retry and timeout rules still apply. In tests, it's a few lines:</p>
+<pre data-title="scripted.ts"><code class="language-ts">const scripted = (fixtures: Record&lt;string, unknown&gt;) =&gt;
   Layer.succeed(GraphQLProtocol.GraphQLProtocol, {
     execute: (request) =&gt;
       Effect.succeed({ body: { data: fixtures[request.operationName ?? ""] } }),
     subscribe: () =&gt; Stream.empty
   })</code></pre>
-<p>Fixtures still go through the real decode and the real middleware. When we switched our mocked backend to this, <strong>10 fixtures failed to decode</strong>: 8 were missing a <code>__typename</code> that the real CMS always sends, and 2 had timestamps in the wrong unit. The old mock had been happily returning invalid data for months.</p>
-<blockquote><p>There is also <code>GraphQLClient.layerTest</code>, where handlers return values directly. It's handy, but it skips decoding and middleware, so we use the scripted protocol for anything that should behave like production.</p></blockquote>
+<p>Test data still goes through the real decoding and the real middleware. The first time we ran our mocked backend this way, <strong>10 fixtures failed</strong>: 8 were missing a <code>__typename</code> that the real CMS always sends, and 2 had timestamps in the wrong unit. Our old mock had been returning bad data for months, and nobody noticed.</p>
+<blockquote><p>There is also <code>GraphQLClient.layerTest</code>, where you return values directly. It's quick, but it skips decoding and middleware, so we only use the scripted protocol.</p></blockquote>
 
-<h3>5. Batching for free</h3>
-<p><code>GraphQLResolver.aliased</code> turns many lookups into one request, each lookup as an aliased copy of the query:</p>
-<pre><code>const library = yield* Library
+<h3>Batching</h3>
+<p><code>GraphQLResolver.aliased</code> turns many lookups into one request. Each lookup becomes an aliased copy of the query:</p>
+<pre data-title="batching.ts"><code class="language-ts">const library = yield* Library
 const Books = GraphQLResolver.aliased(library.BookByIsbn).pipe(RequestResolver.batchN(20))
 const getBook = GraphQLResolver.request(Books)
 
-yield* Effect.forEach(isbns, (isbn) =&gt; getBook({ isbn }), { concurrency: "unbounded" })
-// 4 lookups, 1 POST</code></pre>
-<p>We had one hand-built "aliased query" string for exactly this. It's the next thing to go.</p>
+// 4 lookups, 1 request
+yield* Effect.forEach(isbns, (isbn) =&gt; getBook({ isbn }), { concurrency: "unbounded" })</code></pre>
+<p>We had one hand-built query string doing exactly this. It's the next thing to go.</p>
 
 <hr>
 
 <h2>How we moved</h2>
-<p>We split the move into steps that each left the app working, so each PR could be reviewed and shipped on its own.</p>
-<ol>
-  <li><strong>Upgrade Effect to 4.0.4 and pin it exactly.</strong> The GraphQL module is marked experimental, so it may change in a patch release.</li>
-  <li><strong>Swap the transport, keep the signature.</strong> Our <code>query(document, variables)</code> function stayed the same, so 0 of the 200 call sites changed. Inside, it now builds an <code>effect/graphql</code> operation and maps <code>GraphQLClientError</code> to our existing error types in one function. Every cache key changed once, because the key is now a hash of the printed document.</li>
-  <li><strong>Replace the mock</strong> with a scripted <code>GraphQLProtocol</code> keyed by operation name, and fix the 10 fixtures it caught.</li>
-  <li><strong>Move to the generator, one area of the app at a time</strong> (member pages, search, content pages, and so on), then remove gql.tada.
-    <ul>
-      <li><code>ResultOf&lt;typeof Doc&gt;</code> became <code>Doc.Result</code>.</li>
-      <li><code>VariablesOf</code> became <code>Doc.Variables</code>.</li>
-      <li>Fragments became <code>typeof Fragment.Type</code>, and every <code>readFragment()</code> call disappeared.</li>
-      <li>A <code>graphqlgen --check</code> step in our gates fails when a generated file is out of date.</li>
-    </ul>
-  </li>
+<p>We split the move into steps that each left the app working, so every pull request could be reviewed and shipped on its own.</p>
+<ol class="flow">
+  <li><strong>Upgrade Effect to 4.0.4</strong>The GraphQL module is marked experimental, so we pin the exact version.</li>
+  <li><strong>Swap the client, keep the function</strong>Our <code>query(document, variables)</code> function kept its signature, so none of the ~200 call sites changed. Inside, it now uses <code>effect/graphql</code> and maps its errors to ours in one place.</li>
+  <li><strong>Replace the mock</strong>A scripted <code>GraphQLProtocol</code> keyed by operation name, plus fixes for the 10 fixtures it caught.</li>
+  <li><strong>Move to the generator, one area at a time</strong><code>ResultOf&lt;typeof Doc&gt;</code> became <code>Doc.Result</code>, fragments became plain types, and all 46 <code>readFragment()</code> calls went away. Then we removed gql.tada.</li>
 </ol>
-<p>The generator step touched 195 files: about 12,000 lines added and 38,500 removed, most of the removed lines being the old type cache. The generated code is about 7,000 lines, and it's real code that runs, not just types.</p>
+<p>Steps 1 to 3 are merged. Step 4 is in review as I write this.</p>
+<p>We also added a <code>graphqlgen --check</code> step to our checks. It fails when someone edits a query but forgets to run the generator.</p>
 
-<h2>What bit us</h2>
+<h2>What it cost</h2>
+<p>It wasn't all wins, and I'd rather tell you now:</p>
 <ul>
-  <li><strong>Decide what "success" means yourself.</strong> With partial results, a response body can be passed through even on an odd status. Our own status helper called a 3xx "ok", and a review caught that a redirect with a <code>data</code> body could be cached as valid. We now require an explicit 2xx, with a test for 300, 302 and 304.</li>
-  <li><strong><code>partial: true</code> is not "anything goes".</strong> A <code>null</code> in a non-null field still fails the whole result, as it should. Check how your server propagates nulls before you switch.</li>
-  <li><strong>Don't call the protocol directly.</strong> <code>GraphQLProtocol.execute</code> skips the middleware, so your metrics and spans disappear. Go through the client.</li>
-  <li><strong>The API moved during the release.</strong> Between the preview builds and 4.0.4, request headers became <code>Headers.Headers</code>, and the generator started emitting <code>Schema.Opaque</code> classes. Pin exact versions while it's experimental.</li>
+  <li><strong>Type checking is not faster.</strong> With TypeScript 7, a full check takes about the same 4 to 5 seconds as before. But it creates 17% more types (1.32M → 1.55M) and uses 14% more memory (2.6 GB → 2.9 GB). The generated Schemas are real classes, and TypeScript has to check them all.</li>
+  <li><strong>Some generated code repeats.</strong> The generator wrote 7,017 lines and 702 Schema classes. 211 of those classes (30%) are exact copies of a class in another file, like a small <code>{ html5 }</code> rich-text type that appears 19 times.</li>
+  <li><strong>Our client got bigger, not smaller.</strong> It grew from 190 to 306 lines, because it now handles each error reason on its own instead of lumping them together. I think that's the right trade.</li>
+  <li><strong>No more queries inside TypeScript.</strong> gql.tada let you write a query right next to the component that uses it. Now queries live in <code>.graphql</code> files, and you run <code>graphqlgen --watch</code> while you work.</li>
+</ul>
+
+<h2>Things that bit us</h2>
+<ul>
+  <li><strong>Decide what "success" means yourself.</strong> Our own status helper treated a 3xx as OK, so a redirect with a <code>data</code> body could have been cached as valid. A code review caught it. We now require a 2xx, and a test covers 300, 302 and 304.</li>
+  <li><strong><code>partial: true</code> doesn't mean "anything goes".</strong> A <code>null</code> in a non-null field still fails the whole result. Check how your server handles nulls before you switch.</li>
+  <li><strong>Don't call the protocol directly.</strong> <code>GraphQLProtocol.execute</code> skips the middleware, so your traces and metrics quietly disappear. Always go through the client.</li>
+  <li><strong>The API changed during the release.</strong> Between the preview builds and 4.0.4, request headers became <code>Headers.Headers</code>, and the generator started writing <code>Schema.Opaque</code> classes. Pin exact versions while it's experimental.</li>
 </ul>
 
 <h2>Should you move?</h2>
-<p>If you already use Effect on the server, I think yes. You get runtime decoding, typed errors and a test transport for the price of a generator step. If you don't use Effect, gql.tada is still a great way to get typed documents with no build step. You just have to remember that the types are a promise, not a check.</p>
+<p>If your server already runs on Effect, I think yes. You get checked responses, clear errors and easy tests, and the price is one generator step.</p>
+<p>If you don't use Effect, gql.tada is still a great way to get typed queries with no build step. Just remember that its types are a promise, not a check.</p>
 
 <h2>Thanks</h2>
-<p><a href="https://github.com/tim-smart">Tim Smart</a> built <code>effect/graphql</code> in <a href="https://github.com/Effect-TS/effect/pull/8979">Effect-TS/effect#8979</a>. While it was in review, I tried it against a real app and sent feedback with small reproductions in <a href="https://github.com/Tarekkharsa/effect-graphql-feedback">effect-graphql-feedback</a>: response status on errors, GET requests, per-call URL params, a test client and batching. Each one was fixed or shipped before the release. The code examples in this post come from that repository.</p>
+<p><a href="https://github.com/tim-smart">Tim Smart</a> built <code>effect/graphql</code> in <a href="https://github.com/Effect-TS/effect/pull/8979">Effect-TS/effect#8979</a>. While it was in review, I tried it against a real app and sent feedback with small reproductions in <a href="https://github.com/Tarekkharsa/effect-graphql-feedback">effect-graphql-feedback</a>: the response status on errors, GET requests, per-call URL params, a test client and batching. Each one was fixed or shipped before the release. The code examples in this post come from that repository.</p>
