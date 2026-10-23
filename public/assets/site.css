@@ -182,38 +182,34 @@ main { max-width: var(--wide); margin: 0 auto; padding: clamp(2rem, 6vh, 4rem) 1
 .section-lede { color: var(--muted); margin: -0.3rem 0 1.4rem; max-width: 40rem; }
 .section-lede a { font-family: var(--mono); font-size: 0.85rem; font-weight: 600; white-space: nowrap; }
 
-/* codebase cards: one per studied repo, with its lessons */
-.codebases { display: grid; gap: 1.1rem; }
+/* codebase cards: one short card per studied repo; lessons are linked from each lesson's series nav */
+.codebases { display: grid; grid-template-columns: repeat(auto-fill, minmax(13.5rem, 1fr)); gap: 1rem; }
 .codebase {
-  background: var(--card); border: 1px solid var(--line); border-radius: 16px; padding: 1.4rem 1.5rem 1.25rem;
-  box-shadow: var(--shadow);
+  background: var(--card); border: 1px solid var(--line); border-radius: 16px; padding: 1.15rem 1.2rem 1.05rem;
+  box-shadow: var(--shadow); display: flex; flex-direction: column;
 }
 .kicker {
   font-family: var(--mono); font-size: 0.72rem; letter-spacing: 0.08em; color: var(--faint);
   margin: 0 0 0.4rem; display: flex; flex-wrap: wrap; align-items: center; gap: 0.35rem 0.6rem;
 }
 .kicker > span { white-space: nowrap; }
-.kicker .live {
+.live {
+  font-family: var(--mono); font-size: 0.66rem; flex: none;
   display: inline-flex; align-items: center; gap: 0.4rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--ink);
   border: 1px solid var(--line); background: var(--paper-2); border-radius: 999px; padding: 0.05rem 0.5rem;
 }
-.kicker .live::before { content: ""; width: 0.42rem; height: 0.42rem; border-radius: 50%; background: #3FB950; }
-.codebase h3 { font-family: var(--mono); font-size: 1.45rem; letter-spacing: -0.03em; line-height: 1.2; margin: 0 0 0.4rem; }
+.live::before { content: ""; width: 0.42rem; height: 0.42rem; border-radius: 50%; background: #3FB950; }
+.codebase-title { display: flex; align-items: center; justify-content: space-between; gap: 0.6rem; margin: 0 0 0.4rem; }
+.codebase h3 { font-family: var(--mono); font-size: 1.3rem; letter-spacing: -0.03em; line-height: 1.2; margin: 0; }
 .codebase h3 a { color: var(--ink); }
 .codebase h3 a:hover { color: var(--accent); text-decoration: none; }
-.codebase > p:not(.kicker) { color: var(--muted); margin: 0 0 1rem; max-width: 38rem; }
-.lesson-list {
-  list-style: none; margin: 0 0 1rem; padding: 0; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 0 1.2rem; border-top: 1px solid var(--line);
+.codebase > p:not(.kicker, .codebase-links) { color: var(--muted); margin: 0 0 1rem; font-size: 0.93rem; line-height: 1.5; text-wrap: pretty; }
+.codebase-links {
+  margin: auto 0 0; padding-top: 0.75rem; border-top: 1px solid var(--line);
+  display: flex; flex-wrap: wrap; justify-content: space-between; gap: 0.3rem 0.8rem;
 }
-.lesson-list li { border-bottom: 1px solid var(--line); }
-.lesson-list a {
-  display: flex; gap: 0.65rem; align-items: baseline; padding: 0.55rem 0.1rem; color: var(--ink); font-size: 0.93rem;
-  line-height: 1.4; text-wrap: pretty;
-}
-.lesson-list a:hover { color: var(--accent); text-decoration: none; }
-.lesson-list .n { font-family: var(--mono); font-size: 0.72rem; color: var(--faint); flex: none; }
-.lesson-list a:hover .n { color: var(--accent); }
+.cta-quiet { font-family: var(--mono); font-size: 0.78rem; color: var(--faint); }
+.cta-quiet:hover { color: var(--accent); }
 .cta { font-family: var(--mono); font-size: 0.82rem; font-weight: 600; color: var(--accent); }
 
 /* post list */
@@ -595,10 +591,9 @@ pre.term .tl.painted { animation: paint 0.6s ease; }
   .links a { padding: 0.5rem 0.95rem; }
 
   /* codebase cards */
-  .codebase { padding: 1.15rem 1.1rem 1.05rem; }
-  .codebase h3 { font-size: 1.25rem; }
-  .lesson-list { grid-template-columns: 1fr; }
-  .lesson-list a { padding: 0.65rem 0.1rem; }
+  .codebase { padding: 1.05rem 1.1rem 1rem; }
+  .codebase h3 { font-size: 1.2rem; }
+  .codebase-links a { padding: 0.3rem 0; }
 
   /* post lists: tag on its own line, title below it */
   .posts a.row { padding: 0.95rem 0.6rem; margin: 0 -0.6rem; }

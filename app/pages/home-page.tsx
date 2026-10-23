@@ -43,18 +43,14 @@ export function HomePage() {
           </div>
           <div class="hero-body">
             <p class="lede">
-              Full-stack software engineer working on <strong>AI infrastructure</strong>. Years of
-              shipping <strong>TypeScript</strong>: React front-ends, Node back-ends, and the
-              occasional detour through PHP, Java and Flutter. These days I build the plumbing for
-              coding agents: multi-agent orchestration, and the tooling that makes them reliable to
-              run.
+              Full-stack engineer building <strong>infrastructure for coding agents</strong>:
+              multi-agent orchestration and the tooling that makes agents reliable. Mostly{' '}
+              <strong>TypeScript</strong> and <strong>Effect</strong>, after years of React, Node and
+              the odd detour through PHP, Java and Flutter.
             </p>
             <p class="now">
               <span class="dot" aria-hidden="true" />
-              <span>
-                now: reading great codebases cover to cover and writing up{' '}
-                <a href={postPath(seriesIndex)}>what they teach</a>
-              </span>
+              <span>now: building agent tooling and sending fixes to Effect</span>
             </p>
             <ul class="links">
               <li>
@@ -81,16 +77,16 @@ export function HomePage() {
               height="400"
               fetchpriority="high"
             />
-            <figcaption>usually with coffee, reading someone else's code</figcaption>
+            <figcaption>on my way to fix what my agent broke</figcaption>
           </figure>
         </section>
 
         <section class="section" id="lessons" aria-labelledby="lessons-h">
           <h2 class="section-title" id="lessons-h">
-            Lessons from great codebases
+            How great agent tools are built
           </h2>
           <p class="section-lede">
-            {`I read an open-source codebase cover to cover, then write up ${LESSONS_PER_ROUND} things it does better than most: short, verified in the source, with a prompt to apply each one to your own code.`}{' '}
+            {`Patterns from open-source coding agents, ${LESSONS_PER_ROUND} per codebase: short, checked against the source, with a prompt to apply each one to your own code.`}{' '}
             <a href={postPath(seriesIndex)}>How the lessons work →</a>
           </p>
           <div class="codebases">
@@ -138,25 +134,22 @@ function CodebaseCard(handle: Handle<{ round: Round; latest: boolean }>) {
       <article class="codebase" aria-labelledby={id}>
         <p class="kicker">
           <span>{codebase.repo}</span>
-          {latest ? <span class="live">new</span> : null}
         </p>
-        <h3 id={id}>
-          <a href={postPath(lessons[0]!)}>{codebase.name}</a>
-        </h3>
+        <div class="codebase-title">
+          <h3 id={id}>
+            <a href={postPath(lessons[0]!)}>{codebase.name}</a>
+          </h3>
+          {latest ? <span class="live">new</span> : null}
+        </div>
         <p>{round.pitch}</p>
-        <ol class="lesson-list">
-          {lessons.map((lesson) => (
-            <li>
-              <a href={postPath(lesson)}>
-                <span class="n">{String(lesson.lesson).padStart(2, '0')}</span>
-                <span>{lesson.title}</span>
-              </a>
-            </li>
-          ))}
-        </ol>
-        <a class="cta" href={postPath(finale)}>
-          {`+ ${finale.teaser} →`}
-        </a>
+        <p class="codebase-links">
+          <a class="cta" href={postPath(lessons[0]!)}>
+            {`Read the ${lessons.length} lessons →`}
+          </a>
+          <a class="cta-quiet" href={postPath(finale)}>
+            {`+ ${finale.teaser}`}
+          </a>
+        </p>
       </article>
     )
   }

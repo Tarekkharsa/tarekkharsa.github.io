@@ -135,10 +135,13 @@ describe('lessons series', () => {
     }
   })
 
-  it('lists every codebase and its lessons on the home page', async () => {
-    let { body } = await get('/')
+  it('lists every codebase on the home page and every lesson in its series nav', async () => {
+    let home = (await get('/')).body
     for (let round of rounds) {
-      assert.match(body, new RegExp(`id="codebase-${round.number}"`))
+      assert.match(home, new RegExp(`id="codebase-${round.number}"`))
+      assert.match(home, new RegExp(`href="${postPath(round.lessons[0]!)}"`))
+      assert.match(home, new RegExp(`href="${postPath(round.finale)}"`))
+      let { body } = await get(postPath(round.lessons[0]!))
       for (let page of roundPosts(round)) assert.match(body, new RegExp(`href="${postPath(page)}"`))
     }
   })
