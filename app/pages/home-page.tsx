@@ -50,7 +50,7 @@ export function HomePage() {
             </p>
             <p class="now">
               <span class="dot" aria-hidden="true" />
-              <span>now: building agent tooling and sending fixes to Effect</span>
+              <span>now: building side projects and writing about what I learn</span>
             </p>
             <ul class="links">
               <li>
