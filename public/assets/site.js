@@ -1,6 +1,11 @@
 // Small progressive enhancements: theme toggle, header border, copy buttons, heading anchors.
 (() => {
   const root = document.documentElement;
+  // A prerendered page can wait a while before it's opened; pick up a theme changed since then.
+  document.addEventListener("prerenderingchange", () => {
+    try { const theme = localStorage.getItem("theme"); if (theme) root.dataset.theme = theme; } catch {}
+  }, { once: true });
+
   const toggle = document.querySelector(".theme-toggle");
   const systemDark = matchMedia("(prefers-color-scheme: dark)");
   const current = () => root.dataset.theme || (systemDark.matches ? "dark" : "light");
@@ -53,7 +58,9 @@
   if (body && "IntersectionObserver" in window) {
     const minutes = Number(article.dataset.readMinutes) || 1;
     const minMs = Math.max(10, minutes * 60 * 0.3) * 1000;
-    const start = performance.now();
+    let start = performance.now();
+    // Time spent prerendered isn't reading time.
+    document.addEventListener("prerenderingchange", () => { start = performance.now(); }, { once: true });
     let reachedEnd = false;
     let sent = false;
     const trySend = () => {

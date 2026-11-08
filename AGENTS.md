@@ -14,6 +14,10 @@ docs (`node_modules/remix/INDEX.md`) rather than relying on memory.
   (progressive enhancement; pages must work without it). Do not add `clientEntry()`,
   hydration or the asset server without discussing it first. The one third-party script is
   GoatCounter analytics (`site.analytics`, async, cookie-free); pages must not depend on it.
+- **Fast navigation is native.** Speculation rules (`app/ui/document.tsx`) prerender a page on
+  link hover and `@view-transition` crossfades it. Measured against Remix frame navigation
+  before choosing this: about the same speed without the 34 KB (gzip) runtime. Scripts must tolerate
+  running in a prerender: wait for `prerenderingchange` before anything tied to the reader.
 - **URLs are public and must not change.** Posts live at `/posts/<slug>` (written to
   `dist/posts/<slug>.html`, which Pages serves at both `/posts/<slug>` and the old
   `/posts/<slug>.html`). Link to the clean URL. Feed entry IDs stay on the old `.html`

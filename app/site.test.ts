@@ -161,6 +161,20 @@ describe('lessons series', () => {
   })
 })
 
+describe('speculation rules', () => {
+  it('prerenders only HTML pages', async () => {
+    let { body } = await get('/')
+    let rules = JSON.parse(body.match(/<script type="speculationrules">(.*?)<\/script>/)![1]!)
+    let patterns = rules.prerender[0].where.or.map((rule: { href_matches: string }) => rule.href_matches)
+    assert.deepEqual(patterns, ['/', '/posts/*'])
+  })
+
+  it('is left out of noindex pages', async () => {
+    let { body } = await get('/404.html')
+    assert.equal(body.includes('speculationrules'), false)
+  })
+})
+
 describe('analytics', () => {
   it('loads GoatCounter once on every page', async () => {
     for (let page of staticPages()) {

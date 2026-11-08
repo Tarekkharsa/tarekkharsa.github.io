@@ -32,6 +32,17 @@ export interface DocumentProps {
 // Applied before first paint so a saved theme never flashes.
 const themeScript = `try{const t=localStorage.getItem("theme");if(t)document.documentElement.dataset.theme=t}catch{}`
 
+// Prerenders a page when a reader hovers its link, so the click feels instant. Browsers without
+// speculation rules ignore this. Only HTML pages qualify: the feed and sitemap stay out.
+const speculationRules = JSON.stringify({
+  prerender: [
+    {
+      where: { or: [{ href_matches: '/' }, { href_matches: '/posts/*' }] },
+      eagerness: 'moderate',
+    },
+  ],
+})
+
 export function Document(handle: Handle<DocumentProps>) {
   return () => {
     let { path, title, description, og, jsonLd, noindex, progress, nav, head, children } = handle.props
@@ -62,6 +73,9 @@ export function Document(handle: Handle<DocumentProps>) {
           {og && url ? <OpenGraphTags og={og} url={url} description={description} /> : null}
           {jsonLd ? <JsonLd value={jsonLd} /> : null}
           <script innerHTML={unsafeHTML(themeScript)} />
+          {noindex ? null : (
+            <script type="speculationrules" innerHTML={unsafeHTML(speculationRules)} />
+          )}
           {path?.startsWith('/posts/') ? (
             <script innerHTML={unsafeHTML(cleanUrlScript(path))} />
           ) : null}
