@@ -1,5 +1,6 @@
 import type { Handle } from 'remix/component'
 
+import { contributions, projects, pullUrl, type Contribution } from '../content/open-source.ts'
 import { LESSONS_PER_ROUND, postPath, posts, rounds, seriesIndex, type Round } from '../content/posts.ts'
 import { absoluteUrl, site } from '../site.ts'
 import { Document } from '../ui/document.tsx'
@@ -81,6 +82,36 @@ export function HomePage() {
           </figure>
         </section>
 
+        <section class="section" id="open-source" aria-labelledby="open-source-h">
+          <h2 class="section-title" id="open-source-h">
+            Open source
+          </h2>
+          <ul class="work">
+            {contributions.map((contribution) => (
+              <ContributionRow contribution={contribution} />
+            ))}
+          </ul>
+        </section>
+
+        <section class="section" id="projects" aria-labelledby="projects-h">
+          <h2 class="section-title" id="projects-h">
+            Projects
+          </h2>
+          <ul class="work">
+            {projects.map((project) => (
+              <li>
+                <div class="work-head">
+                  <a class="work-name" href={project.url}>
+                    {project.name}
+                  </a>
+                  <span class="work-meta">{project.language}</span>
+                </div>
+                <p>{project.summary}</p>
+              </li>
+            ))}
+          </ul>
+        </section>
+
         <section class="section" id="lessons" aria-labelledby="lessons-h">
           <h2 class="section-title" id="lessons-h">
             How great agent tools are built
@@ -98,7 +129,7 @@ export function HomePage() {
 
         <section class="section" id="writing" aria-labelledby="writing-h">
           <h2 class="section-title" id="writing-h">
-            Guides
+            Writing
           </h2>
           <ul class="posts">
             {posts.flatMap((post) =>
@@ -122,6 +153,31 @@ export function HomePage() {
       </main>
     </Document>
   )
+}
+
+function ContributionRow(handle: Handle<{ contribution: Contribution }>) {
+  return () => {
+    let { project, url, summary, status, pulls, links = [] } = handle.props.contribution
+    return (
+      <li>
+        <div class="work-head">
+          <a class="work-name" href={url}>
+            {project}
+          </a>
+          <span class={status === 'merged' ? 'status merged' : 'status'}>{status}</span>
+        </div>
+        <p>{summary}</p>
+        <p class="work-links">
+          {pulls.map((pull) => (
+            <a href={pullUrl(pull)}>{`#${pull.number}`}</a>
+          ))}
+          {links.map((link) => (
+            <a href={link.href}>{link.label}</a>
+          ))}
+        </p>
+      </li>
+    )
+  }
 }
 
 function CodebaseCard(handle: Handle<{ round: Round; latest: boolean }>) {

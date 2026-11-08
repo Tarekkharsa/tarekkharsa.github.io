@@ -27,9 +27,9 @@ export const seriesIndex: SeriesIndexPost = {
   slug: series.slug,
   title: series.name,
   description:
-    'Engineering lessons from reading great open-source codebases cover to cover: architecture, performance, testing, PRs, tooling and docs for AI agents, each verified in the source and linked to it.',
+    'Engineering lessons from open-source coding agents: architecture, performance, testing, PRs, tooling and docs for AI agents, each verified in the source and linked to it.',
   subtitle:
-    'I read one open-source codebase cover to cover, then write up eight things it does better than most. Every claim links to the code.',
+    'Patterns from open-source coding agents, eight per codebase. Each one is checked against the source and links to the code.',
   date: '2026-10-09',
   tag: 'Series',
   image: {

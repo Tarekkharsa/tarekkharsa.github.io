@@ -19,11 +19,12 @@ export function SiteHeader(handle: Handle<{ current?: NavSection }>) {
             tarek<span class="accent">.</span>kharsa
           </a>
           <nav class="nav" aria-label="Main">
-            <a href={`${routes.home.href()}#writing`} aria-current={currentFor('writing')}>
-              guides
-            </a>
+            <a href={`${routes.home.href()}#open-source`}>code</a>
             <a href={postPath(seriesIndex)} aria-current={currentFor('series')}>
               lessons
+            </a>
+            <a href={`${routes.home.href()}#writing`} aria-current={currentFor('writing')}>
+              writing
             </a>
             <button class="theme-toggle" type="button" aria-label="Toggle dark mode">
               <SunIcon />

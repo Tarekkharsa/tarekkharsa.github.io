@@ -9,6 +9,7 @@
   --accent-ink: #FFFFFF;
   --accent-soft: rgba(180, 84, 10, 0.09);
   --accent-line: rgba(180, 84, 10, 0.30);
+  --ok: #2B7F3E;
   --line: #E7E2D9;
   --pill-line: #D6CFC3;
   --card: #FFFFFF;
@@ -31,6 +32,7 @@
   --accent-ink: #14171B;
   --accent-soft: rgba(240, 151, 90, 0.11);
   --accent-line: rgba(240, 151, 90, 0.32);
+  --ok: #5CC274;
   --line: #292E34;
   --pill-line: #353B42;
   --card: #181C21;
@@ -49,6 +51,7 @@
     --accent-ink: #14171B;
     --accent-soft: rgba(240, 151, 90, 0.11);
     --accent-line: rgba(240, 151, 90, 0.32);
+    --ok: #5CC274;
     --line: #292E34;
     --pill-line: #353B42;
     --card: #181C21;
@@ -211,6 +214,20 @@ main { max-width: var(--wide); margin: 0 auto; padding: clamp(2rem, 6vh, 4rem) 1
 .cta-quiet { font-family: var(--mono); font-size: 0.78rem; color: var(--faint); }
 .cta-quiet:hover { color: var(--accent); }
 .cta { font-family: var(--mono); font-size: 0.82rem; font-weight: 600; color: var(--accent); }
+
+/* open source and projects: name, status, one sentence, links to the code */
+.work { list-style: none; margin: 0; padding: 0; }
+.work li { border-top: 1px solid var(--line); padding: 1rem 0; }
+.work li:first-child { border-top: none; padding-top: 0.2rem; }
+.work-head { display: flex; align-items: baseline; justify-content: space-between; gap: 1rem; }
+.work-name { font-family: var(--mono); font-weight: 700; font-size: 0.97rem; letter-spacing: -0.01em; color: var(--ink); }
+.work-name:hover { color: var(--accent); text-decoration: none; }
+.work-meta, .status { font-family: var(--mono); font-size: 0.72rem; color: var(--faint); white-space: nowrap; }
+.status.merged { color: var(--ok); }
+.work li > p { margin: 0.25rem 0 0; color: var(--muted); font-size: 0.94rem; max-width: 40rem; text-wrap: pretty; }
+.work li > p.work-links { display: flex; flex-wrap: wrap; gap: 0.2rem 0.9rem; margin-top: 0.45rem; font-family: var(--mono); font-size: 0.78rem; }
+.work-links a { color: var(--faint); }
+.work-links a:hover { color: var(--accent); }
 
 /* post list */
 .posts, .prose .posts { list-style: none; margin: 0; padding: 0; }
@@ -631,6 +648,15 @@ pre.term .tl.painted { animation: paint 0.6s ease; }
   .pager { grid-template-columns: 1fr; margin-top: 2.4rem; }
   .pager .next { grid-column: 1; }
   .share { margin-top: 2rem; }
+}
+@media (max-width: 400px) {
+  .nav { gap: 0; }
+  .nav a { padding: 0.5rem 0.35rem; }
+  .topbar-inner { padding-left: 1rem; padding-right: 1rem; }
+}
+@media (prefers-reduced-motion: no-preference) {
+  @view-transition { navigation: auto; }
+  .topbar { view-transition-name: topbar; }
 }
 @media (prefers-reduced-motion: reduce) {
   * { transition: none !important; }
