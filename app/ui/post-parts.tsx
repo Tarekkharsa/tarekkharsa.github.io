@@ -119,6 +119,9 @@ export function SeriesNav(handle: Handle<{ current: SeriesPost }>) {
               <a
                 href={postPath(post)}
                 aria-current={post === current ? 'page' : undefined}
+                aria-label={
+                  post.kind === 'lesson' ? `Lesson ${post.lesson}: ${post.title}` : post.teaser
+                }
                 title={post.kind === 'lesson' ? post.title : post.teaser}
                 class={post.kind === 'finale' ? 'tips' : undefined}
               >

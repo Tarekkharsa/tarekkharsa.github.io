@@ -10,11 +10,16 @@
   const systemDark = matchMedia("(prefers-color-scheme: dark)");
   const current = () => root.dataset.theme || (systemDark.matches ? "dark" : "light");
   if (toggle) {
-    root.dataset.theme = current();
+    // Until the reader picks a theme, the page keeps following the system setting.
+    const sync = () => toggle.setAttribute("aria-pressed", String(current() === "dark"));
+    sync();
+    systemDark.addEventListener("change", sync);
+    document.addEventListener("prerenderingchange", sync, { once: true });
     toggle.addEventListener("click", () => {
       const next = current() === "dark" ? "light" : "dark";
       root.dataset.theme = next;
       try { localStorage.setItem("theme", next); } catch {}
+      sync();
     });
   }
 

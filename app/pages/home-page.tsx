@@ -4,6 +4,7 @@ import { contributions, projects, pullUrl, type Contribution } from '../content/
 import { LESSONS_PER_ROUND, postPath, posts, rounds, seriesIndex, type Round } from '../content/posts.ts'
 import { absoluteUrl, site } from '../site.ts'
 import { Document } from '../ui/document.tsx'
+import { GitHubLogo, XLogo } from '../ui/icons.tsx'
 import { formatMonth } from '../ui/post-parts.tsx'
 
 const personJsonLd = {
@@ -55,10 +56,14 @@ export function HomePage() {
             </p>
             <ul class="links">
               <li>
-                <a href={site.social.github}>github</a>
+                <a href={site.social.github}>
+                  <GitHubLogo /> github
+                </a>
               </li>
               <li>
-                <a href={site.social.twitter}>twitter</a>
+                <a href={site.social.twitter}>
+                  <XLogo /> twitter
+                </a>
               </li>
             </ul>
           </div>
